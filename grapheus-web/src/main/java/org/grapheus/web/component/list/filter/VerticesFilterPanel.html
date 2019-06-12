@@ -1,0 +1,16 @@
+<wicket:head>
+<style>
+
+.filter-input {
+    width:10vw;
+}
+
+</style>
+</wicket:head>
+<wicket:panel>
+<form wicket:id="filter_form" >
+<input type="text" wicket:id="substring" class="filter-input"></input>
+<a wicket:id="filterDialogLink">...</a>
+</form>
+<div wicket:id="filterDialog"></div>
+</wicket:panel>

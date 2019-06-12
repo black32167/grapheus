@@ -1,0 +1,42 @@
+<wicket:head>
+<style>
+
+.data {
+    display:none;
+}
+#graphCanvas1 {
+    width:100%;
+    height:100%;
+}
+</style>
+
+<wicket:link>
+    <link rel="stylesheet" type="text/css" href="cytoscape-context-menus.css"/>
+
+    <script src="js/cytoscape.min.js"></script>
+    <script src="js/cytoscape-context-menus.js"></script>
+    <script src="js/graphView.js"></script>
+    
+    
+</wicket:link>
+
+</wicket:head>
+
+<wicket:panel>
+
+    <div id="graphCanvas1"></div>
+
+    <div wicket:id="rootVertex" class="rootVertex"/>
+    <div id="vertices">
+        <wicket:container wicket:id="linkedArtifactsList" >
+            <div wicket:id="vertex" class="data"></div>
+        </wicket:container>
+    </div>
+    <div id="edges">
+        <wicket:container class="data" wicket:id="edgesList">
+            <div wicket:id="edge" class="data"></div>
+        </wicket:container>
+    </div>
+
+
+</wicket:panel>

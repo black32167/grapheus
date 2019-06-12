@@ -1,0 +1,97 @@
+:root {
+  --bg-color: lightblue;
+  --txt-color: white;
+  --line-height: 2em;
+}
+
+body {
+	padding:0px;
+	margin:0px;
+	height:100%;
+	
+}
+
+* {
+    font-size: 15px;
+}
+
+input {
+	display: inline-block;
+	position: relative;
+	line-height: normal;
+	padding: 5px 5px 5px 5px;
+    border-radius: 0.5em;
+    border: 1px solid gray;
+	vertical-align: middle;
+	margin: 0 3px 0 0;
+}
+
+select {
+    padding: 5px;
+    border-radius: 0.5em;
+    vertical-align: middle;
+    border: 1px solid gray;
+}
+
+.ui-widget {
+    /*font-size:100%;*/
+}
+.ui-widget-header {
+    background:var(--bg-color);
+}
+.ui-button .ui-icon, .ui-button:hover .ui-icon {
+    background-position:0px 0px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='15px' width='15px'> <text x='2' y='13' fill='lightblue' font-size='20'>x</text> </svg>");
+}
+
+.head-line, div.wicket-modal div.w_caption {
+    background-color:var(--bg-color);
+    font-weight:bold;
+    color:var(--txt-color);
+
+}
+
+.rounded {
+    border-radius:5px;
+}
+    
+.form-sign {
+	display: inline-block;
+	white-space: nowrap;
+	width: 100px;
+	text-align: right;
+	margin-right: 5px;
+}
+
+.centered-content {
+    text-align:center;
+    
+}
+.input-form {
+    display:inline-block;
+	margin: 5px auto 0px auto;
+}
+
+
+.input-form fieldset {
+	padding: 5px;
+}
+
+.form-controls-inner {
+	display: block;
+	margin: 0px auto 0px auto;
+}
+
+.form-control-line {
+    padding: 5px;
+}
+.form-controls {
+	margin-top: 10px;
+}
+
+.feedbackPanel {
+	margin: auto;
+	width: 350px;
+	color: red;
+}
+

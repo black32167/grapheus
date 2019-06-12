@@ -1,0 +1,34 @@
+<wicket:head>
+<style>
+.submit-button {
+    padding-top: 10px;
+    clear:both;
+}
+.operation-panel {
+
+}
+.operation-form {
+    margin: 5px;
+}
+.left-list {
+    float:left;
+    width:calc(50% - 7px)
+}
+.right-list {
+    float:right;
+    margin-right:4px;
+    width:calc(50% - 7px)
+}
+</style>
+</wicket:head>
+<wicket:panel>
+    <div class="operation-panel">
+        
+        <form wicket:id="form" class="operation-form">
+            <wicket:child/>
+            <div class="submit-button">
+                <button wicket:id="submitButton" type="button">Done</button>
+            </div>
+        </form>
+    </div>
+</wicket:panel>

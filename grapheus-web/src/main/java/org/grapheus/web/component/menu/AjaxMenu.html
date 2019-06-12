@@ -1,0 +1,44 @@
+<wicket:head>
+    <style>
+        .head-menu-item {
+            
+            margin-right:3px;
+            padding:3px;
+            text-align:center;
+        }
+        .sub-menu {
+            display:none;
+            position:absolute;
+            z-index:100 !important;
+            width:13em;
+        }
+        .menu-col {
+            display:inline-block;
+            float:left;
+            width:6.5em;
+        }
+        .ui-menu .ui-menu {
+            width: 250px;
+        }
+        .ui-widget.ui-widget-content {
+            border:1px solid white;
+        }
+        .ui-menu-item {
+            background-color: lightblue;
+            
+        }
+    </style>
+</wicket:head>
+<wicket:panel>
+<wicket:container wicket:id="top-menu">
+    <div class="menu-col" >
+        <div class="head-menu-item" wicket:id="header-item"
+            onmouseenter="$('.menu-col').find('.sub-menu').hide();$(this).parent().find('.sub-menu').show()"></div>
+        <div class="sub-menu" wicket:id="menu" onmouseleave="$(this).hide()"></div><!--   -->
+    </div>
+</wicket:container>
+<!-- div class="menu-col">
+    <div class="head-menu-item" onclick="$('.sub-menu2').show()">roo Item1</div>
+    <div class="sub-menu sub-menu2" wicket:id="menu2"></div>
+</div -->
+</wicket:panel>

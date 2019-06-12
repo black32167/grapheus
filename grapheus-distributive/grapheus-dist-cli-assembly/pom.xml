@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>grapheus</groupId>
+        <artifactId>grapheus-distributive</artifactId>
+        <version>1.6-SNAPSHOT</version>
+    </parent>
+    <artifactId>grapheus-dist-cli-assembly</artifactId>
+    <packaging>pom</packaging>
+    <name>Grapheus - Distributive - CLI</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>grapheus</groupId>
+            <artifactId>grapheus-cli</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptor>assembly/grapheus-cli-assembly.xml</descriptor>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <finalName>grapheus-cli</finalName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

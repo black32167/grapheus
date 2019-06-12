@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd"
+	xml:lang="da" lang="da">
+<head>
+<meta charset="utf-8" />
+
+<wicket:head>
+	<style type="text/css">
+    	.blanket {
+    		position: absolute;
+    		display: none;
+    		top:0px;
+    		left:0px;
+    		background: rgba(0, 0, 0, 0.5);
+    		z-index: 1000;
+    		width: 100%;
+    		height: 100%;
+    		font-weight: bold;
+    		text-align: center;
+    	}
+        .menu {
+            display: inline-block;
+        }
+      
+        .head-right {
+            float:right;
+            margin-right:0.5em;
+        }
+        .head-right a {
+            color:var(--txt-color);
+            text-decoration: none;
+        }
+        
+        .page-header {
+            height:1.8em;
+            padding:5px;   
+        }
+        .page-content {
+            height:calc(100% - 1.8em - 13px);
+        }
+        .ui-menu-item {
+            color:var(--txt-color);
+        }
+
+	</style>
+	<!-- script type="text/javascript">
+        $(document).ready(
+                function() {
+                    hideBlanket();
+                    Wicket.Event.subscribe('/ajax/call/beforeSend', function(
+                            attributes, jqXHR, settings) {
+                        if(attributes.target.activeElement.localName != 'input') {
+                            showBlanket()
+                        }
+                        
+                    });
+                    Wicket.Event.subscribe('/ajax/call/complete', function(
+                            attributes, jqXHR, textStatus) {
+                        hideBlanket()
+                    });
+                  
+                })
+
+        function hideBlanket() {
+            $('#blanket').hide();
+        }
+
+        function showBlanket() {
+            $('#blanket').show()
+        }
+
+        function clickFunc(eventData) {
+            var clickedElement = (window.event) ? event.srcElement
+                    : eventData.target;
+            if (clickedElement.tagName.toUpperCase() == 'BUTTON'
+                    || clickedElement.tagName.toUpperCase() == 'A'
+                    || clickedElement.parentNode.tagName.toUpperCase() == 'A'
+                    || (clickedElement.tagName.toUpperCase() == 'INPUT' && (clickedElement.type
+                            .toUpperCase() == 'BUTTON' || clickedElement.type
+                            .toUpperCase() == 'SUBMIT'))) {
+                showBusysign();
+            }
+        }
+    </script -->
+
+</wicket:head>
+
+</head>
+<body>
+	<div id="blanket" class="blanket"></div>
+  
+	<div class="head-line page-header">
+        <div wicket:id="menu" class="menu"></div>
+		<div class="head-right">
+			<a wicket:id="home" href="#">Home</a>
+            | <a wicket:id="logOut" href="#">Log Out <span wicket:id="loggedUser"></span></a>
+		</div>
+	</div>
+    <div class="page-content">
+	   <wicket:child />
+    </div>
+ 
+</body>
+</html>

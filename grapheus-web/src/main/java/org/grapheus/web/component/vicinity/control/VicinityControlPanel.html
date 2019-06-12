@@ -1,0 +1,53 @@
+<wicket:head>
+    <style>
+        .vicinityView {
+            height:calc(100% - 62px);
+            background:white;
+            border-radius:0 0 5px 5px;
+        }
+        .description {
+            height: 2em;
+            border-top: 1px solid gray;
+            padding-top:3px;
+            display:flex;
+            padding:5px;
+            align-items: center;
+            display:none;
+        }
+
+        .vicinity-head-panel {
+            background-color:var(--bg-color);
+            height:50px;
+            margin:5px 5px 7px 5px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        .control-form {
+            margin-top:3px;
+        }
+    </style>
+</wicket:head>
+
+<wicket:panel>
+    <div wicket:id="titleEditDialog"></div>
+
+    <div class="head-line vicinity-head-panel">
+        <div>
+            <b>Title:</b> <a href="#" wicket:id="remoteDocumentLink"><span width="200px" wicket:id="documentTitle"></span></a>   
+        </div>
+        <div>
+            <form wicket:id="controlsForm" class="control-form">
+                <input wicket:id="depth" type="number" style="width: 60px;" title="Depth"/> |&nbsp;
+                <select wicket:id="edgesDirection" title="Edges direction"/>
+                <select wicket:id="layout" title="Graph layout"/>
+            </form>
+        </div>
+      
+    </div>
+    <div class="description">
+        <span wicket:id="documentBody"></span>
+    </div>
+
+    <div wicket:id="vicinityView" class="vicinityView"></div>
+
+</wicket:panel>

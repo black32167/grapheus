@@ -1,0 +1,49 @@
+<wicket:head>
+<style>
+.items {
+    width:100%;
+    height: 400px;
+    float:left;
+    border: 3px inset white;
+    border-radius: 5px;
+    margin-right: 5px;
+}
+.items-title {
+    height: 15px;
+    padding:5px;
+    vertical-align:middle;
+}
+.items-list {
+    height: calc(100% - 15px - 20px);
+    padding:5px;
+    overflow-y: scroll;
+    background-color:white; 
+}
+.item-row {
+    border-bottom: 1px solid gray;
+}
+.item-title {
+    display: inline-block;
+}
+
+.item-control {
+    float: right;
+}
+
+</style>
+</wicket:head>
+<wicket:panel>
+<div wicket:id="droppableArea" class="items">
+    <div class="head-line items-title"><span wicket:id="panelTitle"></span></div>
+    <div class="items-list">
+        <div wicket:id="verticesList" class="item-row">
+            <div class="item-title">
+                <span wicket:id="vertexTitle"></span>
+            </div>
+            <div class="item-control">
+                <a wicket:id="itemRemoveLink">X</a>
+            </div>
+        </div>
+    </div>
+</div>
+</wicket:panel>

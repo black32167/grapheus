@@ -1,0 +1,10 @@
+.classpath
+.project
+.settings
+target
+/*.sh
+/logs/
+/jgraph-override.properties
+*.log
+*.out
+/dep.tree

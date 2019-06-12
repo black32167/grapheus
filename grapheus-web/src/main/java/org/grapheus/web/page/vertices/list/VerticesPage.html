@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
+<head>
+<meta charset="utf-8" />
+
+<wicket:head>
+    <style>
+        .main_content {
+            background-color: var(--bg-color);
+            height:100%;
+            padding-bottom: 3px;
+            min-width:80em;
+            
+        }
+        .content-panel  {
+            height:100%;
+        }
+        .left-panel {
+            float:left;
+            width:500px;
+            padding: 0 0 0 5px; 
+        }
+        .right-panel {
+            float:right;
+           border-radius:5px;
+          /* background-color:white;*/
+           height:100%;
+           width:calc(100% - 505px);
+        }
+
+        .tabpanel1 {
+            float:left;
+            width:100%;
+            background:yellow;
+       /*     font-size:93%;*/
+            line-height:normal;
+        }
+        .tab-row ul {
+            margin:0;
+            padding:0;
+            list-style:none;
+        }
+        .tab-row {
+            margin-left:3px;
+            
+        }
+        .tab-row li {
+            float:left;
+            margin:0;
+            padding:0;
+            margin-right:5px;
+            border-top: 1px solid gray;
+            border-left: 1px solid gray;
+            border-right: 1px solid gray;
+  
+            border-top-left-radius:5px;
+            border-top-right-radius:5px;
+            height: calc(1.8em - 1px);
+            border-bottom: none;
+        }
+        .tab-row .selected {
+            border-bottom: 2px solid var(--bg-color);
+            z-index:100;
+        }
+        .tab-row a {
+            display: block;
+            padding: 5px 15px;
+            text-decoration: none;
+            font-weight: bolder;
+            color: var(--txt-color);
+        }
+        .tab-panel {
+           border:1px solid gray;
+           border-radius: 5px;
+           height:calc(100% - 27px);
+           margin-top: 0px;
+           margin-right:5px;
+           
+        }
+        .tab-row {
+             /*background:lightblue;*/
+             height:27px;
+            
+        }
+    </style>
+	<script>
+	    window.onLayoutResizeCallbacks = []
+    </script>
+</wicket:head>
+
+</head>
+
+<body>
+	<wicket:extend>
+        <div wicket:id="operationDilaog"></div>
+        <div id="main_content" class="main_content">
+		    <div wicket:id="taskList" class="content-panel left-panel"></div>
+    		<div wicket:id="graphView" class="content-panel right-panel"> <!-- class="ui-layout-center" -->
+                <!-- div  class="tabpanel"></div -->
+            </div>
+        </div>
+	</wicket:extend>
+</body>
+</html>

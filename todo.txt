@@ -1,0 +1,4 @@
+TODO: 2019-01-18T12:16:26Z [1] WARNING {queries} slow query: 'FOR v,e in 1..5 ANY 'V_self/:reflexion_persistence_storage_datasource_ReflexionDataSourceStorageImpl' GRAPH 'self' FILTER LENGTH(e.matchedCriteria) != 0  RETURN {  from:SUBSTRING(e._from,7),  to:SUBSTRING(e._to,7)    }', bind vars: {}, took: 398.494668 s
+TODO: panel resizing is buggy
+TODO: easy usage from command line
+TODO: upload functional!!!

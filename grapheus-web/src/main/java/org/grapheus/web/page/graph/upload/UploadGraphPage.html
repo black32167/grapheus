@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Upload Graph</title>
+</head>
+<body>
+    <wicket:extend>
+        <span wicket:id="feedback" />
+        <div class="centered-content">
+            <form wicket:id="uploadForm" style="width: 550px"
+                class="input-form">
+                <fieldset>
+                    <legend>Upload graph from disk</legend>
+                   
+                    <input type="file" wicket:id="upload"></input>
+                    <div>
+                        <input type="submit" value="upload"></input>
+                    </div>
+
+
+                </fieldset>
+
+            </form>
+        </div>
+    </wicket:extend>
+</body>
+</html>

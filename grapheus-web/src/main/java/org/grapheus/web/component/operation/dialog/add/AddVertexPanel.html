@@ -1,0 +1,21 @@
+<wicket:panel>
+    <span wicket:id="feedback" />
+    <form wicket:id="form" class="input-form" style="width: 100%">
+        <fieldset>
+            <legend>Individual vertex details</legend>
+            <div>
+                <span class="form-sign">Title</span><input width="200px"
+                    wicket:id="documentTitle"></input>
+            </div>
+            <div>
+                <span class="form-sign">Document</span>
+                <textarea wicket:id="documentBody"></textarea>
+            </div>
+
+            <div class="form-controls">
+                <button wicket:id="submitButton" type="button" class="form-submit">Add</button>
+            </div>
+        </fieldset>
+
+    </form>
+</wicket:panel>

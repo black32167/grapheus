@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>grapheus</groupId>
+        <artifactId>grapheus</artifactId>
+        <version>1.6-SNAPSHOT</version>
+    </parent>
+    <packaging>pom</packaging>
+    <artifactId>grapheus-server</artifactId>
+    <name>Grapheus - Server - Parent</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <modules>
+        <module>grapheus-infrastructure</module>
+        <module>grapheus-runner</module>
+        <module>grapheus-server-bbt</module>
+        <module>grapheus-server-common</module>
+  </modules>
+</project>

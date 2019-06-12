@@ -1,0 +1,22 @@
+#!/bin/bash
+
+dpush() {
+	local MODULE="${1}"
+	local IMAGE_NAME="$(imageName ${MODULE})"
+	
+	echo "Pushing image '${IMAGE_NAME}' to the remote..."
+	
+   	docker push "${IMAGE_NAME}"
+}
+
+. ${BASH_SOURCE%/*/*}/include/log.sh rdocker.log
+. ${BASH_SOURCE%/*/*}/include/docker-common.sh
+
+set -e
+set -u
+
+dpush web
+dpush back
+
+echo "Done!"
+

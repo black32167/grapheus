@@ -1,0 +1,19 @@
+<wicket:head>
+<style>
+.graph-name-input {
+    padding-top: 10px;
+    clear:both;
+}
+.connected-label {
+    float:right;
+}
+</style>
+</wicket:head>
+<wicket:extend>
+    <div wicket:id="verticesList"></div>
+    
+    <div class="graph-name-input">
+        New graph name:<input wicket:id="newGraphName"/>
+        <span wicket:id="connectedLabel" class="connected-label"></span>
+    </div>
+</wicket:extend>

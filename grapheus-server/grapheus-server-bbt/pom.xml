@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>grapheus</groupId>
+        <artifactId>grapheus-server</artifactId>
+        <version>1.6-SNAPSHOT</version>
+    </parent>
+    <packaging>jar</packaging>
+
+    <artifactId>grapheus-server-bbt</artifactId>
+
+    <name>Grapheus - Server - Blackbox Tests</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <test.rest.url>http://127.0.0.1:8085/grapheus</test.rest.url>
+        <extraServerArgs />
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>grapheus</groupId>
+            <artifactId>grapheus-client</artifactId>
+            <version>1.6-SNAPSHOT</version>
+        </dependency>
+
+     
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>grapheus</groupId>
+            <artifactId>grapheus-dist-back-assembly</artifactId>
+            <version>${project.version}</version>
+            <type>zip</type>
+        </dependency>
+
+    </dependencies>
+    <profiles>
+        <profile>
+            <id>debug-server</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <extraServerArgs>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005</extraServerArgs>
+            </properties>
+        </profile>
+    </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>grapheus</groupId>
+                                    <artifactId>grapheus-dist-back-assembly</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>zip</type>
+
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/grapheus</outputDirectory>
+
+                                </artifactItem>
+                            </artifactItems>
+                            <!-- other configurations here -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+
+                        <id>start-grapheus</id>
+                        <phase>pre-integration-test</phase>
+                        <!-- output="${project.build.directory}/grapheus.log" -->
+                        <configuration>
+                            <skip>${skipTests}</skip>
+                            <target>
+                                <exec executable="bash" dir="${project.build.directory}/grapheus/" failonerror="true">
+                                    <arg value="grapheus.sh" />
+                                    <arg value="start-bg" />
+                                    <env key="JAVA_OPTS" value="-Dgrapheus.settings.properties=${project.basedir}/src/config/grapheus-override.properties -Dgrapheus.shutdown.port=2123 -Ddb.port=${test.db.port} -Dgrapheus.base.uri.key=${test.rest.url} ${extraServerArgs}" />
+                                </exec>
+                                <exec executable="bash" dir="${project.build.directory}/grapheus/" failonerror="true">
+                                    <arg value="grapheus.sh" />
+                                    <arg value="wait" />
+                                    <env key="JAVA_OPTS" value="-Dgrapheus.shutdown.port=2123 -Ddb.port=${test.db.port} -Dgrapheus.base.uri.key=${test.rest.url}" />
+                                </exec>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-grapheus</id>
+                        <phase>post-integration-test</phase>
+                        <configuration>
+                            <skip>${skipTests}</skip>
+                            <target>
+                                <exec executable="bash" dir="${project.build.directory}/grapheus/">
+                                    <arg value="grapheus.sh" />
+                                    <arg value="stop" />
+                                    <env key="JAVA_OPTS" value="-Dgrapheus.shutdown.port=2123" />
+                                </exec>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <test.rest.url>${test.rest.url}</test.rest.url>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

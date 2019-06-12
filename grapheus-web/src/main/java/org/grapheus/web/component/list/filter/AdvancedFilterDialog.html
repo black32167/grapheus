@@ -1,0 +1,32 @@
+<wicket:head>
+<style>
+
+.fieldset {
+    display:inline-block;
+  
+    vertical-align: top;
+    margin:0 0 5px 0;
+}
+
+.small-number-input {
+    width:50px;
+}
+
+</style>
+</wicket:head>
+<wicket:panel>
+	<form wicket:id="filter_form" style="display:inline-block;float:right;clear:right;">
+		<fieldset class="fieldset">
+            <legend>Sorting</legend>
+            <span>Criteria:</span> <select wicket:id="sortingType"/> <select wicket:id="sortingDirection"/>
+        </fieldset>
+        <fieldset class="fieldset">
+            <legend>Filter</legend>
+		    <span>Sinks:</span> <input wicket:id="sinks" type="checkbox"></input>|
+		    <span>Min. edges:</span> <input wicket:id="minEdges" class="small-number-input" type="number"></input><select wicket:id="filteringEdgesDirection"/>
+            <div>
+		      <span>Vicinity Only:</span> <input type="checkbox" wicket:id="restrictByVicinity"></input>
+            </div>
+	    </fieldset>
+	</form>
+</wicket:panel>

@@ -1,0 +1,41 @@
+<wicket:head>
+    <style type="text/css">
+.wicket-mfu-container {
+	padding: 5px;
+	margin-top: 3px;
+	background-color: white;
+	border: 1px solid black;
+	font-size: xx-small;
+}
+
+.wicket-mfu-caption {
+	font-weight: bold;
+}
+
+.wicket-mfu-container input {
+	margin-left: 5px;
+	font-size: xx-small;
+}
+</style>
+</wicket:head>
+<wicket:extend>
+    <span wicket:id="feedback" />
+
+    <div class="centered-content">
+        <form wicket:id="uploadForm" style="width: 550px"
+            class="input-form">
+            <fieldset>
+                <legend>Upload vertices from disk</legend>
+
+                <div>
+                    <input type="submit" value="upload"></input>
+                </div>
+                <hr>
+                <div wicket:id="upload" style="display: inline-block"></div>
+
+
+            </fieldset>
+
+        </form>
+    </div>
+</wicket:extend>

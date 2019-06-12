@@ -1,0 +1,6 @@
+accontName: Test Name
+sources:
+    - name: Source Name
+      basic:
+          name: username
+          password: cGFzc3dvcmQ=

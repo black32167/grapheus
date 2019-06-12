@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd"
+    xml:lang="da" lang="da">
+<head>
+<meta charset="utf-8" />
+
+<wicket:head>
+<style>
+
+.chart {
+    width: 100%;
+    height: 200px;
+    margin: 5px;
+}
+
+.telemetry-item {
+    display: none;
+}
+
+</style>
+</wicket:head>
+
+</head>
+<body>
+    <div class="page-header">
+        <div style="float:right;">
+            <a wicket:id="logOut" href="#">Log Out</a>     
+        </div>       
+    </div>
+    <div class="server" wicket:id="servers">
+        <div wicket:id="serverId" style="border:1px solir gray"></div>
+	    <div>
+		    <div class="chart" gid="chart-rmemory" graphs="total-memory,free-memory,max-memory" divider="1048576">Remote Operative Memory, Mb</div>
+	    </div>
+	    <div>
+		    <div class="chart" gid="chart-dspace"  graphs="total-disk,free-disk,usable-disk" divider="1073741824">Remote Disk Space, Gb</div>
+	     </div>
+	    
+		<div class="telemetry-item" wicket:id="telemetryHistory">
+		    <div class="total-memory" wicket:id="totalMemory"></div>
+		    <div class="free-memory" wicket:id="freeMemory"></div>
+		    <div class="max-memory" wicket:id="maxMemory"></div>
+		    <div class="total-disk" wicket:id="totalDisk"></div>
+		    <div class="free-disk" wicket:id="freeDisk"></div>
+		    <div class="usable-disk" wicket:id="usableDisk"></div>
+		    <div class="timestamp" wicket:id="timestamp"></div>
+		</div>
+    </div>
+</body>
+</html>

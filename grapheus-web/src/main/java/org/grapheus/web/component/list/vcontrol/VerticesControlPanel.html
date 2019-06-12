@@ -1,0 +1,102 @@
+<wicket:head>
+    <style>
+.list {
+    overflow-y: auto;
+
+    background-color:white;
+    border-radius:5px;
+    height:100%;
+
+}
+
+.vlist {
+    height:calc(100% - 35px);
+    width:100%;
+}
+.control-element {
+    display: inline-block;
+}
+.control-element form {
+    margin-bottom:0.3em;
+}
+.control-element-right {
+    padding-top:0.3em;
+    float:right;
+}
+.round-button {
+    border-radius: 50%;
+    width:1.2em;
+    height:1.2em;
+    text-align:center;
+    margin-top:1px;
+    margin-bottom:auto;
+    background-color:white;
+    color:var(--bg-color);
+    cursor:pointer;
+    font-weight: bolder;
+    line-height: 18px;
+}
+
+#verticesListPanel {
+    padding-bottom:3px;
+    width: 100%;
+    background-color:lightblue;
+    height: calc(100% - 2em);
+}
+#verticesListToolbar {
+    padding-bottom: 0px;
+    height:35px;
+    overflow:hidden;
+    z-index:15;
+    margin:0;
+    padding:0 0 0 5px;
+}
+select {
+    font-size: small;
+}
+.graph-selector {
+    width:100px;
+}
+</style>
+    <!-- script>
+	    var resizeVerticesFunction=function() {
+	        setTimeout(()=> {
+	            var parentHeight = $('#verticesListPanel').height()-$('#verticesListToolbar').height();
+	            $('.vlist').height(parentHeight)
+	            console.log("resized-" + parentHeight);
+	        }, 500);
+
+	    }
+	    $(window).resize(() => {
+	        resizeVerticesFunction()
+	    })
+	    $(window).ready(() => {
+	        resizeVerticesFunction()
+	    })
+    </script -->
+</wicket:head>
+<wicket:panel>
+    <!-- div id="verticesListPanel" -->
+        <div class="head-line" id="verticesListToolbar">
+            <div class="control-element">
+                <input type="checkbox" wicket:id="tagAll" title="Toggle page-wide selection"></input>
+            </div>
+            <div class="control-element round-button" wicket:id="removeControl" title="Remove selected vertices">-</div>
+            <div class="control-element round-button" wicket:id="addControl" title="Add vertex">+</div>
+            
+            <div wicket:id="verticesFilter" class="control-element"></div>
+            <div class="control-element">
+                <form wicket:id="graph_selection_form">
+                    <select wicket:id="graph" class="graph-selector" title="Currently displaying graph"/>
+                </form>
+            </div>
+            <div class="control-element-right">
+                <span wicket:id="items_count" title="Filtered items count"/>
+            </div>
+        </div>
+                   
+        <div class="vlist">
+            <div wicket:id="verticesList" class="ui-layout-center list "></div>
+        </div>
+    <!-- /div -->
+</wicket:panel>

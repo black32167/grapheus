@@ -1,0 +1,41 @@
+version: '3'
+services:
+  arangodb:
+    image: ${ARANGODB_IMG:-arangodb/arangodb:3.4.2}
+    container_name: grapheus_arangodb
+    expose:
+      - 8529
+    ports:
+      - 8529:8529
+    environment:
+      - ARANGO_NO_AUTH=1
+      - ARANGO_STORAGE_ENGINE=mmfiles
+
+  grapheus-back:
+    image: ${RX_SERVER_IMG:-black32167/grapheus-back:latest}
+    container_name: grapheus_server
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    depends_on:
+      - arangodb
+    environment:
+      - db_host=arangodb
+      - grapheus_base_uri_key=http://0.0.0.0:8080/grapheus
+      - JAVA_OPTS=-Dgrapheus.server.baseURL=http://127.0.0.1:8080/grapheus
+      - grapheus_name=${RX_USER:-user}
+      - grapheus_password_base64=${RX_PASSWORD:-cGFzc3dvcmQ=}
+    volumes:
+      - "${HOST_DIR:-/tmp}:/user-files"
+
+  grapheus-web:
+    image: ${RX_WEB_IMG:-black32167/grapheus-web:latest}
+    container_name: grapheus_web
+    ports:
+      - 8000:8080
+    depends_on:
+      - grapheus-back
+    environment:
+      - web_port=8080
+      - grapheus_backend_uri=http://grapheus-back:8080/grapheus

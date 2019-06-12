@@ -1,0 +1,72 @@
+<wicket:head>
+<style>
+
+.vertex-list-row {
+    padding: 5px;
+    border: 1px solid #fbd850;
+    border-left: 1px solid #fbd850;
+    border-radius: 4px;
+}
+
+.vertex-title {
+    padding-right: 5px;
+    
+}
+a {
+    text-decoration:none;
+}
+.vertex-title a {   
+    direction: rtl;
+    overflow:hidden;
+    max-width: 22em;
+    text-decoration: none;
+    display:block;
+    -o-text-overflow: ellipsis;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    
+}
+
+
+.vertex-list-row input {
+    margin-top:0px;
+}
+
+.header-section {
+    display: inline-block;
+}
+.header-lborder {
+    padding-left: 5px;
+    padding-right: 5px;
+    border-left: 1px solid #fbd850;
+    
+}
+.item-date, .item-delete {
+    float:right;
+}
+
+
+.vertices-list {
+    overflow-y:auto;
+}
+</style>
+
+</wicket:head>
+<wicket:panel>
+    <div class="vertices-list" >
+    	<form wicket:id="verticesForm" >
+    	    <div wicket:id="artifacts" >
+    	        <div class="vertex-list-row">
+    	            <input wicket:id="selected" type="checkbox">
+    		        <div wicket:id="task_title" class="vertex-title header-section"/>
+    		        
+    		        <a href="#" wicket:id="task_delete" class="item-delete header-section header-lborder" width="100">X</a>
+    		        
+    		        <div wicket:id="task_info" class="item-date header-section header-lborder" width="150"/>
+    	        </div>
+    	    </div>
+        </form>
+    </div>
+
+</wicket:panel>
