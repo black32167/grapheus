@@ -21,7 +21,7 @@ dbuild() {
 	# Unpack CLI distributive
 	artifact_unpack "grapheus:grapheus-dist-${MODULE}-assembly:${VERSION}:zip" "${CTX_DIR}/${MODULE}-dist"
 	
-	docker build -t ${IMAGE_NAME} -f "${BASH_SOURCE%/*}/docker/${MODULE}/Dockerfile" ${CTX_DIR}
+	docker build -t ${IMAGE_NAME} -f "${BASH_SOURCE%/*}/build/${MODULE}/Dockerfile" ${CTX_DIR}
 }
 
 mbuild() {
@@ -29,7 +29,12 @@ mbuild() {
 }
 
 build_runner_zip() {
-  echo "Not implemented"    
+    local target_folder="$(pwd)/target"
+    rm -rf "${target_folder}"
+    mkdir -p "${target_folder}"
+    
+    cd ${BASH_SOURCE%/*}
+    zip -r "${target_folder}/grapheus-runner.zip" grapheus 
 }
 
 . ${BASH_SOURCE%/*}/include/log.sh build.log
