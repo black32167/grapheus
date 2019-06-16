@@ -25,8 +25,9 @@
 	</properties>
 
 	<scm>
-		<developerConnection>scm:git:github.com:black32167/grapheus.git</developerConnection>
-		<tag>HEAD</tag>
+        <connection>scm:git:git@github.com:black32167/grapheus.git</connection>
+		<developerConnection>scm:git:git@github.com:black32167/grapheus.git</developerConnection>
+        <tag>HEAD</tag>
 	</scm>
 
 	<dependencyManagement>
@@ -203,16 +204,21 @@
 
 
 	<build>
-
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <tagNameFormat>grapheus_@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+        </plugins>
 		<pluginManagement>
 			<plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5.3</version>
-                    <configuration>
-                        <tagNameFormat>grapheus_@{project.version}</tagNameFormat>
-                    </configuration>
                 </plugin>
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
