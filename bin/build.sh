@@ -39,16 +39,20 @@ build_runner_zip() {
 
 . ${BASH_SOURCE%/*}/include/log.sh build.log
 . ${BASH_SOURCE%/*}/include/docker-common.sh
+. ${BASH_SOURCE%/*}/include/version-utils.sh
 
 set -e
 set -u
 
-: ${VERSION:=1.6-SNAPSHOT}
+: ${VERSION:=$(version)}
 MODULE="${1-}"
 
 rm -rf "./target"
 
 case "$MODULE" in
+    version)
+        echo "${VERSION}"
+        ;;
     docker-web)
     	dbuild web || die "Can't build module web"
     	;;
