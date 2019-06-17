@@ -5,7 +5,7 @@ log_setup() {
     
     rm -rf "${LOG}" > /dev/null
     mkdir -p $(dirname "${LOG}")
-    echo "Log file: ${LOG}"
+    #echo "Log file: ${LOG}"
 }
 
 log_setup "${1}"
