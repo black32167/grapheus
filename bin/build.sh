@@ -71,7 +71,7 @@ mbuild() {
 
 build_runner_zip() {
     local grapheus_terminal_folder="grapheus-${VERSION}"
-    local tempate_folder="${SCRIPTS_ROOT}/grapheus"
+    local tempate_folder="${SCRIPTS_ROOT}/runner"
     local target_folder="$(pwd)/target/grapheus-runner"
     local destination="${target_folder}/grapheus-runner-${VERSION}.zip"
     
