@@ -4,7 +4,7 @@
     <parent>
         <groupId>grapheus</groupId>
         <artifactId>grapheus-server</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>grapheus-server-common</artifactId>
 
@@ -21,7 +21,7 @@
         <dependency>
             <groupId>grapheus</groupId>
             <artifactId>grapheus-common</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
          <dependency>
             <groupId>org.glassfish.jersey.ext</groupId>
