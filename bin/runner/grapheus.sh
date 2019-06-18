@@ -8,6 +8,7 @@ DOCKER_COMPOSE_FILE="${BASH_SOURCE%/*}/docker-compose"
 
 CMD="${1}"
 
+echo "==== Running version ${VERSION} ===="
 : ${HOST_DIR:=/tmp}
 case "$CMD" in
     pull)

@@ -12,7 +12,7 @@ services:
       - ARANGO_STORAGE_ENGINE=mmfiles
 
   grapheus-back:
-    image: ${RX_SERVER_IMG:-black32167/grapheus-back:${VERSION}}
+    image: black32167/grapheus-back:${VERSION}
     container_name: grapheus_server
     expose:
       - 8080
@@ -30,7 +30,7 @@ services:
       - "${HOST_DIR:-/tmp}:/user-files"
 
   grapheus-web:
-    image: ${RX_WEB_IMG:-black32167/grapheus-web:${VERSION}}
+    image: black32167/grapheus-web:${VERSION}
     container_name: grapheus_web
     ports:
       - 8000:8080

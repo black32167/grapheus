@@ -1,10 +1,16 @@
 #!/bin/bash
 
+# This script can build 'release' and 'current' versions of Grapheus artifacts including:
+# * Maven artifacts
+# * Docker images
+# * Command-line runner
+
+##################################### Globals ###############################################
 set -e
 set -u
 
 SCRIPTS_ROOT="${BASH_SOURCE%/*}"
-##################################### Globals ###############################################
+
 . ${SCRIPTS_ROOT}/include/log.sh build.log
 . ${SCRIPTS_ROOT}/include/docker-common.sh
 . ${SCRIPTS_ROOT}/include/version-utils.sh
