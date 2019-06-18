@@ -89,7 +89,7 @@ build_runner_zip() {
     cp -r "${tempate_folder}" "${target_folder}/${grapheus_terminal_folder}"
  
     # Replace template variables
-    sed -i.bak -e "s/\${VERSION}/${VERSION}/" "${target_folder}/${grapheus_terminal_folder}/docker-compose"
+    sed -i.bak -e "s/\${VERSION}/${VERSION}/" "${target_folder}/${grapheus_terminal_folder}/grapheus.sh"
     find "${target_folder}" -name "*.bak" | xargs rm
     
     # Archiving
