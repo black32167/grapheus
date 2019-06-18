@@ -22,7 +22,7 @@ grapheus-runner$ ./grapheus.sh start
 After a while you'll be able to open web ui page in your browser ([http://127.0.0.1:8000/app/](http://127.0.0.1:8000/app/)):
 <img src="grapheus_screenshot.png" alt="Grapheus screenshot" width="1024px">
 
-# Working with repository
+# Working with the repository
 If you want to use development version or contribute, you will need to clone this repository.
 ### Prerequisites for working with the repository:
 * All prerequisites from '[Prerequisites for starting Grapheus](#prerequisites-for-starting-grapheus)' section
