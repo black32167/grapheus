@@ -1,11 +1,5 @@
 # About
-Grapheus is a tool for _graphs exploration_. It provides _interactive navigation_ through your graphs and helps to _refine the data_ according specific criteria. 
-
-To work with current repository, you will need:
-* Java 8
-* Maven 3x
-* Docker
-* [Docker-Compose](https://docs.docker.com/compose/)
+Grapheus is a tool for _graphs exploration_. It provides _interactive navigation_ through your graphs and helps to _refine the data_ according specific criteria.
 
 # Start Grapheus
 You can start grapheus using small bash script employs docker-compose for environment orchestration. **No repository cloning is required**.
@@ -13,7 +7,7 @@ You can start grapheus using small bash script employs docker-compose for enviro
 * Linux
 * Bash
 * Docker
-* Docker-Compose
+* [Docker-Compose](https://docs.docker.com/compose/)
 
 If you're installing docker for the first time you might need to perform officially recommended [post-installation steps](https://docs.docker.com/install/linux/linux-postinstall/).
 
