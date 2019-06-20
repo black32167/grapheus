@@ -23,24 +23,28 @@ class ClassesInJarIterator(
     fun iterate(dependenciesVisitor: JarDependenciesVisitor) {
         
         Files.find(rootPath, max_depth, isJarFilePredicate()).forEach { pathToJarFile->
-            dependenciesVisitor.onJar(pathToJarFile)
+            dependenciesVisitor.onJarStart(pathToJarFile)
             
             ZipInputStream(FileInputStream(pathToJarFile.toFile())).use {jis->
                 var entry = jis.nextEntry
+
                 while(entry != null) {
                     if(classPatternRegex.matches(entry.name)) {
                         val classReader = ClassReader(jis)
+
                         val classDependenciesExtractingVisitor = ClassDependenciesExtractingVisitor {
                             fieldName, fieldType -> dependenciesVisitor.onField(classReader.className, fieldName, fieldType)
                         }
-                        dependenciesVisitor.onClass(classReader.className)
-                        
+                        dependenciesVisitor.onClass(classReader.className.replace('/', '.'))
+
                         classReader.accept(classDependenciesExtractingVisitor, ClassReader.SKIP_CODE)
                     }
                     entry = jis.nextEntry
                 }
+
             }
         }
+        dependenciesVisitor.onScanningFinished()
     }
     
     private fun isJarFilePredicate(): BiPredicate<Path, BasicFileAttributes> =

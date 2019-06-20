@@ -5,12 +5,7 @@ import org.grapheus.jarscanner.concurrent.TerminatingQueue
 import java.io.FileOutputStream
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.concurrent.ArrayBlockingQueue
 import kotlin.system.exitProcess
-
-class JarScanner {
-    
-}
 
 fun usage() {
     println("Usage:")
@@ -44,7 +39,7 @@ fun main(args:Array<String>) {
                     .localId(className)
                     .title(title)
                     .description(title)
-                    .build());
+                    .build())
         }
 
         override fun onField(className:String, fieldName: String, fieldType: String) {
