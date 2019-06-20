@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.grapheus.client.model.GraphStreamSerializer;
 import org.grapheus.client.model.RGraphInfo;
 import org.grapheus.client.model.graph.RGraph;
 import org.grapheus.client.model.graph.RGraphsContainer;
@@ -144,11 +145,10 @@ public class GraphResource {
                 .ok(new StreamingOutput() {
                     @Override
                     public void write(OutputStream output) throws IOException, WebApplicationException {
-                        GraphStreamSerializer.builder()//
+                        new GraphStreamSerializer()//
                                     .graphId(graphId)//
                                     .verticesProducer(vertexIterable)
                                     .edgesProducer(edgesIterable)
-                                    .build()
                                     .serialize(output);
                     }
                 })

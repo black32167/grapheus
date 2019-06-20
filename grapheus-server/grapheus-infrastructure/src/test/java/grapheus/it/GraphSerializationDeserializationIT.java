@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.grapheus.client.model.GraphStreamSerializer;
 import org.grapheus.client.model.graph.edge.REdge;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.junit.Test;
 
 import grapheus.rest.resource.graph.GraphStreamParser;
-import grapheus.rest.resource.graph.GraphStreamSerializer;
 
 /**
  * @author black
@@ -33,11 +33,10 @@ public class GraphSerializationDeserializationIT {
         Collection<RVertex> vertices = Arrays.asList(
                 RVertex.builder().localId("fromId").build(),
                 RVertex.builder().localId("toId").build());
-        GraphStreamSerializer serializer = GraphStreamSerializer.builder()
+        GraphStreamSerializer serializer = new GraphStreamSerializer()
                 .edgesProducer(edges)
                 .verticesProducer(vertices)
-                .graphId("graphId")
-                .build();
+                .graphId("graphId");
         
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         

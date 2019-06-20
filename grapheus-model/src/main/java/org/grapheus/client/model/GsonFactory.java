@@ -1,7 +1,7 @@
 /**
  * 
  */
-package grapheus.rest.resource.graph;
+package org.grapheus.client.model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

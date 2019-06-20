@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.grapheus.client.model.GsonFactory;
 import org.grapheus.client.model.graph.GraphStreamFields;
 import org.grapheus.client.model.graph.edge.REdge;
 import org.grapheus.client.model.graph.vertex.RVertex;
