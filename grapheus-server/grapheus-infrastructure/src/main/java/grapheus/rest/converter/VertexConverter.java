@@ -3,18 +3,16 @@
  */
 package grapheus.rest.converter;
 
+import grapheus.persistence.model.graph.PersistentVertex;
+import grapheus.view.SemanticFeature;
+import org.grapheus.client.model.graph.vertex.RVertex;
+import org.grapheus.client.model.graph.vertex.RVertex.RProperty;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import org.grapheus.client.model.graph.vertex.RVertex;
-import org.grapheus.client.model.graph.vertex.RVertex.RProperty;
-
-import grapheus.persistence.model.graph.PersistentVertex;
-import grapheus.view.SemanticFeature;
 
 /**
  * @author black
@@ -44,11 +42,11 @@ public final class VertexConverter {
                 build();
     }
 
-    private static List<SemanticFeature> toInternalProperties(RProperty[] properties) {
+    private static List<SemanticFeature> toInternalProperties(List<RProperty> properties) {
         if(properties == null) {
             return new ArrayList<>();//!!! Important to be mutable
         }
-        return Arrays.asList(properties).stream().//
+        return properties.stream().//
                 map(extProp -> SemanticFeature.builder().//
                         feature(extProp.getName()).//
                         value(extProp.getValue()).//

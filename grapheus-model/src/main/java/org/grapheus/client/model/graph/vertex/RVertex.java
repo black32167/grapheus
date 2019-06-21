@@ -3,10 +3,9 @@
  */
 package org.grapheus.client.model.graph.vertex;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 /**
  * @author black
@@ -22,16 +21,30 @@ public class RVertex {
     @NoArgsConstructor
     @Builder
     public static class RProperty {
-        String name;
-        String value;
+        private String name;
+        private String value;
     }
 
-    private String localId;//local datasource id
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class RReference {
+        private List<String> classifiers;
+        private String destinationId;
+    }
+
+    private String localId;//local id //TODO: remove
     private String sourceUrl;
-    private String artifactId;//unique id
+    private String artifactId;//unique id //TODO: rename to 'id'
     private String title;
     private String description;
-    private long updateTimeMills;
-    private RProperty[] properties;
+    private long updateTimeMills; //TODO: convert to 'Long'?
+
+    @Singular
+    private List<RProperty> properties;
+
+    @Singular
+    private List<RReference> references; // TODO: add support <<<<<<<<<<
 
 }

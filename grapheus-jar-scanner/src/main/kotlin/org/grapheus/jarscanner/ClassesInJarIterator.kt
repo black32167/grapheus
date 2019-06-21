@@ -21,27 +21,32 @@ class ClassesInJarIterator(
     val max_depth = 99
     
     fun iterate(dependenciesVisitor: JarDependenciesVisitor) {
-        
+        val encounteredJarNames = mutableSetOf<String>()
+
         Files.find(rootPath, max_depth, isJarFilePredicate()).forEach { pathToJarFile->
-            dependenciesVisitor.onJarStart(pathToJarFile)
-            
-            ZipInputStream(FileInputStream(pathToJarFile.toFile())).use {jis->
-                var entry = jis.nextEntry
+            if(dependenciesVisitor.onJarStart(pathToJarFile)) {
+                ZipInputStream(FileInputStream(pathToJarFile.toFile())).use { jis ->
+                    var entry = jis.nextEntry
 
-                while(entry != null) {
-                    if(classPatternRegex.matches(entry.name)) {
-                        val classReader = ClassReader(jis)
+                    while (entry != null) {
+                        if (classPatternRegex.matches(entry.name)) {
+                            val classReader = ClassReader(jis)
 
-                        val classDependenciesExtractingVisitor = ClassDependenciesExtractingVisitor {
-                            fieldName, fieldType -> dependenciesVisitor.onField(classReader.className, fieldName, fieldType)
+                            val classDependenciesExtractingVisitor = ClassDependenciesExtractingVisitor { fieldName, fieldType ->
+                                dependenciesVisitor.onField(classReader.className, fieldName, fieldType)
+                            }
+
+                            val className = classReader.className.replace('/', '.')
+                            if (dependenciesVisitor.onClassStart(className)) {
+                                classReader.accept(classDependenciesExtractingVisitor, ClassReader.SKIP_CODE)
+
+                                dependenciesVisitor.onClassEnd(className)
+                            }
                         }
-                        dependenciesVisitor.onClass(classReader.className.replace('/', '.'))
-
-                        classReader.accept(classDependenciesExtractingVisitor, ClassReader.SKIP_CODE)
+                        entry = jis.nextEntry
                     }
-                    entry = jis.nextEntry
-                }
 
+                }
             }
         }
         dependenciesVisitor.onScanningFinished()

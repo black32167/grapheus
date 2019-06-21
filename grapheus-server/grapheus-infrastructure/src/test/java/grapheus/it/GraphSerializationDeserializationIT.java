@@ -3,8 +3,11 @@
  */
 package grapheus.it;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import grapheus.rest.resource.graph.GraphStreamParser;
+import org.grapheus.client.model.GraphStreamSerializer;
+import org.grapheus.client.model.graph.edge.REdge;
+import org.grapheus.client.model.graph.vertex.RVertex;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,12 +16,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.grapheus.client.model.GraphStreamSerializer;
-import org.grapheus.client.model.graph.edge.REdge;
-import org.grapheus.client.model.graph.vertex.RVertex;
-import org.junit.Test;
-
-import grapheus.rest.resource.graph.GraphStreamParser;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author black
