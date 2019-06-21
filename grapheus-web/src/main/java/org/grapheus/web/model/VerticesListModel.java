@@ -101,16 +101,16 @@ public class VerticesListModel extends LoadableDetachableModel<VerticesRemoteDat
                     filter.getSortingType() == null ? null : new VerticesSortCriteria(filter.getSortingType(), filter.getSortingDirection()));
             
             Collection<RVertex> vertices = tasksEnvelope.getArtifacts();
-            Collection<String> verticesKeys = vertices.stream().map(RVertex::getArtifactId).collect(Collectors.toList());
+            Collection<String> verticesKeys = vertices.stream().map(RVertex::getId).collect(Collectors.toList());
             
             Collection<RVertexInfo> vInfos = loadAdditionalInfo(verticesKeys);
             Map<String, String> vId2Info = vInfos.stream().collect(Collectors.toMap(RVertexInfo::getVertexKey, RVertexInfo::getInfoData));
            
             List<VertexInfo> loadedVertices = vertices.stream().map(v-> VertexInfo.builder().//
-                        artifactId(v.getArtifactId()).//
+                        vertexId(v.getId()).//
                         title(v.getTitle()).//
                         updatedTimestamp(v.getUpdateTimeMills()).//
-                        vertexInfo(vId2Info.getOrDefault(v.getArtifactId(), "")).//
+                        vertexInfo(vId2Info.getOrDefault(v.getId(), "")).//
                         editable(tasksEnvelope.isEditPermitted()).//
                         build()
             ).collect(Collectors.toList());

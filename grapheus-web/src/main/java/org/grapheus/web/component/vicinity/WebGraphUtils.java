@@ -57,13 +57,13 @@ public class WebGraphUtils {
         
         Collection<RVertex> artifacts = RemoteUtil.vertexAPI().loadArtifacts(graphName, artifactsIds);
 //        Map<String, RVertex> artifactsMap = artifacts.stream().collect(Collectors.toMap(
-//                (a)->a.getArtifactId(), (a)->a));
+//                (a)->a.getId(), (a)->a));
         
         List<Vertex> vertices = artifacts.stream()
                 .map(a -> Vertex.builder().//
-                    name(a.getTitle() != null ? a.getTitle() : "#"+a.getArtifactId()).//
-                    id(a.getArtifactId()).//
-                    neighbors(neighborsMap.getOrDefault(a.getArtifactId(), Collections.emptyList())).//
+                    name(a.getTitle() != null ? a.getTitle() : "#"+a.getId()).//
+                    id(a.getId()).//
+                    neighbors(neighborsMap.getOrDefault(a.getId(), Collections.emptyList())).//
                     build())
                 .collect(Collectors.toList());
   

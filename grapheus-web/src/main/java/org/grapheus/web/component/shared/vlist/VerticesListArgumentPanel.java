@@ -72,7 +72,7 @@ public class VerticesListArgumentPanel extends Panel {
                 
                // ListItem<VertexInfo> item = (ListItem<VertexInfo>) component;
                 VertexInfo data = (VertexInfo) session.getAttribute("draggingVertex");//item.getModelObject();//TODO: can we do better? See also VerticesList
-                vertices.put(data.getArtifactId(), data);
+                vertices.put(data.getVertexId(), data);
                 target.add(VerticesListArgumentPanel.this);
                 if(onChangeCallback != null) {
                     onChangeCallback.accept(target);
@@ -107,7 +107,7 @@ public class VerticesListArgumentPanel extends Panel {
                 VertexInfo data = item.getModelObject();
                 item.add(new Label("vertexTitle", data.getTitle()));
                 item.add(new LambdaAjaxLink("itemRemoveLink", target->  {
-                    verticesMap.remove(data.getArtifactId());
+                    verticesMap.remove(data.getVertexId());
                     target.add(VerticesListArgumentPanel.this);
                     if(onChangeCallback != null) {
                         onChangeCallback.accept(target);
@@ -118,7 +118,7 @@ public class VerticesListArgumentPanel extends Panel {
     }
     
     public List<String> getVerticesIds() {
-        return vertices.values().stream().map(v->v.getArtifactId()).collect(Collectors.toList());
+        return vertices.values().stream().map(v->v.getVertexId()).collect(Collectors.toList());
     }
 
     public void clear() {

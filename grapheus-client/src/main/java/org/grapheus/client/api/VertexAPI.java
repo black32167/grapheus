@@ -131,12 +131,12 @@ public class VertexAPI {
     }
 
     public void updateVertex(String graphName,String artifactId, RVertex vertex) {
-        URI uri = graphPath(graphName).path("{artifactId}").path("update").build(artifactId);
+        URI uri = graphPath(graphName).path("{vertexId}").path("update").build(artifactId);
         restClient.put(uri, vertex);
     }
 
     public void delete(String graphName, String artifactId) {
-        URI uri = graphPath(graphName).path("{artifactId}").build(artifactId);
+        URI uri = graphPath(graphName).path("{vertexId}").build(artifactId);
         restClient.delete(uri);
     }
 

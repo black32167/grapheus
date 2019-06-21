@@ -29,7 +29,7 @@ public class NonclusterProcessingArtifactsRegistry implements InflightArtifactsR
         }
         List<PersistentVertex> registeredArtifacts = new ArrayList<>();
         for(PersistentVertex nextCandidate: unprocessedArtifactCandidatesChunk) {
-            if(inflightIds.add(nextCandidate.getExternalCompositeId())) {
+            if(inflightIds.add(nextCandidate.getId())) {
                 registeredArtifacts.add(nextCandidate);
             }
         }
@@ -43,7 +43,7 @@ public class NonclusterProcessingArtifactsRegistry implements InflightArtifactsR
 
     @Override
     public void unregister(PersistentVertex processed) {
-        inflightIds.remove(processed.getExternalCompositeId());
+        inflightIds.remove(processed.getId());
     }
 
 

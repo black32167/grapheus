@@ -8,6 +8,7 @@ import org.grapheus.client.model.graph.edge.REdge;
 import grapheus.persistence.model.graph.PersistentEdge;
 import grapheus.persistence.storage.graph.ExternalCompositeId;
 import grapheus.persistence.storage.traverse.Edge;
+import org.grapheus.client.model.graph.vertex.RVertex;
 
 /**
  * @author black
@@ -33,5 +34,11 @@ public class EdgeConverter {
                 .to(ExternalCompositeId.buildCompleteId(verticesCollection , e.getTo()))
                 .build();
     }
-           
+
+    public static PersistentEdge toInternal(String verticesCollection, String vertextId, RVertex.RReference reference) {
+        return PersistentEdge.builder()//
+                .from(ExternalCompositeId.buildCompleteId(verticesCollection, vertextId))
+                .to(ExternalCompositeId.buildCompleteId(verticesCollection , reference.getDestinationId()))
+                .build();
+    }
 }

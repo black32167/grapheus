@@ -16,7 +16,7 @@ public final class ExternalCompositeId {
     }
 
     public static String from(PersistentVertex vertex) {
-        return from(vertex.getLocalId());
+        return from(vertex.getId());
     }
     
     private ExternalCompositeId() {}

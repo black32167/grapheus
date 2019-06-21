@@ -50,7 +50,7 @@ public class DefaultVertexStorage extends StorageSupport implements VertexStorag
         persistingArtifact.setUpdatedTimestamp(now);
         String vertexCollectionName = GraphNameUtils.verticesCollectionName(graphName);
         updateDocument(vertexCollectionName, persistingArtifact);
-        log.debug("Updated artifact #" + persistingArtifact.getExternalCompositeId());
+        log.debug("Updated artifact #" + persistingArtifact.getId());
     }
 
     @Override
@@ -76,11 +76,11 @@ public class DefaultVertexStorage extends StorageSupport implements VertexStorag
         persistingArtifact.setCreatedTimestamp(now);
         persistingArtifact.setUpdatedTimestamp(now);
         if (persistingArtifact.getTitle() == null) {
-            persistingArtifact.setTitle("#" + persistingArtifact.getExternalCompositeId());
+            persistingArtifact.setTitle("#" + persistingArtifact.getId());
         }
         String vertexCollectionName = GraphNameUtils.verticesCollectionName(graphName);
         createDocument(vertexCollectionName, persistingArtifact);
-        log.debug("Created artifact #" + persistingArtifact.getExternalCompositeId());
+        log.debug("Created artifact #" + persistingArtifact.getId());
     }
 
     /**

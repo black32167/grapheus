@@ -52,7 +52,7 @@ public class ClassUploader {
                 userClient.vertex().addVertex(GraphNamesConstants.DEFAULT_GRAPH_NAME, RVertex.builder().//
                         description(fileContent).//
                         title(className).//
-                        localId(className).//
+                        id(className).//
                         build());
             } catch (Exception e) {
                 e.printStackTrace();

@@ -47,7 +47,7 @@ public class DefaultGraphsStorageIT {
     public void testUpdateVertexConflict() throws GraphExistsException {
         graphStorage.addGraph(GRAPH_NAME);
         
-        PersistentVertex v = PersistentVertex.builder().externalCompositeId("id").build();
+        PersistentVertex v = PersistentVertex.builder().id("id").build();
         vertexStorage.createVertex(GRAPH_NAME, v);
         String initialRev = v.getRev();
         vertexStorage.updateVertex(GRAPH_NAME, v);
@@ -66,7 +66,7 @@ public class DefaultGraphsStorageIT {
         semanticFeatures1.add(SemanticFeature.from(f1Name, "v1"));
         semanticFeatures1.add(SemanticFeature.from(f2Name, "v2"));
         PersistentVertex v1 = PersistentVertex.builder().//
-                externalCompositeId("id1").//
+                id("id1").//
                 semanticFeatures(semanticFeatures1).//
                 build();
         vertexStorage.createVertex(GRAPH_NAME, v1);
@@ -75,7 +75,7 @@ public class DefaultGraphsStorageIT {
         semanticFeatures2.add(SemanticFeature.from(f1Name, "v3"));
         semanticFeatures2.add(SemanticFeature.from(f3Name, "v2"));
         PersistentVertex v2 = PersistentVertex.builder().//
-                externalCompositeId("id2").//
+                id("id2").//
                 semanticFeatures(semanticFeatures2).//
                 build();
         vertexStorage.createVertex(GRAPH_NAME, v2);

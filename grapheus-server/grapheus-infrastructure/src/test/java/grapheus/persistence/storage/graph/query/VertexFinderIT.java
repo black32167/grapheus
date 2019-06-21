@@ -79,7 +79,7 @@ public class VertexFinderIT extends GraphTestSupport {
                 Collections.singleton(DS_ID_1+":"+LOCAL_ID_1),
                 Collections.singleton("excl"),
                 artifacts::add);
-        List<String> retrievedIds = artifacts.stream().map(a -> a.getExternalCompositeId()).collect(Collectors.toList());
+        List<String> retrievedIds = artifacts.stream().map(a -> a.getId()).collect(Collectors.toList());
         
         assertEquals(2, retrievedIds.size());
         assertTrue(retrievedIds.containsAll(Arrays.asList(DS_ID_1 + ":" + LOCAL_ID_1, DS_ID_1 + ":" + LOCAL_ID_2)));
@@ -109,8 +109,8 @@ public class VertexFinderIT extends GraphTestSupport {
        
         PersistentVertex v = PersistentVertex.builder().//
                 sourceId(dsId).//
-                localId(artifactLocalId).//
-                externalCompositeId(dsId + ":" + artifactLocalId).//
+                id(artifactLocalId).//
+                id(dsId + ":" + artifactLocalId).//
                 build();
         v.getSemanticFeatures().add(SemanticFeature.builder().//
                 feature(SemanticFeatureType.LOCAL_ID_REFERENCE).//

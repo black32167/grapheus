@@ -58,14 +58,14 @@ public class DefaultVertexStorageIT extends GraphTestSupport {
         PersistentVertex vertex = PersistentVertex.builder()
                 .title("title")
                 .description("description")
-                .externalCompositeId("id")
+                .id("id")
                 .build();
         
         graph(GRAPH_NAME).vertex(vertex).build();
         
         PersistentVertex partialVertex = new PersistentVertex();
         partialVertex.setTitle("title1");
-        partialVertex.setExternalCompositeId("id");
+        partialVertex.setId("id");
         storage.partiallyUpdateVertex(GRAPH_NAME, partialVertex);
         
         PersistentVertex updatedVertex = loadVertex(GRAPH_NAME, "id");
@@ -79,7 +79,7 @@ public class DefaultVertexStorageIT extends GraphTestSupport {
         PersistentVertex vertex = PersistentVertex.builder()
                 .title("title")
                 .description("description")
-                .externalCompositeId("id")
+                .id("id")
                 .build();
         
         graph(GRAPH_NAME).vertex(vertex).build();

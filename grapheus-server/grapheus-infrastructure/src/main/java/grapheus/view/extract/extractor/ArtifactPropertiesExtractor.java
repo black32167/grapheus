@@ -35,7 +35,7 @@ public class ArtifactPropertiesExtractor implements SemanticFeatureExtractor {
                             build());
             });
         });
-        String localId = buildingArtifact.getLocalId();
+        String localId = buildingArtifact.getId();
         newFeatures.add(//
                 SemanticFeature.builder().//
                     feature(SemanticFeatureType.LOCAL_ID_IDENTITY).//

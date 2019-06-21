@@ -164,7 +164,7 @@ public class VerticesControlPanel extends Panel {
         IModel<Boolean> cbModel = Model.of(false);
         LambdaAjaxCheckbox checkbox = new LambdaAjaxCheckbox(id, cbModel, (target) -> {
             if(Boolean.TRUE.equals(cbModel.getObject())) {
-                vertexListModel.getObject().getVertices().forEach(v->selectedVerticesIds.add(v.getArtifactId()));
+                vertexListModel.getObject().getVertices().forEach(v->selectedVerticesIds.add(v.getVertexId()));
             } else {
                 selectedVerticesIds.clear();;
             }

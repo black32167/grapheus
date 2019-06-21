@@ -93,15 +93,15 @@ public class AnalyticsCommandProcessor implements CommandProcessor {
         final String fPattern = ofNullable(pattern).orElse(DEFAULT_BRIDGE_PATTERN);
 
         Collection<RVertex> artifacts = vertex().loadArtifacts(graph, ids);
-        Map<String, RVertex> id2a = artifacts.stream().collect(Collectors.toMap(RVertex::getArtifactId, Function.identity()));
+        Map<String, RVertex> id2a = artifacts.stream().collect(Collectors.toMap(RVertex::getId, Function.identity()));
         return bridges.stream().map(b->{
             RVertex fromA = id2a.get(b.getFrom());
             RVertex toA = id2a.get(b.getTo());
             return fPattern.
                 replace("{titleFrom}", fromA.getTitle()).
-                replace("{idFrom}", fromA.getArtifactId()).
+                replace("{idFrom}", fromA.getId()).
                 replace("{titleTo}", toA.getTitle()).
-                replace("{idTo}", toA.getArtifactId());
+                replace("{idTo}", toA.getId());
             }).collect(Collectors.toList());
     }
     private VertexAPI vertex() {
@@ -121,7 +121,7 @@ public class AnalyticsCommandProcessor implements CommandProcessor {
     private String format(String pattern, RVertex a) {
         return pattern.
                 replace("{title}", a.getTitle()).
-                replace("{id}", a.getArtifactId());
+                replace("{id}", a.getId());
     }
     @Override
     public Class<?> processingClass() {

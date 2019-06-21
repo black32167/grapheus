@@ -51,7 +51,7 @@ public class VerticesListViewPanel extends Panel {
         private static final long serialVersionUID = 1L;
         private final String title;
         private final long updatedTimestamp;
-        private final String artifactId; 
+        private final String vertexId;
         private final RVertex vertex;
         private final String vertexInfo;
         private final boolean editable;
@@ -117,15 +117,15 @@ public class VerticesListViewPanel extends Panel {
                         .set("helper", "'clone'")
                         );
                 item.add(draggableBehavior);
-                item.add(new AjaxCheckBox("selected", new Model<Boolean>(vertexSelectionModel.getObject().contains(vertexInfo.artifactId))) {
+                item.add(new AjaxCheckBox("selected", new Model<Boolean>(vertexSelectionModel.getObject().contains(vertexInfo.vertexId))) {
                     private static final long serialVersionUID = 1L;
 
                     @Override
                     protected void onUpdate(AjaxRequestTarget target) {
                         if(Boolean.TRUE.equals(getDefaultModelObject())) {
-                            vertexSelectionModel.getObject().add(vertexInfo.artifactId);
+                            vertexSelectionModel.getObject().add(vertexInfo.vertexId);
                         } else {
-                            vertexSelectionModel.getObject().remove(vertexInfo.artifactId);
+                            vertexSelectionModel.getObject().remove(vertexInfo.vertexId);
                         }
                     }
                     
@@ -133,9 +133,9 @@ public class VerticesListViewPanel extends Panel {
                 item.add(new VertexLinkPanel(
                         "task_title",
                         title,
-                        vertexInfo.getArtifactId(),
+                        vertexInfo.getVertexId(),
                         graphName, target-> {
-                    	vertexSelectionListener.onVertexSelected(target, vertexInfo.getArtifactId());
+                    	vertexSelectionListener.onVertexSelected(target, vertexInfo.getVertexId());
                 }));
                 
                 item.add(new Label("task_info", vertexInfo.getVertexInfo()));
@@ -144,7 +144,7 @@ public class VerticesListViewPanel extends Panel {
                     private static final long serialVersionUID = 1L;
                     @Override
                     public void onClick() {
-                        RemoteUtil.vertexAPI().delete(graphName, vertexInfo.getArtifactId());
+                        RemoteUtil.vertexAPI().delete(graphName, vertexInfo.getVertexId());
                     }
                 }.setVisible(vertexInfo.isEditable()));
             }

@@ -53,8 +53,8 @@ public class MergeVerticesTransactionIT extends GraphTestSupport {
             .build();
         
 
-        updateVertex(GRAPH_NAME, PersistentVertex.builder().externalCompositeId("v2").description("descV2").build());
-        updateVertex(GRAPH_NAME, PersistentVertex.builder().externalCompositeId("v3").description("descV3").build());
+        updateVertex(GRAPH_NAME, PersistentVertex.builder().id("v2").description("descV2").build());
+        updateVertex(GRAPH_NAME, PersistentVertex.builder().id("v3").description("descV3").build());
 
         
         String mergedId = transaction.merge("user", GRAPH_NAME, "Comp:new", Arrays.asList("v2", "v3"));

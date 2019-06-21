@@ -60,8 +60,8 @@ public class FeatureSubgraphGraphGenerator {
                         log.info("Creating new vertex '{}'", targetArtifactId);
                         vertexStorage.createVertex(newGraphName, 
                                 PersistentVertex.builder().//
-                                externalCompositeId(targetArtifactId).//
-                                localId(value).//
+                                id(targetArtifactId).//
+                                id(value).//
                                 title(value).//
                                 description("").//
                                 build());
@@ -94,8 +94,8 @@ public class FeatureSubgraphGraphGenerator {
                             Optional<PersistentVertex> maybeVToTarget = vertexStorage.getByExternalId(newGraphName, ExternalCompositeId.from(valueToTarget));
                             if(maybeVFromTarget.isPresent() && maybeVToTarget.isPresent()) {   
                                 edgesStorage.connect(newGraphName,
-                                        maybeVFromTarget.get().getExternalCompositeId(),
-                                        maybeVToTarget.get().getExternalCompositeId());
+                                        maybeVFromTarget.get().getId(),
+                                        maybeVToTarget.get().getId());
                             }
                         }
                     }

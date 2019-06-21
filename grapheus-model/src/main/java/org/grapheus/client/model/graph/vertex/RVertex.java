@@ -34,9 +34,7 @@ public class RVertex {
         private String destinationId;
     }
 
-    private String localId;//local id //TODO: remove
-    private String sourceUrl;
-    private String artifactId;//unique id //TODO: rename to 'id'
+    private String id;
     private String title;
     private String description;
     private long updateTimeMills; //TODO: convert to 'Long'?
@@ -45,6 +43,6 @@ public class RVertex {
     private List<RProperty> properties;
 
     @Singular
-    private List<RReference> references; // TODO: add support <<<<<<<<<<
+    private List<RReference> references;
 
 }

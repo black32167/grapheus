@@ -31,12 +31,12 @@ import grapheus.view.SemanticFeature;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(of="externalCompositeId")
+@EqualsAndHashCode(of="id")
 @Index(fields="artifact.updatedTimestamp", type=IndexType.SKIP, unique=false)
 @Index(fields=PersistentVertex.FIELD_VIEW_HINT_VAL, type=IndexType.HASH, unique=false)
 @Index(fields=PersistentVertex.FIELD_VIEW_HINT_TYPE, type=IndexType.HASH, unique=false) //It has low selectivity, maybe not worth to spend memory
 @Index(fields=PersistentVertex.FIELD_TITLE, type=IndexType.SKIP, unique=false)
-@ToString(of={"externalCompositeId"})
+@ToString(of={"id"})
 public class PersistentVertex {
     public static final String FIELD_ID = "_key";
     public static final String FIELD_SEMANTIC_FEATURES = "semanticFeatures";
@@ -51,7 +51,7 @@ public class PersistentVertex {
     public static final String VIRTUAL_ORDER = "order";
     
     @DocumentField(Type.KEY)
-    private String externalCompositeId; // 'dataSourceHash:remoteLocalId'
+    private String id;
 
     @DocumentField(Type.REV)
     private String rev;
@@ -71,8 +71,6 @@ public class PersistentVertex {
     private String url;
     
     private String title;
-    
-    private String localId;
     
     private String description;
     

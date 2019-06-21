@@ -137,7 +137,7 @@ public class VicinityControlPanel extends Panel {
                 VertexInfo data = (VertexInfo) session.getAttribute("draggingVertex");//item.getModelObject();//TODO: can we do better? See also VerticesList
                 
                 RemoteUtil.operationAPI().connect(graphIdSupplier.get(),
-                        Collections.singletonList(data.getArtifactId()), 
+                        Collections.singletonList(data.getVertexId()),
                         Collections.singletonList(vicinityVertexModel.getFilter().getSelectedVertexId()));
                 target.add(graphView);
             }

@@ -92,8 +92,7 @@ public class VertexResource {
     
     @Inject
     private UserConverter userConverter;
-    
-    
+
 
     @GET
     @Path("/properties")//TODO: is it used?
@@ -147,13 +146,13 @@ public class VertexResource {
 
     
     @PUT
-    @Path("{artifactId}/update")
-    public void update(@PathParam("artifactId") String artifactId, RVertex artifact) {
+    @Path("{vertexId}/update")
+    public void update(@PathParam("vertexId") String vertexId, RVertex artifact) {
       
         PersistentVertex internalArtifact = new PersistentVertex();
         internalArtifact.setTitle(artifact.getTitle());
         internalArtifact.setDescription(artifact.getDescription());
-        internalArtifact.setExternalCompositeId(artifactId);
+        internalArtifact.setId(vertexId);
          
         String grapheusUserKey = GrapheusRequestContextHolder.getContext().getUserId();
         try {
@@ -244,9 +243,9 @@ public class VertexResource {
     }
     
     @DELETE
-    @Path("{artifactId}")
+    @Path("{vertexId}")
     public Response deleteArtifact(
-            @PathParam("artifactId") String artifactId) throws InterruptedException, ExecutionException {
+            @PathParam("vertexId") String artifactId) throws InterruptedException, ExecutionException {
         
         String grapheusUserKey = GrapheusRequestContextHolder.getContext().getUserId();
         

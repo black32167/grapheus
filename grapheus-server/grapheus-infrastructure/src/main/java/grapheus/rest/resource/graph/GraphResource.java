@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,6 @@ public class GraphResource {
     
     @Inject
     private GraphsManager graphManager;
-    
 
     @Inject
     private VertexBulkImporterFactory vertexBulkImporterFactory;
@@ -106,7 +106,7 @@ public class GraphResource {
     @Path("{graphId}/import")
     public Response importGraph(@PathParam("graphId") String graphId, InputStream graphStream) throws Exception {
         String grapheusUserKey = GrapheusRequestContextHolder.getContext().getUserId();
-        
+        graphId = graphId.replace('-', '_');
         log.info("Creating graph {}", graphId);
         
         createGraph(graphId);
@@ -117,7 +117,14 @@ public class GraphResource {
                 EdgeBulkImporter edgeImporter = edgeBulkImporterFactory.newEdgeImporter(grapheusUserKey, graphId)) {
             GraphStreamParser.builder()
                 .edgeConsumer(e -> edgeImporter.importEdge(EdgeConverter.toInternal(verticesCollection, e)))
-                .vertexConsumer(v -> vertexImporter.importVertex(VertexConverter.toInternal(v)))
+                .vertexConsumer(v -> {
+                    vertexImporter.importVertex(VertexConverter.toInternal(v));
+                    Optional.ofNullable(v.getReferences()).ifPresent(references -> {
+                        for(RVertex.RReference reference:references) {
+                            edgeImporter.importEdge(EdgeConverter.toInternal(verticesCollection, v.getId(), reference));
+                        }
+                    });
+                })
                 .build()
                 .consumeStream(graphStream);
         }

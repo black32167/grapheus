@@ -22,7 +22,7 @@ public class StatisticsEndpointIT extends AbstractUserBasedIT {
 //            client.put("artifact/"+getCurrentScope(), RVertex.builder().//
 //                    description("Mars base, blocked by MaRs").//
 //                    title("Mars base").//
-//                    artifactId("MRS-2").//
+//                    id("MRS-2").//
 //                    build());
 //            try {
 //                Thread.sleep(500);

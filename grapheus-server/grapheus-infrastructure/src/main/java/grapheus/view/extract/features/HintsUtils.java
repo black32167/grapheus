@@ -33,7 +33,7 @@ public final class HintsUtils {
     }
 
     public static Set<String> getExternalIds(Collection<PersistentVertex> artifacts) {
-        return artifacts.stream().map(a -> a.getExternalCompositeId()).collect(Collectors.toSet());
+        return artifacts.stream().map(a -> a.getId()).collect(Collectors.toSet());
     }
 
     private HintsUtils() {}

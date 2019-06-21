@@ -24,9 +24,7 @@ public final class VertexConverter {
         return RVertex.builder().//
                 description(internalVertexModel.getDescription()).//
                 title(internalVertexModel.getTitle()).//
-                localId(internalVertexModel.getLocalId()).//
-                artifactId(internalVertexModel.getExternalCompositeId()).//
-                sourceUrl(internalVertexModel.getUrl()).//
+                id(internalVertexModel.getId()).//
                 updateTimeMills(internalVertexModel.getUpdatedTimestamp()).//
                 build();
     }
@@ -35,7 +33,7 @@ public final class VertexConverter {
 
         return PersistentVertex.builder().//
                 url(null).
-                localId(Optional.ofNullable(remoteVertexModel.getLocalId()).orElseGet(() -> UUID.randomUUID().toString())).//
+                id(Optional.ofNullable(remoteVertexModel.getId()).orElseGet(() -> UUID.randomUUID().toString())).//
                 semanticFeatures(toInternalProperties(remoteVertexModel.getProperties())).
                 description(remoteVertexModel.getDescription()).//
                 title(remoteVertexModel.getTitle()).//

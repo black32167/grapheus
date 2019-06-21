@@ -88,7 +88,7 @@ abstract public class GraphTestSupport {
             graphStorage.addGraph(graphName);
             for(VertexDefinition v: verticesDefinition.values()) {
                 vertexStorage.createVertex(graphName, PersistentVertex.builder().//
-                        description("").title("").externalCompositeId(v.key).semanticFeatures(Collections.singletonList(SemanticFeature.builder().//
+                        description("").title("").id(v.key).semanticFeatures(Collections.singletonList(SemanticFeature.builder().//
                                 value(v.key).
                                 feature(SemanticFeatureType.LOCAL_ID_REFERENCE).
                                 build())).
@@ -130,7 +130,7 @@ abstract public class GraphTestSupport {
                 ArtifactsFilter.builder().limit(100).build(), 
                 Collections.singletonList(verticesSortCriteria)).getVertices()
                     .stream()
-                    .map(PersistentVertex::getExternalCompositeId)
+                    .map(PersistentVertex::getId)
                     .collect(Collectors.toList());
     }
     

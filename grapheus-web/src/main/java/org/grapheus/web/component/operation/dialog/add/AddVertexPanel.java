@@ -69,7 +69,7 @@ public class AddVertexPanel extends Panel {
             protected void onSubmit(AjaxRequestTarget target) {
                 try {
                     RemoteUtil.vertexAPI().addVertex(graphName, RVertex.builder().//
-                        localId(UUID.randomUUID().toString().toUpperCase()).//
+                        id(UUID.randomUUID().toString().toUpperCase()).//
                         title(documentTitle).//
                         description(documentBody).//
                         build());

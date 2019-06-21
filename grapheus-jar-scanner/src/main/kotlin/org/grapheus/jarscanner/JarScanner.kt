@@ -81,7 +81,7 @@ fun main(args:Array<String>) {
             verticesQueue.put(
                     RVertex
                         .builder()
-                        .localId(className.classNameToVertextId())
+                        .id(className.classNameToVertextId())
                         .title(title)
                         .description(title)
                         .references(references)

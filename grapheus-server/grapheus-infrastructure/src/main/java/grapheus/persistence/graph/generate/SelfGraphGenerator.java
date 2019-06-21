@@ -59,7 +59,7 @@ public class SelfGraphGenerator {
             log.info("Processing bean '{}'", beanClass.getCanonicalName());
             Collection<Class<?>> dependencies = collectDependencies(bean);
             vertexPersister.update(graphName,
-                    PersistentVertex.builder().localId(beanClass.getCanonicalName())
+                    PersistentVertex.builder().id(beanClass.getCanonicalName())
                             .title(beanClass.getSimpleName()).description(beanClass.getSimpleName())
                             .semanticFeatures(dependenciesToFeatures(dependencies)).build());
         }

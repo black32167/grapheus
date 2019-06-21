@@ -3,6 +3,7 @@
  */
 package grapheus.absorb.link;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -25,18 +26,20 @@ import grapheus.view.extract.features.SemanticFeatureType;
 public class DirectReferenceDataLinker implements RealtimeDataLinker {
     @Override
     public Collection<PersistentEdge> link(String graphName, PersistentVertex v) {
+        List<PersistentEdge> connections = new ArrayList<>();
+
         List<SemanticFeature> features = v.getSemanticFeatures();
-        if(features == null) {
-            return Collections.emptyList();
+        if(features != null) {
+            String vertexCollectionName = GraphNameUtils.verticesCollectionName(graphName);
+
+            features.stream().//
+                    filter(f -> SemanticFeatureType.LOCAL_ID_REFERENCE.equals(f.getFeature())).//
+                    map(f -> f.getValue()).//
+                    map(localTargetId -> ExternalCompositeId.from(localTargetId)).
+                    map(globalTargetId -> buildEdge(vertexCollectionName, v.getId(), globalTargetId)).
+                    collect(Collectors.toCollection(() -> connections));
         }
         
-        String vertexCollectionName = GraphNameUtils.verticesCollectionName(graphName);
-        List<PersistentEdge> connections = features.stream().//
-                filter(f->SemanticFeatureType.LOCAL_ID_REFERENCE.equals(f.getFeature())).//
-                map(f->f.getValue()).//
-                map(localTargetId->ExternalCompositeId.from(localTargetId)).
-                map(globalTargetId->buildEdge(vertexCollectionName, v.getExternalCompositeId(), globalTargetId)).
-                collect(Collectors.toList());
         return connections;
     }
 

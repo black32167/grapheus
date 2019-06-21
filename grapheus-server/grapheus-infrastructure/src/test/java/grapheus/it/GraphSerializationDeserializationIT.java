@@ -30,8 +30,8 @@ public class GraphSerializationDeserializationIT {
         // Serializing
         Collection<REdge> edges = Arrays.asList(REdge.builder().from("fromId").to("toId").build());
         Collection<RVertex> vertices = Arrays.asList(
-                RVertex.builder().localId("fromId").build(),
-                RVertex.builder().localId("toId").build());
+                RVertex.builder().id("fromId").build(),
+                RVertex.builder().id("toId").build());
         GraphStreamSerializer serializer = new GraphStreamSerializer()
                 .edgesProducer(edges)
                 .verticesProducer(vertices)
@@ -55,7 +55,7 @@ public class GraphSerializationDeserializationIT {
         assertTrue("Deserialized edges collection should contain 'valid directed edge", deserializedEdges.stream().anyMatch(e->e.getFrom().equals("fromId") && e.getTo().equals("toId")));
         
         assertEquals("Deserialized vertices collection should contain 2 elements", 2, deserializedVertices.size());
-        assertTrue("Deserialized vertices collection should contain 'from' vertex", deserializedVertices.stream().anyMatch(v->v.getLocalId().equals("fromId")));
-        assertTrue("Deserialized vertices collection should contain 'to' vertex", deserializedVertices.stream().anyMatch(v->v.getLocalId().equals("toId")));
+        assertTrue("Deserialized vertices collection should contain 'from' vertex", deserializedVertices.stream().anyMatch(v->v.getId().equals("fromId")));
+        assertTrue("Deserialized vertices collection should contain 'to' vertex", deserializedVertices.stream().anyMatch(v->v.getId().equals("toId")));
     }
 }

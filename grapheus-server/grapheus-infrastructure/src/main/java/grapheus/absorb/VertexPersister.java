@@ -51,7 +51,7 @@ public class VertexPersister {
     public boolean update(String graphName, @NonNull PersistentVertex newVertex) {
 
         String artifactId = ExternalCompositeId.from(newVertex);
-        newVertex.setExternalCompositeId(artifactId);
+        newVertex.setId(artifactId);
         
         // Looking for existing artifact
         Optional<PersistentVertex> maybeOldVertex = vertexStorage.//
@@ -72,7 +72,7 @@ public class VertexPersister {
         } else {
             vertexStorage.createVertex(graphName, newVertex);
         }
-        //TODO: how about 'real time data unlinkers'?
+
         ListenerUtils.iterateLogExceptions(realtimeDataLinkers, l-> link(graphName, l, newVertex));
         
         graphStorage.setUnprocessed(graphName);
@@ -94,7 +94,7 @@ public class VertexPersister {
         Collection<PersistentEdge> connections = new ArrayList<PersistentEdge>();
         vertices.forEach(v->{
             String artifactId = ExternalCompositeId.from(v);
-            v.setExternalCompositeId(artifactId);
+            v.setId(artifactId);
             if(v.getDescription() == null || v.getDescription().trim().isEmpty()) {
                 v.setDescription(v.getTitle());
             }
@@ -113,12 +113,12 @@ public class VertexPersister {
             Collection<PersistentVertex> vertices,
             Collection<PersistentEdge> connections) {
         Collection<PersistentVertex> ephemeralVertices = new HashSet<PersistentVertex>();
-        Set<String> existingVerticesIds = vertices.stream().map(v->v.getExternalCompositeId()).collect(Collectors.toSet());
+        Set<String> existingVerticesIds = vertices.stream().map(v->v.getId()).collect(Collectors.toSet());
         connections.forEach(c->{
             String globalId = ExternalCompositeId.extractKeyFromCompleteId(c.getTo());
             if(!existingVerticesIds.contains(globalId)) {
                 ephemeralVertices.add(PersistentVertex.builder()
-                        .externalCompositeId(globalId)
+                        .id(globalId)
                         //.title("?"+globalId)
                         .build());
             }

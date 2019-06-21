@@ -89,9 +89,8 @@ public class CyclesGraphGenerator {
             vertexStorage.createVertex(graphName,
                 PersistentVertex.builder().//
                     title(vertexKey).//
-                    localId(vertexKey).//
                     description("").//
-                    externalCompositeId(fullVId).//
+                    id(fullVId).//
                     build());
         } catch (DocumentExistsException e) {
             log.trace("Vertex {} probably participate in multiple cycles", vertexKey);

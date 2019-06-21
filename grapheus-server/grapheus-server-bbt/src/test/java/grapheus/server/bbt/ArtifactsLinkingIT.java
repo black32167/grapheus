@@ -34,48 +34,48 @@ public class ArtifactsLinkingIT extends AbstractUserBasedIT {
             vertexAPI.addVertex(GRAPH_NAME, RVertex.builder().//
                     description("Mars base, blocked by MRS-1").//
                     title("Mars base").//
-                    artifactId("MRS-2").//
+                    id("MRS-2").//
                     build());
             
             try {
                 Thread.sleep(500); 
-            } catch  (Exception e) {}
+            } catch  (Exception e) {/*Nothing*/}
             
             vertexAPI.addVertex(GRAPH_NAME, RVertex.builder().//
                     description("Spaceship, prerequisite for Mars program").//
                     title("Spaceship").//
-                    artifactId("MRS-1").//
+                    id("MRS-1").//
                     build());
             
             try {
                 Thread.sleep(500); 
-            } catch  (Exception e) {}
+            } catch  (Exception e) {/*Nothing*/}
             
             
             vertexAPI.addVertex(GRAPH_NAME, RVertex.builder().//
                     description("Oxygen factory, blocked by MRS-2 and MRS-1").//
                     title("Spaceship").//
-                    artifactId("MRS-3").//
+                    id("MRS-3").//
                     build());
             
             try {
                 Thread.sleep(500);
-            } catch (Exception e) {}
+            } catch (Exception e) {/*Nothing*/}
             
             vertexAPI.addVertex(GRAPH_NAME, RVertex.builder().//
                     description("Oxygen factory, blocked by MRS-2").//
                     title("Spaceship").//
-                    artifactId("MRS-3").//
+                    id("MRS-3").//
                     build());
             
             try {
                 Thread.sleep(500); 
-            } catch (Exception e) {}
+            } catch (Exception e) {/*Nothing*/}
             
             vertexAPI.addVertex(GRAPH_NAME, RVertex.builder().//
                     description("Something unrelated desc").//
                     title("Something unrelated").//
-                    artifactId("UNR-1").//
+                    id("UNR-1").//
                     build());
             
             RVerticesContainer clustersEnvelope = client.get(
@@ -97,37 +97,37 @@ public class ArtifactsLinkingIT extends AbstractUserBasedIT {
             vertexAPI.addVertex(GRAPH_NAME, RVertex.builder().//
                     description("Mars base").//
                     title("Mars base").//
-                    artifactId("1").//
+                    id("1").//
                     build());
             try {
                 Thread.sleep(500);
-            } catch  (Exception e) {}
+            } catch  (Exception e) {/*Nothing*/}
             
             vertexAPI.addVertex(GRAPH_NAME, RVertex.builder().//
                     description("Spaceship, prerequisite for Mars base").//
                     title("Spaceship").//
-                    artifactId("2").//
+                    id("2").//
                     build());
             
             try {
                 Thread.sleep(500); 
-            } catch  (Exception e) {}
+            } catch  (Exception e) {/*Nothing*/}
             
             
             vertexAPI.addVertex(GRAPH_NAME, RVertex.builder().//
                     description("Oxygen factory for Mars base").//
                     title("Spaceship").//
-                    artifactId("3").
+                    id("3").
                     build());
             
             
             try {
                 Thread.sleep(500);
-            } catch (Exception e) {}
+            } catch (Exception e) {/*Nothing*/}
             vertexAPI.addVertex(GRAPH_NAME,  RVertex.builder().//
                     description("Something unrelated desc").//
                     title("Something unrelated").//
-                    artifactId("UNR-1").//
+                    id("UNR-1").//
                     build());
             
             RVerticesContainer clustersEnvelope = client.get(
