@@ -31,6 +31,7 @@ public class RVertex {
     @Builder
     public static class RReference {
         private List<String> classifiers;
+        private boolean reversed;
         private String destinationId;
     }
 

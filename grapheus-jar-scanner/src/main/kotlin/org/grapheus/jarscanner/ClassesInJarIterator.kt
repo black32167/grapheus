@@ -32,12 +32,19 @@ class ClassesInJarIterator(
                         if (classPatternRegex.matches(entry.name)) {
                             val classReader = ClassReader(jis)
 
+                            val className = normalizeClassname(classReader.className)
+
                             val classDependenciesExtractingVisitor = ClassDependenciesExtractingVisitor { fieldName, fieldType ->
-                                dependenciesVisitor.onField(classReader.className, fieldName, fieldType)
+                                dependenciesVisitor.onField(className, fieldName, fieldType)
                             }
 
-                            val className = classReader.className.replace('/', '.')
                             if (dependenciesVisitor.onClassStart(className)) {
+                                classReader.interfaces.forEach { intfce->
+                                    dependenciesVisitor.onInterface(normalizeClassname(intfce))
+                                }
+                                dependenciesVisitor.onSuperclass(normalizeClassname(classReader.superName))
+
+                                
                                 classReader.accept(classDependenciesExtractingVisitor, ClassReader.SKIP_CODE)
 
                                 dependenciesVisitor.onClassEnd(className)
@@ -49,9 +56,10 @@ class ClassesInJarIterator(
                 }
             }
         }
+
         dependenciesVisitor.onScanningFinished()
     }
-    
+    private fun normalizeClassname(className:String) = className.replace('/', '.')
     private fun isJarFilePredicate(): BiPredicate<Path, BasicFileAttributes> =
         BiPredicate<Path, BasicFileAttributes>() {path, attrs ->
             attrs.isRegularFile && jarPatterRegex.matches(path.fileName.toString())}

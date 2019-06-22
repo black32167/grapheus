@@ -36,9 +36,15 @@ public class EdgeConverter {
     }
 
     public static PersistentEdge toInternal(String verticesCollection, String vertextId, RVertex.RReference reference) {
+        String vertexId = ExternalCompositeId.buildCompleteId(verticesCollection, vertextId);
+        String referenceId = ExternalCompositeId.buildCompleteId(verticesCollection , reference.getDestinationId());
+
+        String sourceId = reference.isReversed() ? referenceId : vertexId;
+        String destinationId = reference.isReversed() ? vertexId : referenceId;
+
         return PersistentEdge.builder()//
-                .from(ExternalCompositeId.buildCompleteId(verticesCollection, vertextId))
-                .to(ExternalCompositeId.buildCompleteId(verticesCollection , reference.getDestinationId()))
+                .from(sourceId)
+                .to(destinationId)
                 .build();
     }
 }

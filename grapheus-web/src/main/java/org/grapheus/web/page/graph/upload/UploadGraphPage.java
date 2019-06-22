@@ -49,7 +49,7 @@ public class UploadGraphPage extends AbstractGrapheusAuthenticatedPage {
                     error("Unknown file type");
                 } else {
                     try {
-                        String newGraphId = fileUpload.getClientFileName().replaceAll("\\..*", "");
+                        String newGraphId = fileUpload.getClientFileName().replaceAll("\\..*", "").replaceAll("-", "_");
                         RemoteUtil.graphsAPI().upload(newGraphId, fileUpload.getInputStream());
                         setResponsePage(VerticesPage.class, 
                                 new PageParameters().add(VerticesPage.PARAM_SELECTED_GRAPH, newGraphId));

@@ -4,22 +4,11 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
-import org.objectweb.asm.signature.SignatureReader
-import org.objectweb.asm.signature.SignatureVisitor
 
 /**
  * Extracts dependencies from the specified class.
  */
 class ClassDependenciesExtractingVisitor(val fieldCallback:(String, String) -> Unit) : ClassVisitor(Opcodes.ASM7) {
-    private val exclusionPatterns = listOf(
-        "java\\..*",
-        "javax\\..*",
-        "[^.]*")
-    private val collectionTypes = listOf(
-        "java.util.List",
-        "java.util.Collection",
-        "java.util.List"
-    )
     
     override fun visitField(
         access: Int,
@@ -47,11 +36,8 @@ class ClassDependenciesExtractingVisitor(val fieldCallback:(String, String) -> U
             fieldCallback(fieldName, fieldType)
         }
     }
+
     
-    private fun isCollectionType(typeClassName:String) = collectionTypes.contains(typeClassName)
-    
-    private fun isEligibleField(access: Int, fieldType: String):Boolean =
-        ((access and Opcodes.ACC_STATIC) == 0) &&
-        !exclusionPatterns.map { it.toRegex() }.any { it.matches(fieldType) }
+    private fun isEligibleField(access: Int, fieldType: String):Boolean = (access and Opcodes.ACC_STATIC) == 0
 
 }

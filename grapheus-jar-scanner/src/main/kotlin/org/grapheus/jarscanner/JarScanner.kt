@@ -2,6 +2,7 @@ package org.grapheus.jarscanner
 import org.grapheus.client.model.GraphStreamSerializer
 import org.grapheus.client.model.graph.vertex.RVertex
 import org.grapheus.jarscanner.concurrent.TerminatingQueue
+import org.objectweb.asm.Opcodes
 import org.slf4j.LoggerFactory
 import java.io.FileOutputStream
 import java.lang.IllegalStateException
@@ -21,6 +22,11 @@ fun String.classNameToVertextId() = this.replace('.', '_')
 fun main(args:Array<String>) {
     val log = LoggerFactory.getLogger("main")
 
+    val exclusionPatterns = listOf(
+            "java\\..*",
+            "javax\\..*",
+            "[^.]*")
+
     if (args.size < 1) {
         usage()
     }
@@ -30,8 +36,9 @@ fun main(args:Array<String>) {
     val verticesQueue = TerminatingQueue<RVertex>()
 
     // Scanning events listener
+    data class ClassReference (val targetClass:String, val reverseRelation:Boolean)
     class ClassDescriptor(val name:String) {
-        val references =  mutableSetOf<String>()
+        val references =  mutableSetOf<ClassReference>()
     }
     val dependenciesVisitor = object: JarDependenciesVisitor {
         private var currentJarFileName:String? = null
@@ -72,10 +79,11 @@ fun main(args:Array<String>) {
             }
 
             val title = className.classNameToVertextTitle()
-            val references = currentClass!!.references.map { destinationClass->
+            val references = currentClass!!.references.map { ref->
                 RVertex.RReference
                     .builder()
-                    .destinationId(destinationClass.classNameToVertextId())
+                    .destinationId(ref.targetClass.classNameToVertextId())
+                    .reversed(ref.reverseRelation)
                     .build()
             }
             verticesQueue.put(
@@ -88,11 +96,28 @@ fun main(args:Array<String>) {
                         .property(RVertex.RProperty.builder().name("source").value(currentJarFileName).build())
                         .build())
         }
-
-        override fun onField(className:String, fieldName: String, fieldType: String) {
-            currentClass!!.references.add(fieldType.replace("\\$.*".toRegex(), ""))
-            log.info("\t Encountered field ${className}#${fieldName} : ${fieldType}")
+        override fun onInterface(intfce: String) {
+            if(isEligibleType(intfce)) {
+                currentClass!!.references.add(ClassReference(chompInternalClass(intfce), true))
+            }
         }
+
+        override fun onSuperclass(superName: String) {
+            if(isEligibleType(superName)) {
+                currentClass!!.references.add(ClassReference(chompInternalClass(superName), true))
+            }
+        }
+        override fun onField(className:String, fieldName: String, fieldType: String) {
+            if(isEligibleType(fieldType)) {
+                currentClass!!.references.add(ClassReference(chompInternalClass(fieldType), false))
+                log.info("\t Encountered field ${className}#${fieldName} : ${fieldType}")
+            }
+        }
+
+        private fun chompInternalClass(className:String) = className.replace("\\$.*".toRegex(), "")
+
+        private fun isEligibleType(type: String):Boolean =
+                        !exclusionPatterns.map { it.toRegex() }.any { it.matches(type) }
     }
 
     // Scanning folder in the separate thread
