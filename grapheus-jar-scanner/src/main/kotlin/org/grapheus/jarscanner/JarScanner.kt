@@ -1,136 +1,47 @@
 package org.grapheus.jarscanner
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.defaultLazy
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.path
 import org.grapheus.client.model.GraphStreamSerializer
 import org.grapheus.client.model.graph.vertex.RVertex
 import org.grapheus.jarscanner.concurrent.TerminatingQueue
-import org.objectweb.asm.Opcodes
-import org.slf4j.LoggerFactory
+import org.grapheus.jarscanner.visitor.VertexCollectingDependencyVisitor
 import java.io.FileOutputStream
-import java.lang.IllegalStateException
 import java.nio.file.Path
 import java.nio.file.Paths
-import kotlin.system.exitProcess
 
-fun usage() {
-    println("Usage:")
-    println("    JarScanner <root_folder>")
-    exitProcess(1)
+
+/** Convert the option values to an `Int` */
+class ScanCommand : CliktCommand() {
+
+    private val folderToIndex: Path by argument().path()
+
+    private val outputPath:Path by option("-o", help="Output path for resuting graph dump").path()
+            .defaultLazy {
+                Paths.get("out-graph.zip")//"${folderToIndex.fileName.toString()}
+            }
+
+    override fun run() {
+        // Queue shared between producer and consumer
+        val verticesQueue = TerminatingQueue<RVertex>()
+
+        // Scanning folder in the separate thread
+        Thread {
+            ClassesInJarIterator(folderToIndex, "grapheus-.*\\.jar")
+                    .iterate(VertexCollectingDependencyVisitor(verticesQueue))
+        }.start()
+
+        // Consuming and serializing found entries
+        FileOutputStream(outputPath.toFile())
+                .use { output->
+                    GraphStreamSerializer()
+                            .graphId(folderToIndex.fileName.toString())
+                            .verticesProducer(verticesQueue)
+                            .serialize(output)
+                }
+    }
 }
 
-fun String.classNameToVertextTitle() = this.replace(".*\\.".toRegex(), "")
-fun String.classNameToVertextId() = this.replace('.', '_')
-
-fun main(args:Array<String>) {
-    val log = LoggerFactory.getLogger("main")
-
-    val exclusionPatterns = listOf(
-            "java\\..*",
-            "javax\\..*",
-            "[^.]*")
-
-    if (args.size < 1) {
-        usage()
-    }
-    val scanRoot = Paths.get(args[0])
-
-    // Queue shared between producer and consumer
-    val verticesQueue = TerminatingQueue<RVertex>()
-
-    // Scanning events listener
-    data class ClassReference (val targetClass:String, val reverseRelation:Boolean)
-    class ClassDescriptor(val name:String) {
-        val references =  mutableSetOf<ClassReference>()
-    }
-    val dependenciesVisitor = object: JarDependenciesVisitor {
-        private var currentJarFileName:String? = null
-        private var currentClass:ClassDescriptor? = null
-        private val encounteredClasses = mutableSetOf<String>()
-        private val encounteredJars = mutableSetOf<String>()
-
-        override fun onJarStart(jarPath: Path):Boolean {
-            val jarFileName = jarPath.fileName.toString()
-            if(encounteredJars.add(jarFileName)) {
-                log.info("======= Jar found: ${jarPath}")
-                currentJarFileName = jarFileName
-                return true
-            } else {
-                log.error("======= Jar is already registered: ${jarPath}")
-                return false
-            }
-        }
-
-        override fun onScanningFinished() {
-            verticesQueue.close()
-        }
-
-        override fun onClassStart(className: String):Boolean {
-            if(encounteredClasses.add(className)) {
-                log.info("Encountered class ${className}")
-                currentClass = ClassDescriptor(className)
-                return true
-            } else {
-                log.error("Class ${className} is already registered")
-                return false
-            }
-        }
-
-        override fun onClassEnd(className: String) {
-            if(currentClass == null || className != currentClass!!.name) {
-                throw IllegalStateException("Closing wrong class (${className}), expected: ${currentClass?.name ?: "<null>"}")
-            }
-
-            val title = className.classNameToVertextTitle()
-            val references = currentClass!!.references.map { ref->
-                RVertex.RReference
-                    .builder()
-                    .destinationId(ref.targetClass.classNameToVertextId())
-                    .reversed(ref.reverseRelation)
-                    .build()
-            }
-            verticesQueue.put(
-                    RVertex
-                        .builder()
-                        .id(className.classNameToVertextId())
-                        .title(title)
-                        .description(title)
-                        .references(references)
-                        .property(RVertex.RProperty.builder().name("source").value(currentJarFileName).build())
-                        .build())
-        }
-        override fun onInterface(intfce: String) {
-            if(isEligibleType(intfce)) {
-                currentClass!!.references.add(ClassReference(chompInternalClass(intfce), true))
-            }
-        }
-
-        override fun onSuperclass(superName: String) {
-            if(isEligibleType(superName)) {
-                currentClass!!.references.add(ClassReference(chompInternalClass(superName), true))
-            }
-        }
-        override fun onField(className:String, fieldName: String, fieldType: String) {
-            if(isEligibleType(fieldType)) {
-                currentClass!!.references.add(ClassReference(chompInternalClass(fieldType), false))
-                log.info("\t Encountered field ${className}#${fieldName} : ${fieldType}")
-            }
-        }
-
-        private fun chompInternalClass(className:String) = className.replace("\\$.*".toRegex(), "")
-
-        private fun isEligibleType(type: String):Boolean =
-                        !exclusionPatterns.map { it.toRegex() }.any { it.matches(type) }
-    }
-
-    // Scanning folder in the separate thread
-    Thread {
-        ClassesInJarIterator(scanRoot, "grapheus-.*\\.jar").iterate(dependenciesVisitor)
-    }.start()
-
-    // Consuming and serializing found entries
-    FileOutputStream("${scanRoot.fileName.toString()}-graph.zip").use { output->
-        GraphStreamSerializer()
-            .graphId(scanRoot.fileName.toString())
-            .verticesProducer(verticesQueue)
-            .serialize(output)
-    }
-
-}
+fun main(args:Array<String>) = ScanCommand().main(args)
