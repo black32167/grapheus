@@ -10,4 +10,4 @@ SCRIPTS_ROOT="${BASH_SOURCE%/*}"
 
 . ${SCRIPTS_ROOT}/include/version-utils.sh
 
-VERSION=$(current_version) ${SCRIPTS_ROOT}/runner/grapheus.sh $@
+VERSION=$(current_version) ${SCRIPTS_ROOT}/grapheus-runner/grapheus.sh $@

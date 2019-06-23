@@ -10,6 +10,7 @@ set -e
 set -u
 
 SCRIPTS_ROOT="${BASH_SOURCE%/*}"
+TARGET_FOLDER="$(pwd)/target"
 
 . ${SCRIPTS_ROOT}/include/log.sh build.log
 . ${SCRIPTS_ROOT}/include/docker-common.sh
@@ -21,9 +22,10 @@ CMD="${2-}"
 ##################################### Functions ###############################################
 usage() {
     echo "Usage:"
-    echo "    $0 {current|release} {docker-back|docker-web|maven|runner-zip|all}"
+    echo "    $0 {current|release} {docker-back|docker-web|maven|runner-zip|scanner-zip|all}"
     exit 1
 }
+
 artifact_unpack() {
     local ARTIFACT="${1}"
     local OUTPUT="${2}"
@@ -34,6 +36,17 @@ artifact_unpack() {
         -Dartifact="${ARTIFACT}" \
         -DoutputDirectory="${OUTPUT}" >> ${LOG} || die "Could not unpack maven artifact ${ARTIFACT}"
 }
+artifact_copy() {
+    local ARTIFACT="${1}"
+    local OUTPUT="${2}"
+
+    echo "Copying ${ARTIFACT} to ${OUTPUT}..."
+
+    mvn dependency:copy -pl . \
+        -Dartifact="${ARTIFACT}" \
+        -DoutputDirectory="${OUTPUT}" >> ${LOG} || die "Could not unpack maven artifact ${ARTIFACT}"
+}
+
 
 dbuild() {
     local MODULE="${1}"
@@ -49,11 +62,9 @@ dbuild() {
 }
 
 mbuild_release() {
-
-    local target_folder="$(pwd)/target"
-    local release_checkout_folder="${target_folder}/release-checkout"
+    local release_checkout_folder="${TARGET_FOLDER}/release-checkout"
     
-    mkdir -p "${target_folder}"
+    mkdir -p "${TARGET_FOLDER}"
     rm -rf "${release_checkout_folder}"
     
     git clone . "${release_checkout_folder}"
@@ -75,28 +86,56 @@ mbuild() {
     esac
 }
 
+build_scanner_runner_zip() {
+    local distributive_folder="grapheus-jar-scanner-${VERSION}"
+    local output_path="${TARGET_FOLDER}/${distributive_folder}"
+    local target_zip_path="${TARGET_FOLDER}/grapheus-jar-scanner-${VERSION}.zip"
+
+    mkdir -p "${output_path}"
+    rm -rf "${output_path}"
+    rm -rf "${target_zip_path}"
+
+    # Copy scanner's uber-jar
+    artifact_copy "grapheus:grapheus-jar-scanner:${VERSION}:jar:jar-with-dependencies" "${output_path}"
+
+    # Copy scanner runner script
+    cp -r "${SCRIPTS_ROOT}/jarscanner-runner/." "${output_path}/"
+
+    # Replace template variables
+    sed -i.bak -e "s/\${VERSION}/${VERSION}/" ${output_path}/*.sh
+    find "${output_path}" -name "*.bak" | xargs rm
+
+    # zip content
+    cd "${TARGET_FOLDER}"
+    set -x
+    zip -r "${target_zip_path}" "${distributive_folder}"
+
+    echo "Archive created: ${target_zip_path}"
+}
+
 build_runner_zip() {
-    local grapheus_terminal_folder="grapheus-${VERSION}"
-    local tempate_folder="${SCRIPTS_ROOT}/runner"
-    local target_folder="$(pwd)/target/grapheus-runner"
-    local destination="${target_folder}/grapheus-runner-${VERSION}.zip"
+    local distributive_folder="grapheus-${VERSION}"
+    local tempate_folder="${SCRIPTS_ROOT}/grapheus-runner"
+    local runner_target_path="${TARGET_FOLDER}/${distributive_folder}"
+    local target_zip_path="${TARGET_FOLDER}/grapheus-runner-${VERSION}.zip"
     
     # Initialize 'target' folder:
-    rm -rf "${target_folder}"
-    mkdir -p "${target_folder}"
+    rm -rf "${runner_target_path}"
+    rm -rf "${target_zip_path}"
+    mkdir -p "${runner_target_path}"
     
     # Copy templates to 'target'
-    cp -r "${tempate_folder}" "${target_folder}/${grapheus_terminal_folder}"
+    cp -r "${tempate_folder}/." "${runner_target_path}/"
  
     # Replace template variables
-    sed -i.bak -e "s/\${VERSION}/${VERSION}/" "${target_folder}/${grapheus_terminal_folder}/grapheus.sh"
-    find "${target_folder}" -name "*.bak" | xargs rm
+    sed -i.bak -e "s/\${VERSION}/${VERSION}/" "${runner_target_path}/grapheus.sh"
+    find "${runner_target_path}" -name "*.bak" | xargs rm
     
     # Archiving
-    cd "${target_folder}"
-    zip -r "${destination}" "${grapheus_terminal_folder}" 
+    cd "${TARGET_FOLDER}"
+    zip -r "${target_zip_path}" "${distributive_folder}"
     
-    echo "Archive created: ${destination}"
+    echo "Archive created: ${target_zip_path}"
 }
 
 build_docker_web() {
@@ -118,7 +157,6 @@ build_all() {
 }
 
 ##################################### Entry point ###############################################
-rm -rf "./target"
 
 case "${VER_SPECIFIER}" in
     release)
@@ -150,6 +188,9 @@ case "$CMD" in
     	;;
     runner-zip)
         build_runner_zip
+        ;;
+    scanner-zip)
+        build_scanner_runner_zip
         ;;
     all)
     	build_all
