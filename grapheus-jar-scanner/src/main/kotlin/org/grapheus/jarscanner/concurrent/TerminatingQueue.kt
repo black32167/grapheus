@@ -1,8 +1,6 @@
 package org.grapheus.jarscanner.concurrent
 
 import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.CountDownLatch
-import java.lang.IllegalStateException
 
 class TerminatingQueue<T> : Iterable<T> {
     private val backingQueue = ArrayBlockingQueue<T>(100)//TODO: constant
@@ -26,24 +24,35 @@ class TerminatingQueue<T> : Iterable<T> {
             }
             closed = true
         }
-        backingQueue.put(terminator!! as T)
+
+        @Suppress("UNCHECKED_CAST")
+        backingQueue.put(terminator as T)
     }
 
     override fun iterator(): Iterator<T> = object : Iterator<T> {
         var lastElement: T? = null
+        var hadNext = true
 
         override fun hasNext(): Boolean {
-            lastElement = backingQueue.take()
-            if(lastElement == terminator) {
-                lastElement = null
-            }
-            return lastElement != null
+            return pullNext() != null
         }
 
         override fun next(): T {
-            val nextElement = lastElement
+            val nextElement = pullNext()
             lastElement = null
-            return nextElement ?: throw IllegalStateException("Queue is already closed")
+            return nextElement ?: throw NoSuchElementException("Queue is already closed")
+        }
+
+        private fun pullNext():T? {
+            if(lastElement == null && hadNext) {
+                lastElement = backingQueue.take()
+                if (lastElement == terminator) {
+                    lastElement = null
+                }
+
+                hadNext = lastElement != null
+            }
+            return lastElement
         }
     }
 }
