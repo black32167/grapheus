@@ -34,6 +34,6 @@ If you want to use development version or contribute, you will need to clone thi
 ```
 $ git clone git@github.com:black32167/grapheus.git # For http use https://github.com/black32167/grapheus.git
 $ cd grapheus
-grapheus$ ./bin/build.sh current all # Will build maven artifacts, docker images and script runner. 
-grapheus$ ./bin/grapheus.sh start    # Runs docker-compose infrastructure
+grapheus$ ./bin/build.sh all      # Builds maven artifacts, docker images and script runner.
+grapheus$ ./bin/grapheus.sh start # Runs docker-compose infrastructure
 ```
