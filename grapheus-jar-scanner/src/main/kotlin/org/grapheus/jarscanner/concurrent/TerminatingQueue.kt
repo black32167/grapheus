@@ -1,13 +1,19 @@
 package org.grapheus.jarscanner.concurrent
 
 import java.util.concurrent.ArrayBlockingQueue
+import java.util.function.Consumer
 
-class TerminatingQueue<T> : Iterable<T> {
+class TerminatingQueue<T> : Consumer<T>, Iterable<T> {
+
     private val backingQueue = ArrayBlockingQueue<T>(100)//TODO: constant
     private val terminator = Any()
 
     @Volatile
     var closed = false
+
+    override fun accept(element: T) {
+        put(element)
+    }
 
     fun put(element: T) {
         if (closed) {

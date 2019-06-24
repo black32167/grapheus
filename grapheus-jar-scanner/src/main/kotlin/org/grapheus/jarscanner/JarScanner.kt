@@ -31,6 +31,7 @@ class ScanCommand : CliktCommand() {
         Thread {
             ClassesInJarIterator(folderToIndex, "grapheus-.*\\.jar")
                     .iterate(VertexCollectingDependencyVisitor(verticesQueue))
+            verticesQueue.close()
         }.start()
 
         // Consuming and serializing found entries

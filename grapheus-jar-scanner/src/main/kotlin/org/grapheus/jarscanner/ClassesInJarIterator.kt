@@ -59,6 +59,7 @@ class ClassesInJarIterator(
 
         dependenciesVisitor.onScanningFinished()
     }
+
     private fun normalizeClassname(className:String) = className.replace('/', '.')
     private fun isJarFilePredicate(): BiPredicate<Path, BasicFileAttributes> =
         BiPredicate<Path, BasicFileAttributes>() {path, attrs ->

@@ -2,15 +2,15 @@ package org.grapheus.jarscanner.visitor
 
 import org.grapheus.client.model.graph.vertex.RVertex
 import org.grapheus.jarscanner.JarDependenciesVisitor
-import org.grapheus.jarscanner.concurrent.TerminatingQueue
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
+import java.util.function.Consumer
 
 /**
  * Scanning events listener.
  */
 class VertexCollectingDependencyVisitor (
-        val verticesQueue : TerminatingQueue<RVertex>
+        val verticesQueue : Consumer<RVertex>
 ): JarDependenciesVisitor {
     private val log = LoggerFactory.getLogger(VertexCollectingDependencyVisitor::class.java)
     private val exclusionPatterns = listOf(
@@ -42,7 +42,7 @@ class VertexCollectingDependencyVisitor (
     }
 
     override fun onScanningFinished() {
-        verticesQueue.close()
+        // Nothing
     }
 
     override fun onClassStart(className: String):Boolean {
@@ -69,7 +69,7 @@ class VertexCollectingDependencyVisitor (
                     .reversed(ref.reverseRelation)
                     .build()
         }
-        verticesQueue.put(
+        verticesQueue.accept(
                 RVertex
                         .builder()
                         .id(classNameToVertextId(className))
