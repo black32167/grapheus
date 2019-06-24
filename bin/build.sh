@@ -1,9 +1,11 @@
 #!/bin/bash
 
-# This script can build 'release' and 'current' versions of Grapheus artifacts including:
+# This script can build Grapheus artifacts including:
 # * Maven artifacts
 # * Docker images
-# * Command-line runner
+# * Command-line runner of Grapheus dockerized infrastructure
+# * Command-line runner of jar scanner (writes dependency graph on disk)
+
 
 ##################################### Globals ###############################################
 set -e
@@ -16,14 +18,24 @@ TARGET_FOLDER="$(pwd)/target"
 . ${SCRIPTS_ROOT}/include/docker-common.sh
 . ${SCRIPTS_ROOT}/include/version-utils.sh
 
-VER_SPECIFIER=${1-}
-CMD="${2-}"
+CMD="${1-}"
+: ${VERSION:=$(current_version)}
+
+SUMMARY="" # Summary variable populated by individual tasks
 
 ##################################### Functions ###############################################
 usage() {
     echo "Usage:"
-    echo "    $0 {current|release} {docker-back|docker-web|maven|runner-zip|scanner-zip|all}"
+    echo "    $0 {docker-back|docker-web|maven|runner-zip|scanner-zip|all}"
     exit 1
+}
+
+summary() {
+    if [[ "${SUMMARY}" != "" ]]; then
+        SUMMARY+="\n"
+    fi
+
+    SUMMARY+="\t- ${1}"
 }
 
 artifact_unpack() {
@@ -36,6 +48,7 @@ artifact_unpack() {
         -Dartifact="${ARTIFACT}" \
         -DoutputDirectory="${OUTPUT}" >> ${LOG} || die "Could not unpack maven artifact ${ARTIFACT}"
 }
+
 artifact_copy() {
     local ARTIFACT="${1}"
     local OUTPUT="${2}"
@@ -47,7 +60,6 @@ artifact_copy() {
         -DoutputDirectory="${OUTPUT}" >> ${LOG} || die "Could not unpack maven artifact ${ARTIFACT}"
 }
 
-
 dbuild() {
     local MODULE="${1}"
     local IMAGE_NAME="$(imageName ${MODULE} ${VERSION})"
@@ -58,42 +70,21 @@ dbuild() {
 	# Unpack CLI distributive
 	artifact_unpack "grapheus:grapheus-dist-${MODULE}-assembly:${VERSION}:zip" "${CTX_DIR}/${MODULE}-dist"
 	
-	docker build -t ${IMAGE_NAME} -f "${BASH_SOURCE%/*}/build/${MODULE}/Dockerfile" ${CTX_DIR}
-}
+	docker build -t ${IMAGE_NAME} -f "${SCRIPTS_ROOT}/build/${MODULE}/Dockerfile" ${CTX_DIR}
 
-mbuild_release() {
-    echo "========================================"
-    echo "=== Building maven RELEASE artifacts ==="
-    echo "========================================"
-
-    local release_checkout_folder="${TARGET_FOLDER}/release-checkout"
-    
-    mkdir -p "${TARGET_FOLDER}"
-    rm -rf "${release_checkout_folder}"
-    
-    git clone . "${release_checkout_folder}"
-    cd "${release_checkout_folder}" || die "Cannot navigate to folder ${release_checkout_folder}"
-    git checkout "$(latest_tag)"
-
-    mvn clean install -DskipTests|| die "Can't build release artifacts"
-}
-
-mbuild_current() {
-    echo ""
-    echo "========================================"
-    echo "=== Building maven CURRENT artifacts ==="
-    echo "========================================"
-    echo ""
-
-    mvn clean install -DskipTests || die "Can't build current snapshot artifacts"
+	summary "Docker '${MODULE}' image: '${IMAGE_NAME}'"
 }
 
 mbuild() {
-    case "${VER_SPECIFIER}" in
-        release) mbuild_release ;;
-        current) mbuild_current ;;
-        *) die "Invalid version specifier: ${VER_SPECIFIER}"
-    esac
+    echo ""
+    echo "========================================"
+    echo "=== Building maven artifacts ==="
+    echo "========================================"
+    echo ""
+
+    mvn clean install -DskipTests || die "Can't build maven artifacts"
+
+    summary "Maven artifacts"
 }
 
 build_scanner_runner_zip() {
@@ -122,11 +113,13 @@ build_scanner_runner_zip() {
     find "${output_path}" -name "*.bak" | xargs rm
 
     # zip content
-    cd "${TARGET_FOLDER}"
-    set -x
-    zip -r "${target_zip_path}" "${distributive_folder}"
+    (
+        cd "${TARGET_FOLDER}"
+        zip -r "${target_zip_path}" "${distributive_folder}"
 
-    echo "Archive created: ${target_zip_path}"
+        echo "Archive created: ${target_zip_path}"
+    )
+    summary "Grapheus jar scanner distributable zip: '${target_zip_path}'"
 }
 
 build_runner_zip() {
@@ -148,10 +141,13 @@ build_runner_zip() {
     find "${runner_target_path}" -name "*.bak" | xargs rm
     
     # Archiving
-    cd "${TARGET_FOLDER}"
-    zip -r "${target_zip_path}" "${distributive_folder}"
-    
-    echo "Archive created: ${target_zip_path}"
+    (
+        cd "${TARGET_FOLDER}"
+        zip -r "${target_zip_path}" "${distributive_folder}"
+
+        echo "Archive created: ${target_zip_path}"
+    )
+    summary "Grapheus runner distributable zip: '${target_zip_path}'"
 }
 
 build_docker_web() {
@@ -163,6 +159,7 @@ build_docker_web() {
 
     dbuild web  || die "Can't build web-ui module"
 }
+
 build_docker_server() {
     echo ""
     echo "============================================"
@@ -179,25 +176,13 @@ build_docker_all() {
 }
 
 build_all() {
-    (mbuild)
-    (build_docker_all)
-    (build_runner_zip)
-    (build_scanner_runner_zip)
+    mbuild
+    build_docker_all
+    build_runner_zip
+    build_scanner_runner_zip
 }
 
 ##################################### Entry point ###############################################
-
-case "${VER_SPECIFIER}" in
-    release)
-        : ${VERSION:=$(release_version)}
-        ;;
-    current)
-        : ${VERSION:=$(current_version)}
-        ;;
-    *)
-        usage
-        ;;
-esac
 
 case "$CMD" in
     version)
@@ -228,6 +213,12 @@ case "$CMD" in
  	    usage
 	    ;;
 esac
+
+if [[ "${SUMMARY}" != "" ]]; then
+    echo -e "\nThe following items were built:"
+    echo -e "${SUMMARY}"
+fi
+
 
 
 
