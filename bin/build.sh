@@ -31,8 +31,8 @@ artifact_unpack() {
     local OUTPUT="${2}"
     
     echo "Unpacking ${ARTIFACT} to ${OUTPUT}..."
-    
-    mvn dependency:unpack -pl . \
+
+    mvn dependency:unpack \
         -Dartifact="${ARTIFACT}" \
         -DoutputDirectory="${OUTPUT}" >> ${LOG} || die "Could not unpack maven artifact ${ARTIFACT}"
 }
@@ -42,7 +42,7 @@ artifact_copy() {
 
     echo "Copying ${ARTIFACT} to ${OUTPUT}..."
 
-    mvn dependency:copy -pl . \
+    mvn dependency:copy \
         -Dartifact="${ARTIFACT}" \
         -DoutputDirectory="${OUTPUT}" >> ${LOG} || die "Could not unpack maven artifact ${ARTIFACT}"
 }
@@ -62,6 +62,10 @@ dbuild() {
 }
 
 mbuild_release() {
+    echo "========================================"
+    echo "=== Building maven RELEASE artifacts ==="
+    echo "========================================"
+
     local release_checkout_folder="${TARGET_FOLDER}/release-checkout"
     
     mkdir -p "${TARGET_FOLDER}"
@@ -75,6 +79,12 @@ mbuild_release() {
 }
 
 mbuild_current() {
+    echo ""
+    echo "========================================"
+    echo "=== Building maven CURRENT artifacts ==="
+    echo "========================================"
+    echo ""
+
     mvn clean install -DskipTests || die "Can't build current snapshot artifacts"
 }
 
@@ -87,6 +97,12 @@ mbuild() {
 }
 
 build_scanner_runner_zip() {
+    echo ""
+    echo "=================================================="
+    echo "=== Building jar scanner distributable archive ==="
+    echo "=================================================="
+    echo ""
+
     local distributive_folder="grapheus-jar-scanner-${VERSION}"
     local output_path="${TARGET_FOLDER}/${distributive_folder}"
     local target_zip_path="${TARGET_FOLDER}/grapheus-jar-scanner-${VERSION}.zip"
@@ -139,9 +155,21 @@ build_runner_zip() {
 }
 
 build_docker_web() {
+    echo ""
+    echo "============================================="
+    echo "=== Building web application docker image ==="
+    echo "============================================="
+    echo ""
+
     dbuild web  || die "Can't build web-ui module"
 }
 build_docker_server() {
+    echo ""
+    echo "============================================"
+    echo "=== Building backend server docker image ==="
+    echo "============================================"
+    echo ""
+
     dbuild back || die "Can't build backend module"
 }
 
@@ -151,9 +179,10 @@ build_docker_all() {
 }
 
 build_all() {
-    mbuild
-    build_docker_all
-    build_runner_zip
+    (mbuild)
+    (build_docker_all)
+    (build_runner_zip)
+    (build_scanner_runner_zip)
 }
 
 ##################################### Entry point ###############################################
