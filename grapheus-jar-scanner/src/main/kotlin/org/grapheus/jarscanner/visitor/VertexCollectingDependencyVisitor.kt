@@ -32,11 +32,11 @@ class VertexCollectingDependencyVisitor (
     override fun onJarStart(jarPath: Path):Boolean {
         val jarFileName = jarPath.fileName.toString()
         if(encounteredJars.add(jarFileName)) {
-            log.info("======= Jar found: ${jarPath}")
+            log.info("======= Scanning Jar: ${jarPath}")
             currentJarFileName = jarFileName
             return true
         } else {
-            log.error("======= Jar is already registered: ${jarPath}")
+            log.error("======= Jar name is already registered, skipping: ${jarPath}")
             return false
         }
     }
@@ -47,11 +47,11 @@ class VertexCollectingDependencyVisitor (
 
     override fun onClassStart(className: String):Boolean {
         if(encounteredClasses.add(className)) {
-            log.info("Encountered class ${className}")
+            log.info("\tEncountered class '${className}'")
             currentClass = ClassDescriptor(className)
             return true
         } else {
-            log.error("Class ${className} is already registered")
+            log.warn("\tClass '${className}' is already registered, skipping")
             return false
         }
     }
@@ -82,18 +82,20 @@ class VertexCollectingDependencyVisitor (
     override fun onInterface(intfce: String) {
         if(isEligibleType(intfce)) {
             currentClass!!.references.add(ClassReference(chompInternalClass(intfce), true))
+            log.info("\t\tEncountered interface '${intfce}'")
         }
     }
 
     override fun onSuperclass(superName: String) {
         if(isEligibleType(superName)) {
             currentClass!!.references.add(ClassReference(chompInternalClass(superName), true))
+            log.info("\t\tEncountered superclass '${superName}'")
         }
     }
     override fun onField(className:String, fieldName: String, fieldType: String) {
         if(isEligibleType(fieldType)) {
             currentClass!!.references.add(ClassReference(chompInternalClass(fieldType), false))
-            log.info("\t Encountered field ${className}#${fieldName} : ${fieldType}")
+            log.info("\t\tEncountered field '${fieldName}' of type '${fieldType}'")
         }
     }
 

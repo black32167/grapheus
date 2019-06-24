@@ -21,8 +21,6 @@ class ClassesInJarIterator(
     val max_depth = 99
     
     fun iterate(dependenciesVisitor: JarDependenciesVisitor) {
-        val encounteredJarNames = mutableSetOf<String>()
-
         Files.find(rootPath, max_depth, isJarFilePredicate()).forEach { pathToJarFile->
             if(dependenciesVisitor.onJarStart(pathToJarFile)) {
                 ZipInputStream(FileInputStream(pathToJarFile.toFile())).use { jis ->
@@ -42,7 +40,10 @@ class ClassesInJarIterator(
                                 classReader.interfaces.forEach { intfce->
                                     dependenciesVisitor.onInterface(normalizeClassname(intfce))
                                 }
-                                dependenciesVisitor.onSuperclass(normalizeClassname(classReader.superName))
+                                if(classReader.superName != null) {
+                                    // 'superName' can be null in case of Java9 'module-info.class', for example
+                                    dependenciesVisitor.onSuperclass(normalizeClassname(classReader.superName))
+                                }
 
                                 
                                 classReader.accept(classDependenciesExtractingVisitor, ClassReader.SKIP_CODE)
@@ -52,7 +53,6 @@ class ClassesInJarIterator(
                         }
                         entry = jis.nextEntry
                     }
-
                 }
             }
         }
