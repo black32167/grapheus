@@ -82,7 +82,7 @@ mbuild() {
     echo "========================================"
     echo ""
 
-    mvn clean install -DskipTests || die "Can't build maven artifacts"
+    mvn clean install -DskipTests -T1.5C || die "Can't build maven artifacts"
 
     summary "Maven artifacts"
 }
