@@ -125,6 +125,13 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
                     vicinityVertexModel.getFilter().setSelectedVertexId(artifactId);
                     showVicinity(target);
                 })
+                .vertexRemovalListener((target, removedIds) -> {
+                    String selectedVertexId = vicinityVertexModel.getFilter().getSelectedVertexId();
+                    if(selectedVertexId != null && removedIds.contains(selectedVertexId)) {
+                        vicinityVertexModel.getFilter().setSelectedVertexId(null);
+                    }
+                    showVicinity(target);
+                })
                 .build()
                 .setOutputMarkupId(true);
     }

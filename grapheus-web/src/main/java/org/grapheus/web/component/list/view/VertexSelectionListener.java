@@ -14,5 +14,4 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 @FunctionalInterface
 public interface VertexSelectionListener extends Serializable {
 	void onVertexSelected(AjaxRequestTarget target, String artifactId);
-
 }

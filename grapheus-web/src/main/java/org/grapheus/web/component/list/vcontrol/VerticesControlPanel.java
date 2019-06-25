@@ -20,6 +20,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.list.filter.VerticesFilterPanel;
+import org.grapheus.web.component.list.view.VertexRemovalListener;
 import org.grapheus.web.component.list.view.VertexSelectionListener;
 import org.grapheus.web.component.list.view.VerticesListViewPanel;
 import org.grapheus.web.component.operation.dialog.add.AddVertexPanel;
@@ -43,6 +44,7 @@ public class VerticesControlPanel extends Panel {
 
 	private final VerticesListModel vertexListModel;
 	private final VertexSelectionListener vertexSelectionListener;
+	private final VertexRemovalListener vertexRemovalListener;
 	private final IModel<List<GraphInfo>> graphListModel;
 	private final ShowOperationSupport dialogOperationSupport;
 	private final SerializableSupplier<String> graphIdSupplier;
@@ -60,10 +62,12 @@ public class VerticesControlPanel extends Panel {
 	        VerticesListModel verticesListModel,
 	        IModel<List<GraphInfo>> graphListModel,
 	        ShowOperationSupport dialogOperationSupport,
-	        VertexSelectionListener vertexSelectionListener) {
+	        VertexSelectionListener vertexSelectionListener,
+			VertexRemovalListener vertexRemovalListener) {
 		super(id);
 		this.graphIdSupplier = graphIdSupplier;
 		this.vertexSelectionListener = vertexSelectionListener;
+		this.vertexRemovalListener = vertexRemovalListener;
 		this.vertexListModel = verticesListModel;
 		this.graphListModel = graphListModel;
 		this.dialogOperationSupport = dialogOperationSupport;
@@ -151,6 +155,7 @@ public class VerticesControlPanel extends Panel {
                 selectedVerticesIds.clear();
                 RemoteUtil.operationAPI().deleteVertices(graphIdSupplier.get(), verticesIdsToDelete);
                 target.add(verticesList);
+				vertexRemovalListener.onVerticesRemoved(target, verticesIdsToDelete);
             }
         });
     }
