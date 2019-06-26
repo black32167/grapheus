@@ -113,14 +113,14 @@ public class VicinityControlPanel extends Panel {
 
     private Component newDirectionSelector(String id) {
         return new DropDownChoice<EdgeDirection>(id, Arrays.asList(EdgeDirection.values())).
-                add(updateGraphViewAjaxBehavior("onchange"));
+                add(updateGraphViewAjaxBehavior("change"));
     }
 
     private Component newDepthSelector(String id) {
         final NumberTextField<Integer> depthInput = new NumberTextField<Integer>(id);
         depthInput.setMaximum(MAX_NEIGHBORS_HOPS);
         depthInput.setMinimum(1);
-        depthInput.add(updateGraphViewAjaxBehavior("onchange"));
+        depthInput.add(updateGraphViewAjaxBehavior("change"));
         return depthInput.setRequired(true);
     }
 
@@ -147,7 +147,7 @@ public class VicinityControlPanel extends Panel {
     }
     private Component newLayoutDropdown(String id) {
         return new DropDownChoice<GraphLayout>(id, Arrays.asList(GraphLayout.values())).
-                add(updateGraphViewAjaxBehavior("onchange"));
+                add(updateGraphViewAjaxBehavior("change"));
     }
 
     private WebMarkupContainer createTitleEditableLink(String id) {
