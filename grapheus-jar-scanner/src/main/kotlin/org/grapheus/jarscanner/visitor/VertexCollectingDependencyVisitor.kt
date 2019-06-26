@@ -9,9 +9,13 @@ import java.util.function.Consumer
 /**
  * Scanning events listener.
  */
+const val TYPE_CLASS = "class"
+const val TYPE_INTERFACE = "interface"
+
 class VertexCollectingDependencyVisitor (
         val verticesQueue : Consumer<RVertex>
 ): JarDependenciesVisitor {
+
     private val log = LoggerFactory.getLogger(VertexCollectingDependencyVisitor::class.java)
     private val exclusionPatterns = listOf(
             "java\\..*",
@@ -20,7 +24,7 @@ class VertexCollectingDependencyVisitor (
             "[^.]*")
 
     data class ClassReference (val targetClass:String, val reverseRelation:Boolean)
-    class ClassDescriptor(val name:String) {
+    class ClassDescriptor(val name:String, val type: String) {
         val references =  mutableSetOf<ClassReference>()
     }
 
@@ -45,10 +49,10 @@ class VertexCollectingDependencyVisitor (
         // Nothing
     }
 
-    override fun onClassStart(className: String):Boolean {
+    override fun onClassStart(className: String, classType: String):Boolean {
         if(encounteredClasses.add(className)) {
             log.info("\tEncountered class '${className}'")
-            currentClass = ClassDescriptor(className)
+            currentClass = ClassDescriptor(name = className, type = classType)
             return true
         } else {
             log.warn("\tClass '${className}' is already registered, skipping")
@@ -77,6 +81,7 @@ class VertexCollectingDependencyVisitor (
                         .description(title)
                         .references(references)
                         .property(RVertex.RProperty.builder().name("source").value(currentJarFileName).build())
+                        .tag(currentClass!!.type)
                         .build())
     }
     override fun onInterface(intfce: String) {
