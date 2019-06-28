@@ -1,6 +1,11 @@
 #!/bin/bash
 
-export SCANNER_JAR="${HOME}/.m2/repository/grapheus/grapheus-jar-scanner/1.0.1-SNAPSHOT/grapheus-jar-scanner-1.0.1-SNAPSHOT-jar-with-dependencies.jar"
+SCRIPTS_ROOT="${BASH_SOURCE%/*}"
+. ${SCRIPTS_ROOT}/include/version-utils.sh
+
+: ${VERSION:=$(current_version)}
+
+export SCANNER_JAR="${HOME}/.m2/repository/grapheus/grapheus-jar-scanner/${VERSION}/grapheus-jar-scanner-${VERSION}-jar-with-dependencies.jar"
 
 SCRIPTS_ROOT="${BASH_SOURCE%/*}"
 

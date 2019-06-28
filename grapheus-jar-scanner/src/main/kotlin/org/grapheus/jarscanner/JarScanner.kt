@@ -1,6 +1,7 @@
 package org.grapheus.jarscanner
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
@@ -22,6 +23,7 @@ class ScanCommand : CliktCommand() {
             .defaultLazy {
                 Paths.get("out-graph.zip")//"${folderToIndex.fileName.toString()}
             }
+    private val jarsPattern:String by option("-p", help="Jars file pattern").default(".*\\.jar")
 
     override fun run() {
         // Queue shared between producer and consumer
@@ -29,7 +31,7 @@ class ScanCommand : CliktCommand() {
 
         // Scanning folder in the separate thread
         Thread {
-            ClassesInJarIterator(folderToIndex, "grapheus-.*\\.jar")
+            ClassesInJarIterator(folderToIndex, jarsPattern)
                     .iterate(VertexCollectingDependencyVisitor(verticesQueue))
             verticesQueue.close()
         }.start()
