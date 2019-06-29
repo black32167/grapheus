@@ -4,7 +4,7 @@
     <parent>
         <groupId>grapheus</groupId>
         <artifactId>grapheus-server</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.2.0</version>
     </parent>
 
     <artifactId>grapheus-runner</artifactId>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>grapheus</groupId>
             <artifactId>grapheus-infrastructure</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
+            <version>1.2.0</version>
         </dependency>
       
         <dependency>
