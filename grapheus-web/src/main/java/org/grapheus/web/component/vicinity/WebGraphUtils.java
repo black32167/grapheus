@@ -56,6 +56,7 @@ public class WebGraphUtils {
                     name(persistedVertex.getTitle() != null ? persistedVertex.getTitle() : "#" + persistedVertex.getId()).//
                     id(persistedVertex.getId()).//
                     neighbors(neighborsMap.getOrDefault(persistedVertex.getId(), Collections.emptyList())).//
+                    tags(persistedVertex.getTags()).
                     build());
             artifactsIds.remove(persistedVertex.getId());
         }
@@ -65,6 +66,7 @@ public class WebGraphUtils {
             returningVertices.add(Vertex.builder()//
                     .id(missingVertexId)
                     .name("#"+missingVertexId)
+                    .tags(Collections.singletonList("external"))
                     .neighbors(neighborsMap.getOrDefault(missingVertexId, Collections.emptyList()))//
                     .build());
         }
