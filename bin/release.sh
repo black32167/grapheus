@@ -36,6 +36,8 @@ perform_prepare() {
     read -p "New version (last released was ${last_release_version}): " new_version
     echo "Preparing new release v ${new_version}"
 
+    mvn release:clean
+
     mvn clean -B \
         -Darguments=-DskipTests \
         -DreleaseVersion="${new_version}" \
