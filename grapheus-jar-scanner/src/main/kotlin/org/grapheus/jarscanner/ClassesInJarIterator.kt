@@ -1,6 +1,9 @@
 package org.grapheus.jarscanner
 
+import org.grapheus.jarscanner.visitor.TYPE_CLASS
+import org.grapheus.jarscanner.visitor.TYPE_INTERFACE
 import org.objectweb.asm.ClassReader
+import org.objectweb.asm.Opcodes
 import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -36,7 +39,10 @@ class ClassesInJarIterator(
                                 dependenciesVisitor.onField(className, fieldName, fieldType)
                             }
 
-                            if (dependenciesVisitor.onClassStart(className)) {
+                            val classType:String =
+                                    if((classReader.access and Opcodes.ACC_INTERFACE) != 0) TYPE_INTERFACE
+                                    else TYPE_CLASS
+                            if (dependenciesVisitor.onClassStart(className, classType)) {
                                 classReader.interfaces.forEach { intfce->
                                     dependenciesVisitor.onInterface(normalizeClassname(intfce))
                                 }

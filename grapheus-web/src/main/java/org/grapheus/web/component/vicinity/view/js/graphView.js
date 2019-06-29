@@ -2,65 +2,22 @@ var VRAD = 10;
 var MARGIN = 10; 
 var UNSELECTED_PATH_COLOR = '#ccc'
 var SELECTED_PATH_COLOR = 'red'
-function toValidId(artifactId) {
-    if(typeof artifactId == "undefined") {
-    	return undefined;
-    }
-	return artifactId.replace(/.*:/i, '');
-}
-function handleResize() {
-    cy.resize()
-    cy.fit()
-}
-function cutRight(text, maxLen) {
-	if(text.length > maxLen) {
-		return '...' + text.substring(text.length-maxLen, text.length)
-	}
-	return text
-}
+
+/**
+ * Entry point, invoked when page is loaded.
+ */
 function drawGraph(parameters) {
-	var rootId = toValidId($(".rootVertex").attr("vertexId"));
+	var rootId = getRootVertexId()
 	if (typeof rootId == "undefined") {
 		return;
 	}
 
-	var vertices = $("#vertices").children();
-	
-	var knownVIds = [];
-	var nodesElements = []
-	vertices.each(function() {
-		var jV = $(this)
-		var originalVertexId = jV.attr('vertexId');
-		var vertexId = toValidId(originalVertexId);
-		nodesElements.push({data:{
-				id:toValidId(vertexId),
-				name:cutRight(jV.attr('name'), 30),
-				color:(rootId == vertexId ? 'red' : 'gray'),
-				originalId:originalVertexId
-			}})
+    var nodesElements = buildNodes($("#vertices").children())
+    var knownVIds = getAllVerticesIds(nodesElements)
+	var edgesElements = buildEdges($("#edges").children(), knownVIds)
 
-		knownVIds.push(vertexId)
-	});
-	var knownEdges = [];
-	var edges = $("#edges").children();
-	var edgesElements = []
-	edges.each(function() {
-		var jV = $(this)
-		var from = toValidId(jV.attr('from'));
-		var to = toValidId(jV.attr('to'));
-		var edgeKey = from+":"+to;
-		if(knownVIds.includes(from) && knownVIds.includes(to) && !knownEdges.includes(edgeKey)) {
-			edgesElements.push({data:{source:from,target:to}})
-			knownEdges.push(edgeKey)
-			
-		}
-	});
-	
-	var elements = {
-			nodes: nodesElements,
-			edges: edgesElements
-	}
-	
+    populateTagSelector($('.tagsSelector'), nodesElements)
+
 	var cy = window.cy = cytoscape({
 
 		  container: document.getElementById('graphCanvas1'),
@@ -69,61 +26,162 @@ function drawGraph(parameters) {
 		 // zoom:0.1,
 		 // panningEnabled: false,
 		  wheelSensitivity:0.2,
-		  elements: elements,
+
+		  elements: {
+                        nodes: nodesElements,
+                        edges: edgesElements
+                    },
+
 		  pixelRatio:2,
 	
           style: [ // the stylesheet for the graph
-              {
-                  selector: 'node',
-                  style: {
-                	  'font-size':10,
-            	      'height': 10,
-            	      'width': 10,
-                      'background-color': 'data(color)',
-                      'label': 'data(name)'
+                      {
+                          selector: 'node',
+                          style: {
+                              'font-size':10,
+                              'height': 10,
+                              'width': 10,
+                              'background-color': 'data(color)',
+                              'label': 'data(name)'
+                          }
+                      },
+
+                      {
+                          selector: 'edge',
+                          style: {
+
+                              'width': 0.8,
+
+                              'curve-style': 'bezier',
+                              'line-color': UNSELECTED_PATH_COLOR,
+                              'target-arrow-color': UNSELECTED_PATH_COLOR,
+                              'target-arrow-shape': 'vee',
+                              'arrow-scale':1.5
+                          }
+                      }
+                 ],
+
+          layout: {
+                        name: 'breadthfirst',
+                        circle : parameters.isCircleLayout,
+                        // directed: true,
+                        roots: "#"+rootId,
+                        padding: 10,
+                        avoidOverlap:true,
+                        spacingFactor:0.5,
+                        nodeDimensionsIncludeLabels:true,
+                        fit:true
+
                   }
-              },
 
-              {
-	              selector: 'edge',
-	              style: {
+	});
 
-		              'width': 0.8,
-
-		              'curve-style': 'bezier',
-		              'line-color': UNSELECTED_PATH_COLOR,
-		              'target-arrow-color': UNSELECTED_PATH_COLOR,
-		              'target-arrow-shape': 'vee',
-	            	  'arrow-scale':1.5
-	              }
-              }
-            ],
-
-            layout: {
-            	name: 'breadthfirst',
-          	    circle : parameters.isCircleLayout, 
-              // directed: true,
-                roots: "#"+rootId,
-                padding: 10,
-                avoidOverlap:true,
-                spacingFactor:0.5,
-                nodeDimensionsIncludeLabels:true,
-                fit:true
-
-            }
-
-		});
-
-	setupGraphListeners(parameters)
+	setupGraphListeners(cy, parameters)
 	setupMenu(cy, parameters)
-	
-	
+
+    updateNodeColors(cy)
+}
+
+
+function toValidId(artifactId) {
+    if(typeof artifactId == "undefined") {
+    	return undefined;
+    }
+	return artifactId.replace(/.*:/i, '');
+}
+
+function handleResize() {
+    cy.resize()
+    cy.fit()
+}
+
+function cutRight(text, maxLen) {
+	if(text.length > maxLen) {
+		return '...' + text.substring(text.length-maxLen, text.length)
+	}
+	return text
+}
+
+function getRootVertexId() {
+    return toValidId($(".rootVertex").attr("vertexId"))
+}
+
+function populateTagSelector(tagsSelector, nodesElements) {
+    var allTags = []
+	nodesElements.forEach(e => {
+	    var tags = e.data.tags
+	    tags.forEach(tag => {
+            if(!allTags.includes(tag)) {
+                tagsSelector.append($("<option />").val(tag).text(tag))
+                allTags.push(tag)
+            }
+        })
+	})
+    tagsSelector.change(e => {
+        updateNodeColors(cy)
+    })
+}
+
+function getAllVerticesIds(nodesElements) {
+    return nodesElements.map(e => e.data.id)
+}
+
+function buildEdges(edges, knownVIds) {
+	var edgesElements = []
+	var knownEdges = [];
+	edges.each(function() {
+		var jV = $(this)
+		var from = toValidId(jV.attr('from'));
+		var to = toValidId(jV.attr('to'));
+		var edgeKey = from+":"+to;
+		if(knownVIds.includes(from) && knownVIds.includes(to) && !knownEdges.includes(edgeKey)) {
+			edgesElements.push({data:{source:from,target:to}})
+			knownEdges.push(edgeKey)
+		}
+	});
+	return edgesElements
+}
+
+function buildNodes(vertices) {
+
+	var nodesElements = []
+	var rootId = getRootVertexId()
+	vertices.each(function() {
+		var jV = $(this)
+		var originalVertexId = jV.attr('vertexId');
+		var tags = jV.attr('tags').split(",");
+
+		var vertexId = toValidId(originalVertexId);
+		nodesElements.push({data:{
+				id: toValidId(vertexId),
+				name: cutRight(jV.attr('name'), 30),
+				color: 'gray',
+				selectedVertex: (rootId == vertexId),
+				tags: tags,
+				originalId:originalVertexId
+			}})
+	});
+
+	return nodesElements
+}
+
+function updateNodeColors(cy) {
+    var tagsSelector = $('.tagsSelector')
+    cy.nodes().forEach(nodeEle=> {
+        var newColor = "gray"
+        var nodeData = nodeEle.data()
+        if(nodeData.tags.includes(tagsSelector.val())) {
+            newColor = 'yellow'
+        } else if(nodeData.selectedVertex) {
+            newColor = 'red'
+        }
+        nodeEle.data({color: newColor})
+    })
 }
 
 function setupMenu(cy, parameters) {
 	// Menu:
 	var options = {
-		    // List of initial menu items
 		    menuItems: [
 		    	{
 		            id: 'deleteEdge',
@@ -163,7 +221,7 @@ function joinNodes(mergingVId, mergingToVId, callbackUrl) {
 	console.log('Merging ' + mergingVId + '->' + mergingToVId)
 	Wicket.Ajax.get({ u: callbackUrl+'&mergingVId='+mergingVId+'&mergingToVId='+mergingToVId });
 }
-function findCycle(rootNode, pathColor) {
+function findCycle(cy, rootNode, pathColor) {
 	if(rootNode == undefined) {
 		return
 	}
@@ -207,14 +265,14 @@ function findCycle(rootNode, pathColor) {
 
 }
 
-function setupGraphListeners(settings) {
+function setupGraphListeners(cy, settings) {
 	cy.on('mousedown', 'node', function(evt) {
 		cy.downstart = Date.now()
 	});
 	cy.on('free', 'node', function(evt) {
 		var draggedNodePos = evt.target.position()
 		console.log("dropped "+evt.target.id()+ " to " +		draggedNodePos.x)
-		var rootId = toValidId($(".rootVertex").attr("vertexId"))
+		var rootId = getRootVertexId()
 		cy.nodes("#"+rootId).forEach(ele => {
 			if(ele.id() != evt.target.id()) {
 				var pos = ele.position()
@@ -233,9 +291,9 @@ function setupGraphListeners(settings) {
 		var downduration = Date.now() - cy.downstart
 		if (downduration > 500) {
 
-			findCycle(cy.lastCycleNode, UNSELECTED_PATH_COLOR)
+			findCycle(cy, cy.lastCycleNode, UNSELECTED_PATH_COLOR)
 			cy.lastCycleNode = this
-			findCycle(this, SELECTED_PATH_COLOR)
+			findCycle(cy, this, SELECTED_PATH_COLOR)
 		} else {
 			goToNode(this, settings.navigateCallbackURL)
 		}

@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author black
- *
  */
 public final class VertexConverter {
 
@@ -26,6 +25,7 @@ public final class VertexConverter {
                 title(internalVertexModel.getTitle()).//
                 id(internalVertexModel.getId()).//
                 updateTimeMills(internalVertexModel.getUpdatedTimestamp()).//
+                tags(internalVertexModel.getTags()).//
                 build();
     }
 
@@ -37,6 +37,7 @@ public final class VertexConverter {
                 semanticFeatures(toInternalProperties(remoteVertexModel.getProperties())).
                 description(remoteVertexModel.getDescription()).//
                 title(remoteVertexModel.getTitle()).//
+                tags(remoteVertexModel.getTags()).//
                 build();
     }
 

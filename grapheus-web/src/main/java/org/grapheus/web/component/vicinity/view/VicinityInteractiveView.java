@@ -3,10 +3,10 @@
  */
 package org.grapheus.web.component.vicinity.view;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,7 +88,7 @@ public class VicinityInteractiveView extends Panel {
         add(new WebComponent("rootVertex")
                 .add(new AttributeAppender("vertexId", new PropertyModel<String>(vicinityVertexModel.getFilter(), VicinityModel.Filter.FIELD_SELECTED_VERTEX_ID))));
         
-        add(createLinkedArtifactsList("linkedArtifactsList", vicinityVertexModel));
+        add(createVerticesList("linkedArtifactsList", vicinityVertexModel));
 
         add(createEdgesList("edgesList", vicinityVertexModel));
         
@@ -153,16 +153,21 @@ public class VicinityInteractiveView extends Panel {
         };
     }
 
-    private Component createLinkedArtifactsList(String id, IModel<List<Vertex>> vertexicinityModel) {
-        return new ListView<Vertex>(id, vertexicinityModel) {
+    private Component createVerticesList(String id, IModel<List<Vertex>> vertexVicinityModel) {
+        return new ListView<Vertex>(id, vertexVicinityModel) {
             private static final long serialVersionUID = 1L;
 
             @Override
             protected void populateItem(ListItem<Vertex> item) {
-                Vertex artifact = item.getModelObject();
+                Vertex vertex = item.getModelObject();
                 WebComponent l = new WebComponent("vertex");
-                l.add(new AttributeAppender("vertexId", artifact.getId()));
-                l.add(new AttributeAppender("name", artifact.getName()));
+                l.add(new AttributeAppender("vertexId", vertex.getId()));
+                l.add(new AttributeAppender("name", vertex.getName()));
+
+                String serializedTags = Optional.ofNullable(vertex.getTags())
+                        .map(tags->String.join(",", tags))
+                        .orElse("");
+                l.add(new AttributeAppender("tags", serializedTags));
                 item.add(l);
               
             }

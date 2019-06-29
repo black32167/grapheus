@@ -75,6 +75,8 @@ public class PersistentVertex {
     private String description;
     
     private String sourceId;
+
+    private List<String> tags;
     
     public static class PersistentVertexBuilder {
         private List<SemanticFeature> semanticFeatures = new ArrayList<>();

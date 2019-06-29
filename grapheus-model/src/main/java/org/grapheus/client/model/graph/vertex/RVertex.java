@@ -46,4 +46,7 @@ public class RVertex {
     @Singular
     private List<RReference> references;
 
+    @Singular
+    private List<String> tags;
+
 }
