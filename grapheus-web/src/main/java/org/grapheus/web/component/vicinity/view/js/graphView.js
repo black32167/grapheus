@@ -33,7 +33,7 @@ function drawGraph(parameters) {
                     },
 
 		  pixelRatio:2,
-	
+
           style: [ // the stylesheet for the graph
                       {
                           selector: 'node',
@@ -41,6 +41,8 @@ function drawGraph(parameters) {
                               'font-size':10,
                               'height': 10,
                               'width': 10,
+                              //'border-width':2,
+                              'border-color': 'data(border_color)',
                               'background-color': 'data(color)',
                               'label': 'data(name)'
                           }
@@ -107,16 +109,20 @@ function getRootVertexId() {
 }
 
 function populateTagSelector(tagsSelector, nodesElements) {
-    var allTags = []
+    var allTags = ["root"]
+
 	nodesElements.forEach(e => {
 	    var tags = e.data.tags
 	    tags.forEach(tag => {
             if(!allTags.includes(tag)) {
-                tagsSelector.append($("<option />").val(tag).text(tag))
+
                 allTags.push(tag)
             }
         })
 	})
+
+	allTags.forEach(tag => tagsSelector.append($("<option />").val(tag).text(tag)))
+
     tagsSelector.change(e => {
         updateNodeColors(cy)
     })
@@ -152,10 +158,16 @@ function buildNodes(vertices) {
 		var tags = jV.attr('tags').split(",");
 
 		var vertexId = toValidId(originalVertexId);
+
+        if(rootId == vertexId) {
+            tags.push("root")
+        }
+
 		nodesElements.push({data:{
 				id: toValidId(vertexId),
 				name: cutRight(jV.attr('name'), 30),
 				color: 'gray',
+				border_color : 'gray',
 				selectedVertex: (rootId == vertexId),
 				tags: tags,
 				originalId:originalVertexId
@@ -169,13 +181,17 @@ function updateNodeColors(cy) {
     var tagsSelector = $('.tagsSelector')
     cy.nodes().forEach(nodeEle=> {
         var newColor = "gray"
+        var newBGColor = "gray"
         var nodeData = nodeEle.data()
         if(nodeData.tags.includes(tagsSelector.val())) {
-            newColor = 'yellow'
-        } else if(nodeData.selectedVertex) {
             newColor = 'red'
         }
-        nodeEle.data({color: newColor})
+//        if(nodeData.selectedVertex) {
+//            newColor = 'red'
+//        }
+        nodeEle.data({
+            color: newColor,
+            border_color : newBGColor})
     })
 }
 
