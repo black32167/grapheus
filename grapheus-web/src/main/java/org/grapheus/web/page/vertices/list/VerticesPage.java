@@ -94,7 +94,7 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
                 graphId = availableGraphs.get(0).getGraphName();
             }
         }
-        if(!isExists(graphId)) {
+        if(graphId != null && !isExists(graphId)) {
             // Graph does not exist -> redirecting to page w/o parameters
             setResponsePage(VerticesPage.class);
         }
