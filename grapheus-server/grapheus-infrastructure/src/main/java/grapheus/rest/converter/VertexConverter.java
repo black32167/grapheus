@@ -8,11 +8,11 @@ import grapheus.view.SemanticFeature;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.client.model.graph.vertex.RVertex.RProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.*;
+import static java.util.Optional.*;
 
 /**
  * @author black
@@ -25,7 +25,7 @@ public final class VertexConverter {
                 title(internalVertexModel.getTitle()).//
                 id(internalVertexModel.getId()).//
                 updateTimeMills(internalVertexModel.getUpdatedTimestamp()).//
-                tags(internalVertexModel.getTags()).//
+                tags(ofNullable(internalVertexModel.getTags()).orElse(emptyList())).//
                 build();
     }
 
@@ -33,11 +33,11 @@ public final class VertexConverter {
 
         return PersistentVertex.builder().//
                 url(null).
-                id(Optional.ofNullable(remoteVertexModel.getId()).orElseGet(() -> UUID.randomUUID().toString())).//
+                id(ofNullable(remoteVertexModel.getId()).orElseGet(() -> UUID.randomUUID().toString())).//
                 semanticFeatures(toInternalProperties(remoteVertexModel.getProperties())).
                 description(remoteVertexModel.getDescription()).//
                 title(remoteVertexModel.getTitle()).//
-                tags(remoteVertexModel.getTags()).//
+                tags(ofNullable(remoteVertexModel.getTags()).orElse(emptyList())).//
                 build();
     }
 
