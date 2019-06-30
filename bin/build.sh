@@ -195,7 +195,7 @@ case "$CMD" in
     	build_docker_web
     	;;
     docker-back)
-    	build_docker_web
+    	build_docker_server
     	;;
     maven)
     	mbuild
