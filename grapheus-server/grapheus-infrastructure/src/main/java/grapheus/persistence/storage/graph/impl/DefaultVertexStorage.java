@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import grapheus.persistence.ArangoDBExceptionUtil;
 import org.springframework.stereotype.Repository;
 
 import com.arangodb.ArangoDBException;
@@ -108,9 +109,15 @@ public class DefaultVertexStorage extends StorageSupport implements VertexStorag
     @Override
     public void deleteVertex(String graphId, @NonNull String vertexId) {
         String vertexCollectionName = GraphNameUtils.verticesCollectionName(graphId);
-        update(db -> db.graph(graphId).//
-                vertexCollection(vertexCollectionName).//
-                deleteVertex(vertexId));
+        try {
+            update(db -> db.graph(graphId).//
+                    vertexCollection(vertexCollectionName).//
+                    deleteVertex(vertexId));
+        } catch (ArangoDBException e) {
+            if(!ArangoDBExceptionUtil.isDocumentNotFound(e)) {
+                throw e;
+            }
+        }
     }
 
     @Override
@@ -126,7 +133,7 @@ public class DefaultVertexStorage extends StorageSupport implements VertexStorag
         try {
             return query(db -> db.collection(vertexCollectionName).count().getCount()).intValue();
         } catch (ArangoDBException e) {
-            if(e.getResponseCode() != null && e.getResponseCode() == 404) {
+            if(ArangoDBExceptionUtil.isDocumentNotFound(e)) {
                 throw new DocumentNotFoundException("Cannot find graph " + graphName, e);
             }
             throw e;

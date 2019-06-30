@@ -35,6 +35,7 @@ import com.arangodb.model.DocumentUpdateOptions;
 import com.arangodb.model.HashIndexOptions;
 import com.arangodb.model.SkiplistIndexOptions;
 
+import grapheus.persistence.exception.DocumentNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import grapheus.event.OnAfterDbConnectionListener;
 import grapheus.persistence.conpool.DBConnectionPool;
@@ -107,11 +108,7 @@ public class StorageSupport implements OnAfterDbConnectionListener {
     }
     
     protected void update(DBConnectionUpdateConsumer connectionConsumer) {
-        try {
-            arangoDriverProvider.update(connectionConsumer);
-        } catch (ArangoDBException e) {
-            throw throwStorageException("", e);
-        }
+        arangoDriverProvider.update(connectionConsumer);
     }
     
     
@@ -308,9 +305,10 @@ public class StorageSupport implements OnAfterDbConnectionListener {
     }
 
 
-    private StorageException throwStorageException(String msg, ArangoDBException dbe) {
-     
-        if(dbe.getErrorMessage() != null/*Bug circumvention*/) {
+    protected StorageException throwStorageException(String msg, ArangoDBException dbe) {
+        if(dbe.getResponseCode() == 404) {
+            return new DocumentNotFoundException(msg, dbe);
+        } else if(dbe.getErrorMessage() != null/*Bug circumvention*/) {
             switch(dbe.getErrorNum()) {
             case COLLECTION_NOT_FOUND: return new CollectionNotFoundException(msg);
             case DB_NOT_FOUND:return new DatabaseNotFoundException(msg, dbe);
