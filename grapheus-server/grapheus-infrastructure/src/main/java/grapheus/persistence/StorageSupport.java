@@ -107,7 +107,11 @@ public class StorageSupport implements OnAfterDbConnectionListener {
     }
     
     protected void update(DBConnectionUpdateConsumer connectionConsumer) {
-        arangoDriverProvider.update(connectionConsumer);
+        try {
+            arangoDriverProvider.update(connectionConsumer);
+        } catch (ArangoDBException e) {
+            throw throwStorageException("", e);
+        }
     }
     
     

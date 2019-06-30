@@ -14,6 +14,7 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import grapheus.persistence.exception.DocumentNotFoundException;
 import org.grapheus.client.model.graph.SortDirection;
 import org.grapheus.client.model.graph.VerticesSortCriteria;
 import org.grapheus.client.model.graph.VerticesSortCriteriaType;
@@ -79,8 +80,12 @@ public class GraphsManager {
     public void deleteVertex(
             @NonNull String userKey,
             @NonNull String graphName,
-            @NonNull String artifactId) {
-        vertexStorage.deleteVertex(graphName, artifactId);
+            @NonNull String vertexId) {
+        try {
+            vertexStorage.deleteVertex(graphName, vertexId);
+        } catch (DocumentNotFoundException e) {
+            log.debug("Deleting document not found: {}", vertexId);
+        }
     }
 
     public int getUserArtifactsCount(@NonNull String userKey) {
