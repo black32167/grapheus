@@ -55,7 +55,7 @@ public class VertexPersister {
         
         // Looking for existing artifact
         Optional<PersistentVertex> maybeOldVertex = vertexStorage.//
-                getByExternalId(graphName, artifactId);
+                getById(graphName, artifactId);
         
         // Extract features
         viewExtractor.extractExtraFeatures(newVertex);

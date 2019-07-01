@@ -56,7 +56,7 @@ public class FeatureSubgraphGraphGenerator {
                 for(String value: values) {
                     String targetArtifactId = ExternalCompositeId.from(value);
   
-                    if(!vertexStorage.getByExternalId(newGraphName, targetArtifactId).isPresent()) {
+                    if(!vertexStorage.getById(newGraphName, targetArtifactId).isPresent()) {
                         log.info("Creating new vertex '{}'", targetArtifactId);
                         vertexStorage.createVertex(newGraphName, 
                                 PersistentVertex.builder().//
@@ -83,15 +83,15 @@ public class FeatureSubgraphGraphGenerator {
             Future<?> f = executor.submit(() -> {
                 String fromV = e.getFrom().replaceAll(".*/", "");
                 String toV = e.getTo().replaceAll(".*/", "");
-                Optional<PersistentVertex> maybeVFrom = vertexStorage.getByExternalId(sourceGraphName, fromV);
-                Optional<PersistentVertex> maybeVTo = vertexStorage.getByExternalId(sourceGraphName, toV);
+                Optional<PersistentVertex> maybeVFrom = vertexStorage.getById(sourceGraphName, fromV);
+                Optional<PersistentVertex> maybeVTo = vertexStorage.getById(sourceGraphName, toV);
                 if(maybeVFrom.isPresent() && maybeVTo.isPresent()) {
                     List<String> valuesFrom = getFeatureValues(sourceProperty, maybeVFrom.get());
                     List<String> valuesTo = getFeatureValues(sourceProperty, maybeVTo.get());
                     for(String valueFromTarget : valuesFrom) {
                         for(String valueToTarget : valuesTo) {
-                            Optional<PersistentVertex> maybeVFromTarget = vertexStorage.getByExternalId(newGraphName, ExternalCompositeId.from(valueFromTarget));
-                            Optional<PersistentVertex> maybeVToTarget = vertexStorage.getByExternalId(newGraphName, ExternalCompositeId.from(valueToTarget));
+                            Optional<PersistentVertex> maybeVFromTarget = vertexStorage.getById(newGraphName, ExternalCompositeId.from(valueFromTarget));
+                            Optional<PersistentVertex> maybeVToTarget = vertexStorage.getById(newGraphName, ExternalCompositeId.from(valueToTarget));
                             if(maybeVFromTarget.isPresent() && maybeVToTarget.isPresent()) {   
                                 edgesStorage.connect(newGraphName,
                                         maybeVFromTarget.get().getId(),

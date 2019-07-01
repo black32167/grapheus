@@ -40,7 +40,7 @@ public class DefaultVertexStorage extends StorageSupport implements VertexStorag
 
     private final TimeService ts;
 
-    public Optional<PersistentVertex> getByExternalId(String graphName, String externalCompositeId) {
+    public Optional<PersistentVertex> getById(String graphName, String externalCompositeId) {
         String vertexCollectionName = GraphNameUtils.verticesCollectionName(graphName);
         return findDocument(vertexCollectionName, externalCompositeId, PersistentVertex.class);
     }

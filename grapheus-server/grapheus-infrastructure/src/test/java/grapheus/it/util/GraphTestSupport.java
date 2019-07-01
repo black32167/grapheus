@@ -148,7 +148,7 @@ abstract public class GraphTestSupport {
 
 
     protected PersistentVertex loadVertex(String graphName, String vertexId) {
-        return vertexStorage.getByExternalId(graphName, vertexId).get();
+        return vertexStorage.getById(graphName, vertexId).get();
     }
     protected void updateVertex(String graphName, PersistentVertex vertex) {
         vertexStorage.updateVertex(graphName, vertex);

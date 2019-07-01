@@ -3,22 +3,19 @@
  */
 package grapheus.persistence.graph.generate;
 
-import java.util.Iterator;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import grapheus.persistence.exception.DocumentExistsException;
 import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.model.graph.PersistentVertex;
 import grapheus.persistence.storage.graph.EdgeStorage;
 import grapheus.persistence.storage.graph.ExternalCompositeId;
 import grapheus.persistence.storage.graph.VertexStorage;
 import grapheus.persistence.storage.graph.transaction.cycle.CyclesSearchTransaction;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author black
@@ -55,15 +52,15 @@ public class CyclesGraphGenerator {
            
             String nextVKey = nextV.replaceAll(".*/", "");
             
-            String newNextVId = ensureVertexCreated(newGraphName, nextVKey);
+            String newNextVId = copyVertex(sourceGraphName, newGraphName, nextVKey);
             
             while(cycleIt.hasNext()) {
                 String prevV = cycleIt.next();
                 String prevVKey = prevV.replaceAll(".*/", "");
                 
-                String newPrevVId = ensureVertexCreated(newGraphName, prevVKey);
+                String newPrevVId = copyVertex(sourceGraphName, newGraphName, prevVKey);
                 
-                edgesStorage.connect(newGraphName, newPrevVId, newNextVId);
+                edgesStorage.connectUnchecked(newGraphName, newPrevVId, newNextVId);
                 
                 nextV = prevV;
                 newNextVId = newPrevVId;
@@ -71,7 +68,7 @@ public class CyclesGraphGenerator {
             if(firstV != nextV) {
                 String firstVKey = firstV.replaceAll(".*/", "");
                 String newfirstVId = ExternalCompositeId.from(firstVKey);
-                edgesStorage.connect(newGraphName, newfirstVId, newNextVId);
+                edgesStorage.connectUnchecked(newGraphName, newfirstVId, newNextVId);
             }
         }
         
@@ -83,18 +80,16 @@ public class CyclesGraphGenerator {
      * Attempts to create vertex.
      * Note that vertex can participate in multiple cycles so DocumentExistsException must be caught.
      */
-    private String ensureVertexCreated(String graphName, String vertexKey) {
-        String fullVId = ExternalCompositeId.from(vertexKey);
-        try {
-            vertexStorage.createVertex(graphName,
-                PersistentVertex.builder().//
-                    title(vertexKey).//
-                    description("").//
-                    id(fullVId).//
-                    build());
-        } catch (DocumentExistsException e) {
-            log.trace("Vertex {} probably participate in multiple cycles", vertexKey);
-        }
-        return fullVId;
+    private String copyVertex(String sourceGraphName, String newGraphName, String vertexKey) {
+       // String fullVId = ExternalCompositeId.from(vertexKey);
+        vertexStorage.getById(sourceGraphName, vertexKey).ifPresent(sourceVertex -> {
+            try {
+                vertexStorage.createVertex(newGraphName, sourceVertex);
+            } catch (DocumentExistsException e) {
+                log.trace("Vertex {} probably participate in multiple cycles", vertexKey);
+            }
+        });
+
+        return vertexKey;
     }
 }

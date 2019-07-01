@@ -19,7 +19,7 @@ public interface VertexStorage {
      * Loads artifacts by their identifiers
      */
     List<PersistentVertex> get(String graphName, Collection<String> artifactIds);
-    Optional<PersistentVertex> getByExternalId(String graphName, String externalCompositeId);
+    Optional<PersistentVertex> getById(String graphName, String externalCompositeId);
     
     void partiallyUpdateVertex(String graphName, PersistentVertex persistingArtifact);
     void updateVertex(String graphName, PersistentVertex persistingArtifact);

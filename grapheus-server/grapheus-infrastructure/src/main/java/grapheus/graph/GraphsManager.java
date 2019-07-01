@@ -69,7 +69,7 @@ public class GraphsManager {
             @NonNull String graphName,
             @NonNull String uniqArtifactId)
             throws PermissionDeniedException {
-        Optional<PersistentVertex> maybeArtifact = vertexStorage.getByExternalId(graphName, uniqArtifactId);
+        Optional<PersistentVertex> maybeArtifact = vertexStorage.getById(graphName, uniqArtifactId);
 
         return maybeArtifact;
     }

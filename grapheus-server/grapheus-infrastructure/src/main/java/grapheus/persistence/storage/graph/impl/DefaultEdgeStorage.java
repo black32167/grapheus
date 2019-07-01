@@ -33,6 +33,21 @@ import lombok.extern.slf4j.Slf4j;
 public class DefaultEdgeStorage extends StorageSupport implements EdgeStorage {
 
     @Override
+    public void connectUnchecked(String graphName, String vertex1Id, String vertex2Id) {
+        if (vertex1Id == null || vertex2Id == null || Objects.equals(vertex1Id, vertex2Id)) {
+            return;
+        }
+        log.info("Connecting unchecked '{}'->'{}'", vertex1Id, vertex2Id);
+        String vertexCollectionName = GraphNameUtils.verticesCollectionName(graphName);
+        String edgeCollectionName = GraphNameUtils.edgesCollectionName(graphName);
+
+        createDocument(edgeCollectionName, PersistentEdge.builder().//
+                from(vertexCollectionName + "/" + vertex1Id).//
+                to(vertexCollectionName + "/" + vertex2Id).//
+                build());
+    }
+
+    @Override
     public void connect(String graphName, String vertex1Id, String vertex2Id) {
         if (vertex1Id == null || vertex2Id == null || Objects.equals(vertex1Id, vertex2Id)) {
             return;
