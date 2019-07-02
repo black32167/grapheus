@@ -35,7 +35,7 @@ At the moment scanner considers subclass-to-class, interface-to-implementation a
 ./scan [OPTIONS] FOLDERTOINDEX
 
 Options:
-  -o PATH     Output path for resuting graph dump. Default is 'out-graph.zip'.
+  -o PATH     Output path for resulting graph dump. Default is 'out-graph.zip'.
   -p TEXT     JARs file regexp. Default is '.*\.jar'.
 
 ```
