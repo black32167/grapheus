@@ -22,10 +22,30 @@ grapheus-runner$ ./grapheus.sh start
 After a while you'll be able to open web ui page in your browser ([http://127.0.0.1:8000/app/](http://127.0.0.1:8000/app/)):
 <img src="grapheus_screenshot.png" alt="Grapheus screenshot" width="1024px">
 
-# Working with the repository
+# Using JAR scanner
+JAR scanner tool can scan set of JARs and generate classes dependencies graph archive which can be uploaded to Grapheus for further exploration.
+At the moment scanner considers subclass-to-class, interface-to-implementation and class-to-field relations.
+
+### Prerequisites for running jar scanner
+* JRE 8+
+* Bash
+
+###Usage:
+```
+./scan [OPTIONS] FOLDERTOINDEX
+
+Options:
+  -o PATH     Output path for resuting graph dump. Default is 'out-graph.zip'.
+  -p TEXT     JARs file regexp. Default is '.*\.jar'.
+
+```
+Where FOLDERTOINDEX is the path to the folder containing jars to scan. This folder will be scanned recursively.
+
+# Working with the current repository
 If you want to use development version or contribute, you will need to clone this repository.
 ### Prerequisites for working with the repository:
 * All prerequisites from '[Prerequisites for starting Grapheus](#prerequisites-for-starting-grapheus)' section
+* JDK 8+
 * Git
 * Maven 3
 
