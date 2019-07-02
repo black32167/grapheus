@@ -19,11 +19,11 @@ class ScanCommand : CliktCommand() {
 
     private val folderToIndex: Path by argument().path()
 
-    private val outputPath:Path by option("-o", help="Output path for resuting graph dump").path()
+    private val outputPath:Path by option("-o", help="Output path for resulting graph dump. Default is 'out-graph.zip'.").path()
             .defaultLazy {
                 Paths.get("out-graph.zip")//"${folderToIndex.fileName.toString()}
             }
-    private val jarsPattern:String by option("-p", help="Jars file pattern").default(".*\\.jar")
+    private val jarsPattern:String by option("-p", help="JARs file regexp. Default is '.*\\.jar'.").default(".*\\.jar")
 
     override fun run() {
         // Queue shared between producer and consumer

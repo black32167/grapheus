@@ -11,6 +11,9 @@ import java.util.function.Consumer
  */
 const val TYPE_CLASS = "class"
 const val TYPE_INTERFACE = "interface"
+const val RTYPE_IMPLEMENTS = "implements"
+const val RTYPE_EXTENDS = "extends"
+const val RTYPE_REFERS = "refers"
 
 class VertexCollectingDependencyVisitor (
         val verticesQueue : Consumer<RVertex>
@@ -21,9 +24,10 @@ class VertexCollectingDependencyVisitor (
             "java\\..*",
             "javax\\..*",
             "kotlin\\..*",
-            "[^.]*")
+            "[^.]*",
+            ".*\\.module-info")
 
-    data class ClassReference (val targetClass:String, val reverseRelation:Boolean)
+    data class ClassReference (val targetClass:String, val referenceType:String, val reverseRelation:Boolean)
     class ClassDescriptor(val name:String, val type: String) {
         val references =  mutableSetOf<ClassReference>()
     }
@@ -50,12 +54,12 @@ class VertexCollectingDependencyVisitor (
     }
 
     override fun onClassStart(className: String, classType: String):Boolean {
-        if(encounteredClasses.add(className)) {
+        if(isEligibleType(className) && encounteredClasses.add(className)) {
             log.info("\tEncountered class '${className}'")
             currentClass = ClassDescriptor(name = className, type = classType)
             return true
         } else {
-            log.warn("\tClass '${className}' is already registered, skipping")
+            log.warn("\tClass '${className}' is already registered or is not eligible, skipping")
             return false
         }
     }
@@ -70,6 +74,7 @@ class VertexCollectingDependencyVisitor (
             RVertex.RReference
                     .builder()
                     .destinationId(classNameToVertextId(ref.targetClass))
+                    .classifiers(listOf(ref.referenceType))
                     .reversed(ref.reverseRelation)
                     .build()
         }
@@ -86,20 +91,29 @@ class VertexCollectingDependencyVisitor (
     }
     override fun onInterface(intfce: String) {
         if(isEligibleType(intfce)) {
-            currentClass!!.references.add(ClassReference(chompInternalClass(intfce), true))
+            currentClass!!.references.add(ClassReference(
+                    targetClass = chompInternalClass(intfce),
+                    referenceType = RTYPE_IMPLEMENTS,
+                    reverseRelation = true))
             log.info("\t\tEncountered interface '${intfce}'")
         }
     }
 
     override fun onSuperclass(superName: String) {
         if(isEligibleType(superName)) {
-            currentClass!!.references.add(ClassReference(chompInternalClass(superName), true))
+            currentClass!!.references.add(ClassReference(
+                    targetClass = chompInternalClass(superName),
+                    referenceType = RTYPE_EXTENDS,
+                    reverseRelation = true))
             log.info("\t\tEncountered superclass '${superName}'")
         }
     }
     override fun onField(className:String, fieldName: String, fieldType: String) {
         if(isEligibleType(fieldType)) {
-            currentClass!!.references.add(ClassReference(chompInternalClass(fieldType), false))
+            currentClass!!.references.add(ClassReference(
+                    targetClass = chompInternalClass(fieldType),
+                    referenceType = RTYPE_REFERS,
+                    reverseRelation = false))
             log.info("\t\tEncountered field '${fieldName}' of type '${fieldType}'")
         }
     }

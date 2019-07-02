@@ -27,7 +27,6 @@ class ClassDependenciesExtractingVisitor(val fieldCallback:(String, String) -> U
             }
         }
 
-
         return null
     }
     
