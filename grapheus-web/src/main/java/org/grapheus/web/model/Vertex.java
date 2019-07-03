@@ -14,5 +14,4 @@ public final class Vertex implements Serializable {
     String name;
     String id;
     List<String> tags;
-    List<String> neighbors;
 }

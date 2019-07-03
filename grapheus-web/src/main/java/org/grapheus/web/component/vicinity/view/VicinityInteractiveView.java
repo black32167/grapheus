@@ -4,11 +4,8 @@
 package org.grapheus.web.component.vicinity.view;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
@@ -23,7 +20,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.template.PackageTextTemplate;
 import org.grapheus.web.RemoteUtil;
@@ -31,6 +27,7 @@ import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.component.shared.SerializableSupplier;
 import org.grapheus.web.model.Edge;
 import org.grapheus.web.model.Vertex;
+import org.grapheus.web.model.VicinityGraph;
 import org.grapheus.web.model.VicinityModel;
 
 /**
@@ -137,8 +134,8 @@ public class VicinityInteractiveView extends Panel {
         };
     }
 
-    private Component createEdgesList(String string, IModel<List<Vertex>> vicinityVerticesModel) {
-        return new ListView<Edge>("edgesList", getEdgesModel(vicinityVerticesModel)) {
+    private Component createEdgesList(String id, IModel<VicinityGraph> vicinityVerticesModel) {
+        return new ListView<Edge>(id, new PropertyModel<>(vicinityVerticesModel, VicinityGraph.FIELD_EDGES)) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -148,13 +145,18 @@ public class VicinityInteractiveView extends Panel {
                 WebComponent l = new WebComponent("edge");
                 l.add(new AttributeAppender("from", edge.getFromId()));
                 l.add(new AttributeAppender("to", edge.getToId()));
+                String serializedTags = Optional.ofNullable(edge.getTags())
+                        .map(tags->String.join(",", tags))
+                        .orElse("");
+                l.add(new AttributeAppender("tags", serializedTags));
+
                 item.add(l);
             }
         };
     }
 
-    private Component createVerticesList(String id, IModel<List<Vertex>> vertexVicinityModel) {
-        return new ListView<Vertex>(id, vertexVicinityModel) {
+    private Component createVerticesList(String id, IModel<VicinityGraph> vertexVicinityModel) {
+        return new ListView<Vertex>(id, new PropertyModel<>(vertexVicinityModel, VicinityGraph.FIELD_VERTICES)) {
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -172,29 +174,6 @@ public class VicinityInteractiveView extends Panel {
               
             }
         };
-    }
-
-    private IModel<List<Edge>> getEdgesModel(IModel<List<Vertex>> vicinityVerticesModel) {
-        return new LoadableDetachableModel<List<Edge>>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected List<Edge> load() {
-                List<Edge> edges = vicinityVerticesModel.getObject().stream()
-                        .flatMap(v -> vertexToEdgeList(v))
-                        .collect(Collectors.<Edge>toList());
-             
-                return edges;
-            }
-        };
-    }
-    
-    private Stream<Edge> vertexToEdgeList(Vertex v) {
-        return v.getNeighbors().stream().map(n-> {
-            String from = /*inbound ? n : */v.getId();
-            String to = /*inbound ? v.getId() :*/ n;
-            return Edge.builder().fromId(from).toId(to).build();
-        });
     }
 
 }

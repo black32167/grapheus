@@ -4,8 +4,6 @@
 package org.grapheus.web.model;
 
 import java.io.Serializable;
-import java.util.List;
-
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.grapheus.client.model.graph.edge.EdgeDirection;
 import org.grapheus.web.component.shared.SerializableSupplier;
@@ -20,7 +18,7 @@ import lombok.Setter;
  * @author black
  */
 @RequiredArgsConstructor
-public class VicinityModel extends LoadableDetachableModel<List<Vertex>> {
+public class VicinityModel extends LoadableDetachableModel<VicinityGraph> {
     private static final long serialVersionUID = 1L;
  
     @Getter @Setter
@@ -45,15 +43,16 @@ public class VicinityModel extends LoadableDetachableModel<List<Vertex>> {
     private final SerializableSupplier<String> graphIdSupplier;
     
     @Override
-    protected List<Vertex> load() {
+    protected VicinityGraph load() {//TODO: return VicinityGraph
         String artifactId = filter.getSelectedVertexId();
-        
-        List<Vertex> vertices = WebGraphUtils.listNeighbors(
+
+        VicinityGraph graphView = WebGraphUtils.listNeighbors(
                 graphIdSupplier.get(), 
                 artifactId, 
                 filter.getDepth(),
                 filter.getEdgesDirection());
 
-        return vertices;
+
+        return graphView;
     }
 }

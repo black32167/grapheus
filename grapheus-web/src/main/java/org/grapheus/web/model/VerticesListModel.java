@@ -82,7 +82,7 @@ public class VerticesListModel extends LoadableDetachableModel<VerticesRemoteDat
 
     private final SerializableSupplier<String> graphIdSupplier;
     
-    private final IModel<List<Vertex>> vicinityVerticesListModel;
+    private final IModel<VicinityGraph> vicinityVerticesListModel;
     
     private VerticesRemoteDataset getVerticesInfoList() {
         ArtifactsFilter taskFilter = ArtifactsFilter.builder().//
@@ -93,7 +93,7 @@ public class VerticesListModel extends LoadableDetachableModel<VerticesRemoteDat
                         direction(filter.getFilteringEdgesDirection()).build()).
                 build();
         if(filter.isRestrictByVicinity()) {
-            Set<String> vIds = vicinityVerticesListModel.getObject().stream().map(v->v.getId()).collect(Collectors.toSet());
+            Set<String> vIds = vicinityVerticesListModel.getObject().getVertices().stream().map(Vertex::getId).collect(Collectors.toSet());
             taskFilter.setVerticesIds(vIds);
         }
         try {
