@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * @author black
  */
@@ -45,5 +47,7 @@ public class PersistentEdge {
     @DocumentField(Type.TO)
     @NonNull
     private String to;
+
+    private List<String> tags;
     
 }

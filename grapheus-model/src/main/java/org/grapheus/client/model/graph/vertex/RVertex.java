@@ -30,7 +30,8 @@ public class RVertex {
     @NoArgsConstructor
     @Builder
     public static class RReference {
-        private List<String> classifiers;
+        @Singular
+        private List<String> tags;
         private boolean reversed;
         private String destinationId;
     }

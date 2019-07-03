@@ -74,7 +74,7 @@ class VertexCollectingDependencyVisitor (
             RVertex.RReference
                     .builder()
                     .destinationId(classNameToVertextId(ref.targetClass))
-                    .classifiers(listOf(ref.referenceType))
+                    .tag(ref.referenceType)
                     .reversed(ref.reverseRelation)
                     .build()
         }

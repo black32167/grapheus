@@ -32,7 +32,6 @@ import grapheus.view.SemanticFeature;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of="id")
-@Index(fields="artifact.updatedTimestamp", type=IndexType.SKIP, unique=false)
 @Index(fields=PersistentVertex.FIELD_VIEW_HINT_VAL, type=IndexType.HASH, unique=false)
 @Index(fields=PersistentVertex.FIELD_VIEW_HINT_TYPE, type=IndexType.HASH, unique=false) //It has low selectivity, maybe not worth to spend memory
 @Index(fields=PersistentVertex.FIELD_TITLE, type=IndexType.SKIP, unique=false)
