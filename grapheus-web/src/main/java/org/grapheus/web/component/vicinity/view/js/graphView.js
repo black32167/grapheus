@@ -1,7 +1,7 @@
 var VRAD = 10; 
 var MARGIN = 10; 
 var UNSELECTED_PATH_COLOR = '#ccc'
-var SELECTED_PATH_COLOR = 'red'
+var SELECTED_PATH_COLOR = 'yellow'
 
 /**
  * Entry point, invoked when page is loaded.
@@ -15,8 +15,6 @@ function drawGraph(parameters) {
     var nodesElements = buildNodes($("#vertices").children())
     var knownVIds = getAllVerticesIds(nodesElements)
 	var edgesElements = buildEdges($("#edges").children(), knownVIds)
-
-    populateTagSelector($('.tagsSelector'), nodesElements)
 
 	var cy = window.cy = cytoscape({
 
@@ -53,7 +51,6 @@ function drawGraph(parameters) {
                           style: {
 
                               'width': 0.8,
-
                               'curve-style': 'bezier',
                               'line-color': UNSELECTED_PATH_COLOR,
                               'target-arrow-color': UNSELECTED_PATH_COLOR,
@@ -81,7 +78,10 @@ function drawGraph(parameters) {
 	setupGraphListeners(cy, parameters)
 	setupMenu(cy, parameters)
 
-    updateNodeColors(cy)
+
+    populateTagSelector($('.verticesTagsSelector'), nodesElements, (tag, cy) => {updateNodeColors(tag, cy)})
+    populateTagSelector($('.edgesTagsSelector'), edgesElements,  (tag, cy) => {updateEdgeColors(tag, cy)})
+
 }
 
 
@@ -108,14 +108,13 @@ function getRootVertexId() {
     return toValidId($(".rootVertex").attr("vertexId"))
 }
 
-function populateTagSelector(tagsSelector, nodesElements) {
-    var allTags = ["root"]
+function populateTagSelector(tagsSelector, nodesElements, onChangeCallback) {
+    var allTags = []
 
 	nodesElements.forEach(e => {
 	    var tags = e.data.tags
 	    tags.forEach(tag => {
             if(!allTags.includes(tag)) {
-
                 allTags.push(tag)
             }
         })
@@ -123,9 +122,9 @@ function populateTagSelector(tagsSelector, nodesElements) {
 
 	allTags.forEach(tag => tagsSelector.append($("<option />").val(tag).text(tag)))
 
-    tagsSelector.change(e => {
-        updateNodeColors(cy)
-    })
+    tagsSelector.change(e => onChangeCallback(tagsSelector.val(), cy))
+
+    onChangeCallback(tagsSelector.val(), cy)
 }
 
 function getAllVerticesIds(nodesElements) {
@@ -139,9 +138,14 @@ function buildEdges(edges, knownVIds) {
 		var jV = $(this)
 		var from = toValidId(jV.attr('from'));
 		var to = toValidId(jV.attr('to'));
+		var tags = jV.attr('tags').split(",");
 		var edgeKey = from+":"+to;
 		if(knownVIds.includes(from) && knownVIds.includes(to) && !knownEdges.includes(edgeKey)) {
-			edgesElements.push({data:{source:from,target:to}})
+			edgesElements.push({data:{
+			    source:from,
+			    target:to,
+			    tags:tags
+            }})
 			knownEdges.push(edgeKey)
 		}
 	});
@@ -177,21 +181,28 @@ function buildNodes(vertices) {
 	return nodesElements
 }
 
-function updateNodeColors(cy) {
-    var tagsSelector = $('.tagsSelector')
+function updateNodeColors(selectedTag, cy) {
     cy.nodes().forEach(nodeEle=> {
         var newColor = "gray"
         var newBGColor = "gray"
         var nodeData = nodeEle.data()
-        if(nodeData.tags.includes(tagsSelector.val())) {
+        if(nodeData.tags.includes(selectedTag)) {
             newColor = 'red'
         }
-//        if(nodeData.selectedVertex) {
-//            newColor = 'red'
-//        }
         nodeEle.data({
             color: newColor,
             border_color : newBGColor})
+    })
+}
+
+function updateEdgeColors(selectedTag, cy) {
+    cy.edges().forEach(edgeEle=> {
+        var newColor = "gray"
+        var edgeData = edgeEle.data()
+        if(edgeData.tags.includes(selectedTag)) {
+            newColor = 'red'
+        }
+        edgeEle.style({'line-color':newColor,'target-arrow-color':newColor})
     })
 }
 
