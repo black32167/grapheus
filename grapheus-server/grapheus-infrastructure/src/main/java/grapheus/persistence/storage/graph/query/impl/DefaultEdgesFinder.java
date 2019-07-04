@@ -26,20 +26,17 @@ import grapheus.persistence.storage.traverse.Edge;
 @Service
 @Slf4j
 public class DefaultEdgesFinder extends StorageSupport implements EdgesFinder {
-    
-    
+
     @Override
-    public Collection<Edge> getNeighbors(String graphName, String artifactId, EdgeDirection edgesDirection, int hops) {
+    public Collection<PersistentEdge> getNeighbors(String graphName, String artifactId, EdgeDirection edgesDirection, int hops) {
         String vertexColectionName = GraphNameUtils.verticesCollectionName(graphName);
         String directionClause = edgesDirection.name();
         String aql = "FOR v,e in 1.." + hops + " " + directionClause + " '" + vertexColectionName + "/" + artifactId
                 + "' " + "GRAPH '" + graphName + "'"
-                + "  RETURN { " + " from:SUBSTRING(e._from,"
-                + (vertexColectionName.length() + 1) + "), " + " to:SUBSTRING(e._to,"
-                + (vertexColectionName.length() + 1) + ") " + "   }";
+                + "  RETURN e";
         log.debug("getNeighbors query={}", aql);
-        List<Edge> partifacts = q(aql, Collections.emptyMap(), Edge.class).asListRemaining();
-        return partifacts;
+        List<PersistentEdge> neighborhoodEdges = q(aql, Collections.emptyMap(), PersistentEdge.class).asListRemaining();
+        return neighborhoodEdges;
     }
     
     

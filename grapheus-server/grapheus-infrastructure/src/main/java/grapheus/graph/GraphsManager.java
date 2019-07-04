@@ -59,7 +59,7 @@ public class GraphsManager {
     /**
      * Finds artifacts related to user and groups them in cluster.
      */
-    public Collection<Edge> findNeighbors(String currentUserKey, String graphName, String artifactId, EdgeDirection edgesDirection, int depth) {
+    public Collection<PersistentEdge> findNeighbors(String currentUserKey, String graphName, String artifactId, EdgeDirection edgesDirection, int depth) {
         return edgesFinder.getNeighbors(graphName, artifactId, edgesDirection, depth);
     }
 

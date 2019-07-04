@@ -3,16 +3,37 @@
  */
 package grapheus.rest.resource.graph;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+import grapheus.TimeService;
+import grapheus.context.GrapheusRequestContextHolder;
+import grapheus.exception.PermissionDeniedException;
+import grapheus.graph.GraphsManager;
+import grapheus.graph.VertexInfoCalculatorManager;
+import grapheus.graph.bulk.VertexBulkImporterFactory;
+import grapheus.graph.bulk.VertexBulkImporterFactory.VertexBulkImporter;
+import grapheus.persistence.exception.CollectionNotFoundException;
+import grapheus.persistence.graph.calculate.CalculatedVertexInfo;
+import grapheus.persistence.model.graph.PersistentEdge;
+import grapheus.persistence.model.graph.PersistentVertex;
+import grapheus.persistence.model.personal.GrapheusUser;
+import grapheus.persistence.storage.graph.query.VertexFinder.SearchResult;
+import grapheus.rest.converter.EdgeConverter;
+import grapheus.rest.converter.VertexConverter;
+import grapheus.service.uds.ArtifactsFilter;
+import grapheus.user.UserConverter;
+import grapheus.utils.EntityIdUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.grapheus.client.model.RUserList;
+import org.grapheus.client.model.graph.RPropertiesContainer;
+import org.grapheus.client.model.graph.VertexInfoType;
+import org.grapheus.client.model.graph.VerticesSortCriteria;
+import org.grapheus.client.model.graph.edge.EdgeDirection;
+import org.grapheus.client.model.graph.edge.RAdjacentEdgesFilter;
+import org.grapheus.client.model.graph.edge.REdgesContainer;
+import org.grapheus.client.model.graph.search.RSearchRequest;
+import org.grapheus.client.model.graph.vertex.RVertex;
+import org.grapheus.client.model.graph.vertex.RVertexInfo;
+import org.grapheus.client.model.graph.vertex.RVertexInfosContainer;
+import org.grapheus.client.model.graph.vertex.RVerticesContainer;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -30,39 +51,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
-import org.grapheus.client.model.RUserList;
-import org.grapheus.client.model.graph.RPropertiesContainer;
-import org.grapheus.client.model.graph.VertexInfoType;
-import org.grapheus.client.model.graph.VerticesSortCriteria;
-import org.grapheus.client.model.graph.edge.EdgeDirection;
-import org.grapheus.client.model.graph.edge.RAdjacentEdgesFilter;
-import org.grapheus.client.model.graph.edge.REdge;
-import org.grapheus.client.model.graph.edge.REdgesContainer;
-import org.grapheus.client.model.graph.search.RSearchRequest;
-import org.grapheus.client.model.graph.vertex.RVertex;
-import org.grapheus.client.model.graph.vertex.RVertexInfo;
-import org.grapheus.client.model.graph.vertex.RVertexInfosContainer;
-import org.grapheus.client.model.graph.vertex.RVerticesContainer;
-
-import grapheus.TimeService;
-import grapheus.context.GrapheusRequestContextHolder;
-import grapheus.exception.PermissionDeniedException;
-import grapheus.graph.GraphsManager;
-import grapheus.graph.VertexInfoCalculatorManager;
-import grapheus.graph.bulk.VertexBulkImporterFactory;
-import grapheus.graph.bulk.VertexBulkImporterFactory.VertexBulkImporter;
-import grapheus.persistence.exception.CollectionNotFoundException;
-import grapheus.persistence.graph.calculate.CalculatedVertexInfo;
-import grapheus.persistence.model.graph.PersistentVertex;
-import grapheus.persistence.model.personal.GrapheusUser;
-import grapheus.persistence.storage.graph.query.VertexFinder.SearchResult;
-import grapheus.persistence.storage.traverse.Edge;
-import grapheus.rest.converter.VertexConverter;
-import grapheus.service.uds.ArtifactsFilter;
-import grapheus.user.UserConverter;
-import grapheus.utils.EntityIdUtils;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @author black
@@ -283,20 +281,13 @@ public class VertexResource {
             @QueryParam("depth") @DefaultValue("1") int depth) throws InterruptedException, ExecutionException {
         String grapheusUserKey = GrapheusRequestContextHolder.getContext().getUserId();
         EdgeDirection direction = EdgeDirection.valueOf(directionSpec);
-        Collection<Edge> edges = graphsManager.findNeighbors(grapheusUserKey, graphName, artifactId, direction, depth);
+        Collection<PersistentEdge> edges = graphsManager.findNeighbors(grapheusUserKey, graphName, artifactId, direction, depth);
 
         return REdgesContainer.builder().
-                edges(edges.stream().map(this::toExternalEdge).collect(Collectors.toList())).
+                edges(edges.stream().map(EdgeConverter::toExternalEdge).collect(Collectors.toList())).
                 build();
     }
 
-    private REdge toExternalEdge(Edge edge) {
-        return REdge.builder().//
-                from(edge.getFrom()).//
-                to(edge.getTo()).//
-                build();
-    }
-    
     private RVertexInfo toExternalVertexInfo(CalculatedVertexInfo internalVInfo) {
         return RVertexInfo.builder().
                 vertexKey(EntityIdUtils.toKey(internalVInfo.getVertexId())).
