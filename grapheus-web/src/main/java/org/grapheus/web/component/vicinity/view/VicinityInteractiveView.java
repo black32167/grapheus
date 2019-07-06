@@ -83,7 +83,7 @@ public class VicinityInteractiveView extends Panel {
     protected void onInitialize() {
         super.onInitialize();
         add(new WebComponent("rootVertex")
-                .add(new AttributeAppender("vertexId", new PropertyModel<String>(vicinityVertexModel.getFilter(), VicinityModel.Filter.FIELD_SELECTED_VERTEX_ID))));
+                .add(new AttributeAppender("vertexId", new PropertyModel<String>(vicinityVertexModel.getFilter(), VicinityModel.VicinityState.FIELD_SELECTED_VERTEX_ID))));
         
         add(createVerticesList("linkedArtifactsList", vicinityVertexModel));
 

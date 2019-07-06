@@ -36,7 +36,7 @@ function drawGraph(parameters) {
                       {
                           selector: 'node',
                           style: {
-                              'font-size':10,
+                              'font-size':20,
                               'height': 10,
                               'width': 10,
                               //'border-width':2,
@@ -65,9 +65,11 @@ function drawGraph(parameters) {
                         circle : parameters.isCircleLayout,
                         // directed: true,
                         roots: "#"+rootId,
-                        padding: 10,
+                        padding: 5,
                         avoidOverlap:true,
-                        spacingFactor:0.5,
+                        spacingFactor:0.8,
+                        grid:false,
+                        maximal: true,
                         nodeDimensionsIncludeLabels:true,
                         fit:true
 
@@ -78,9 +80,10 @@ function drawGraph(parameters) {
 	setupGraphListeners(cy, parameters)
 	setupMenu(cy, parameters)
 
-
-    populateTagSelector($('.verticesTagsSelector'), nodesElements, (tag, cy) => {updateNodeColors(tag, cy)})
-    populateTagSelector($('.edgesTagsSelector'), edgesElements,  (tag, cy) => {updateEdgeColors(tag, cy)})
+    cy.ready(()=>{
+        updateNodeColors($('.verticesTagsSelector').val())
+        updateEdgeColors($('.edgesTagsSelector').val())
+    })
 
 }
 
@@ -108,24 +111,6 @@ function getRootVertexId() {
     return toValidId($(".rootVertex").attr("vertexId"))
 }
 
-function populateTagSelector(tagsSelector, nodesElements, onChangeCallback) {
-    var allTags = []
-
-	nodesElements.forEach(e => {
-	    var tags = e.data.tags
-	    tags.forEach(tag => {
-            if(!allTags.includes(tag)) {
-                allTags.push(tag)
-            }
-        })
-	})
-
-	allTags.forEach(tag => tagsSelector.append($("<option />").val(tag).text(tag)))
-
-    tagsSelector.change(e => onChangeCallback(tagsSelector.val(), cy))
-
-    onChangeCallback(tagsSelector.val(), cy)
-}
 
 function getAllVerticesIds(nodesElements) {
     return nodesElements.map(e => e.data.id)
@@ -181,7 +166,11 @@ function buildNodes(vertices) {
 	return nodesElements
 }
 
-function updateNodeColors(selectedTag, cy) {
+/**
+ * Highlights nodes marked with specified tag.
+ * Part of javascript API for backend
+ */
+function updateNodeColors(selectedTag) {
     cy.nodes().forEach(nodeEle=> {
         var newColor = "gray"
         var newBGColor = "gray"
@@ -195,7 +184,12 @@ function updateNodeColors(selectedTag, cy) {
     })
 }
 
-function updateEdgeColors(selectedTag, cy) {
+
+/**
+ * Highlights edges marked with specified tag.
+ * Part of javascript API for backend
+ */
+function updateEdgeColors(selectedTag) {
     cy.edges().forEach(edgeEle=> {
         var newColor = "gray"
         var edgeData = edgeEle.data()

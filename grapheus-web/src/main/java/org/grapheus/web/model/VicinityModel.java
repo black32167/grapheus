@@ -22,7 +22,7 @@ public class VicinityModel extends LoadableDetachableModel<VicinityGraph> {
     private static final long serialVersionUID = 1L;
  
     @Getter @Setter
-    public final static class Filter implements Serializable {
+    public final static class VicinityState implements Serializable {
         private static final long serialVersionUID = 1L;
         public static final String EDGES_DIRECTION = "edgesDirection";
         public static final String DEPTH = "depth";
@@ -35,10 +35,14 @@ public class VicinityModel extends LoadableDetachableModel<VicinityGraph> {
         private String selectedVertexId;
         
         private GraphLayout layout = GraphLayout.LAYERED;
+
+
+        private String selectedVerticesTag;
+        private String selectedEdgesTag;
     }
     
     @Getter
-    private final Filter filter = new Filter();
+    private final VicinityState filter = new VicinityState();
     
     private final SerializableSupplier<String> graphIdSupplier;
     

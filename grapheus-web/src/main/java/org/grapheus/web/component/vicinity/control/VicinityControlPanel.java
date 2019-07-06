@@ -5,6 +5,7 @@ package org.grapheus.web.component.vicinity.control;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -16,6 +17,7 @@ import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.NumberTextField;
@@ -43,6 +45,8 @@ import com.googlecode.wicket.jquery.ui.widget.dialog.InputDialog;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import static java.util.stream.Collectors.*;
+
 /**
  * @author black
  *
@@ -59,8 +63,9 @@ public class VicinityControlPanel extends Panel {
     private final IModel<RVertex> artifactModel;
     private final SerializableSupplier<String> graphIdSupplier;
     private final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback;
-    
+
     private final VicinityModel vicinityVertexModel;
+
 
     @Builder
     public VicinityControlPanel(String id, 
@@ -105,14 +110,58 @@ public class VicinityControlPanel extends Panel {
         add(createVertexControlForm("controlsForm")
                 .add(newDepthSelector("depth"))
                 .add(newDirectionSelector("edgesDirection"))
-                .add(newLayoutDropdown("layout")));
+                .add(newLayoutDropdown("layout"))
+                .add(newVerticesTagSelector("selectedVerticesTag"))
+                .add(newEdgesTagSelector("selectedEdgesTag")));
         add(new Label("documentBody", new PropertyModel<>(artifactModel, "description")));
         
         add(graphView.add(newDroppabe(".vicinityView")));
     }
 
+    private Component newVerticesTagSelector(String id) {
+
+        return new DropDownChoice<>(id, verticesTagsModel(), new ChoiceRenderer<>(null, "toString()"))
+                .setOutputMarkupId(true)
+                .add(new AjaxFormComponentUpdatingBehavior("change") {
+                    private static final long serialVersionUID = 1L;
+                    protected void onUpdate(AjaxRequestTarget target) {
+                        target.appendJavaScript("updateNodeColors('" + vicinityVertexModel.getFilter().getSelectedVerticesTag() + "');");
+                    }
+                });
+    }
+
+    private IModel<List<String>> verticesTagsModel() {
+        return new LoadableDetachableModel<List<String>>() {
+            @Override
+            protected List<String> load() {
+                return vicinityVertexModel.getObject().getVertices().stream().flatMap(v->v.getTags().stream()).distinct().collect(toList());
+            }
+        };
+    }
+
+    private Component newEdgesTagSelector(String id) {
+        return new DropDownChoice<>(id, edgesTagsModel(), new ChoiceRenderer<>(null, "toString()"))
+                .setOutputMarkupId(true)
+                .add(new AjaxFormComponentUpdatingBehavior("change") {
+                    private static final long serialVersionUID = 1L;
+                    protected void onUpdate(AjaxRequestTarget target) {
+                        target.appendJavaScript("updateEdgeColors('" + vicinityVertexModel.getFilter().getSelectedEdgesTag() + "');");
+                    }
+                });
+    }
+
+    private IModel<List<String>> edgesTagsModel() {
+        return new LoadableDetachableModel<List<String>>() {
+            @Override
+            protected List<String> load() {
+                return vicinityVertexModel.getObject().getEdges().stream().flatMap(e->e.getTags().stream()).distinct().collect(toList());
+            }
+        };
+    }
+
+
     private Component newDirectionSelector(String id) {
-        return new DropDownChoice<EdgeDirection>(id, Arrays.asList(EdgeDirection.values())).
+        return new DropDownChoice<>(id, Arrays.asList(EdgeDirection.values())).
                 add(updateGraphViewAjaxBehavior("change"));
     }
 
@@ -173,9 +222,9 @@ public class VicinityControlPanel extends Panel {
        };
     }
 
-    private Form<VicinityModel.Filter> createVertexControlForm(String formId) {
-        return new Form<VicinityModel.Filter>(
-                formId, new CompoundPropertyModel<VicinityModel.Filter>(vicinityVertexModel.getFilter()));
+    private Form<VicinityModel.VicinityState> createVertexControlForm(String formId) {
+        return new Form<VicinityModel.VicinityState>(
+                formId, new CompoundPropertyModel<VicinityModel.VicinityState>(vicinityVertexModel.getFilter()));
     }
     
 
