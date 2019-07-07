@@ -67,12 +67,11 @@ function drawGraph(parameters) {
                         roots: "#"+rootId,
                         padding: 5,
                         avoidOverlap:true,
-                        spacingFactor:0.8,
+                        spacingFactor:0.5,
                         grid:false,
                         maximal: true,
                         nodeDimensionsIncludeLabels:true,
                         fit:true
-
                   }
 
 	});
@@ -80,9 +79,36 @@ function drawGraph(parameters) {
 	setupGraphListeners(cy, parameters)
 	setupMenu(cy, parameters)
 
+    // TODO: can it be invoked on VicinityControlPanel side when one is rendered?
+
     cy.ready(()=>{
         updateNodeColors($('.verticesTagsSelector').val())
         updateEdgeColors($('.edgesTagsSelector').val())
+
+        var levels = []
+
+        cy.elements().bfs({
+            root: "#"+rootId,
+            visit: function(v, e, u, i, depth) {
+                if(levels.length < depth+1) {
+                    levels.push([])
+                }
+                levels[depth].push(v)
+            }
+        })
+
+        for(var d = 0; d < levels.length; d++) {
+            levels[d].sort((v1, v2) => {return v1.position().x - v2.position().x})
+            for(var idx = 0; idx < levels[d].length; idx++) {
+                var pos = levels[d][idx].position()
+                var _idx = parameters.isCircleLayout ? d : idx
+                if((_idx % 2) == 0) {
+                    levels[d][idx].position({x:pos.x, y:pos.y+25})
+                }
+            }
+        }
+
+        cy.fit()
     })
 
 }
