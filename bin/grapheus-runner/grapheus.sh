@@ -11,6 +11,8 @@ CMD="${1}"
 export VERSION="${VERSION}"
 echo "==== Grapheus v${VERSION} ===="
 : ${HOST_DIR:=/tmp}
+
+
 case "$CMD" in
     pull)
         dcompose pull
@@ -21,16 +23,19 @@ case "$CMD" in
         [[ "${SERVICE}" == "" ]] || CMD_TAIL="--no-deps ${SERVICE}"
         dcompose up ${CMD_TAIL}
         ;;
-    stop|down)
+    stop|rm)
         SERVICE="${2}"
         case "$CMD" in
             stop)
                 dcompose stop "${SERVICE}"
                 ;;
-            down)
-                dcompose down "${SERVICE}"
+            rm)
+                dcompose rm -fvs "${SERVICE}"
                 ;;
         esac
+        ;;
+    down)
+        dcompose down
         ;;
     show)
         docker ps -a | grep "grapheus_"
@@ -38,7 +43,8 @@ case "$CMD" in
     *)
         echo "Usage:"
         echo "    $0 pull"
-        echo "    $0 {start|stop|down} [arangodb|grapheus-back|grapheus-web]"
+        echo "    $0 down"
+        echo "    $0 {start|stop|rm} [database|backend|frontend]"
         echo "    $0 show"
         exit 1;
 esac
