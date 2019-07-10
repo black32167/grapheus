@@ -1,7 +1,7 @@
 var VRAD = 10; 
 var MARGIN = 10; 
 var UNSELECTED_PATH_COLOR = '#ccc'
-var SELECTED_PATH_COLOR = 'yellow'
+var SELECTED_PATH_COLOR = 'red'
 
 /**
  * Entry point, invoked when page is loaded.
@@ -202,7 +202,7 @@ function updateNodeColors(selectedTag) {
         var newBGColor = "gray"
         var nodeData = nodeEle.data()
         if(nodeData.tags.includes(selectedTag)) {
-            newColor = 'red'
+            newColor = 'green'
         }
         nodeEle.data({
             color: newColor,
@@ -220,7 +220,7 @@ function updateEdgeColors(selectedTag) {
         var newColor = "gray"
         var edgeData = edgeEle.data()
         if(edgeData.tags.includes(selectedTag)) {
-            newColor = 'red'
+            newColor = 'green'
         }
         edgeEle.style({'line-color':newColor,'target-arrow-color':newColor})
     })
