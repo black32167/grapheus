@@ -36,7 +36,6 @@ public class PathsGenerationTransactionIT extends GraphTestSupport {
 
     @Inject
     private PathsGenerationTransaction transaction;
-    
 
     @Test
     @DirtiesContext
@@ -53,8 +52,6 @@ public class PathsGenerationTransactionIT extends GraphTestSupport {
         transaction.findPaths(GRAPH_NAME, NEW_GRAPH_NAME, asList("v1"));
         
         Assert.assertEquals(1, findOutboundConnections(NEW_GRAPH_NAME, "v1").size());
-       
-        
     }
     
     @Test

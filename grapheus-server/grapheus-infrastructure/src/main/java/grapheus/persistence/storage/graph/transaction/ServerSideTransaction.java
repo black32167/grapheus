@@ -21,14 +21,9 @@ import grapheus.persistence.conpool.DBConnectionPool;
 abstract public class ServerSideTransaction {
     @Inject
     private DBConnectionPool dbTemplate;
-    
-
 
     /**
-     * Applies ascribes order to nodes in topological order.
-     * 
-     * @param graphName
-     * @return first vertex in the order
+     * Applies ascribed order to nodes in topological order.
      */
     protected <T> T transaction(String transactionCodeFile, Class<T> returnType, TransactionOptions options) {
         return dbTemplate.query((ArangoDatabase db) -> {
