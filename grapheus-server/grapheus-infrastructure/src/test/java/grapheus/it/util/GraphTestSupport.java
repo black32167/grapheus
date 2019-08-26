@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import grapheus.persistence.foxx.GrapheusFoxxService;
 import org.grapheus.client.model.graph.VerticesSortCriteria;
 import org.grapheus.client.model.graph.edge.EdgeDirection;
 import org.springframework.test.context.ContextConfiguration;
@@ -48,7 +49,8 @@ import lombok.RequiredArgsConstructor;
         DefaultVertexStorage.class,
         DefaultEdgeStorage.class,
         DefaultVertexFinder.class,
-        DefaultEdgesFinder.class
+        DefaultEdgesFinder.class,
+        GrapheusFoxxService.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
 abstract public class GraphTestSupport {
