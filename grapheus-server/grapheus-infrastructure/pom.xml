@@ -133,8 +133,25 @@
             </resource>
         </resources>
         <plugins>
-            <!-- <plugin> <groupId>io.fabric8</groupId> <artifactId>docker-maven-plugin</artifactId> 
-                </plugin> -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <executions>
+                    <execution>
+                        <goals><goal>exec</goal></goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>src/bin/prepare-foxx.sh</argument>
+                                <argument>${project.basedir}/src/foxx</argument>
+                                <argument>${project.build.outputDirectory}/grapheus-foxx.zip</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>
