@@ -1,4 +1,6 @@
-function (graphName) {
+exports.execute = function (params) {
+
+    var graphName = params['graphId']
     var adb = require("@arangodb")
     var agraph = require('@arangodb/general-graph')._graph(graphName)
     var ecol = eval('agraph.E_'+graphName)    
@@ -47,13 +49,13 @@ function (graphName) {
         
         path.pop()
         status[aId]=2
-        
     }
     
     while(allVertices.hasNext()) {
         var a = allVertices.next()
         dfs(a._id, [])
     }
-    return cycles
-    
+    return {
+        'cycles' : cycles
+    }
 }

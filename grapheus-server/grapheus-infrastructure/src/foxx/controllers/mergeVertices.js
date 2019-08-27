@@ -85,5 +85,7 @@ exports.execute = function (params) {
     
     vcol.update(targetVertex._key, {description:targetDescription})
 
-    return targetVertex._key
+    return {
+        'newVertexKey': targetVertex._key
+    }
 }

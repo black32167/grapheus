@@ -5,13 +5,14 @@ const router = createRouter();
 
 module.context.use(router);
 
-router.get('/find-paths', getRequestProcessor('./findPaths'))
-router.get('/merge-vertices', getRequestProcessor('./mergeVertices'))
+router.get('/find-paths', getRequestProcessor('findPaths'))
+router.get('/merge-vertices', getRequestProcessor('mergeVertices'))
+router.get('/find-cycles', getRequestProcessor('findCycles'))
 
 function getRequestProcessor(controllerPath) {
-    var controller = require(controllerPath)
+    var controller = require(`./controllers/${controllerPath}`)
     return (req, res) => {
         var result = controller.execute(req.queryParams)
-        res.send(result)
+        res.json(result)
     }
 }
