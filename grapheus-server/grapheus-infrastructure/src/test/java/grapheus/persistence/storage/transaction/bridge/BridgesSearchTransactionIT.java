@@ -3,8 +3,13 @@
  */
 package grapheus.persistence.storage.transaction.bridge;
 
-import java.util.List;
-
+import grapheus.it.TestConstants;
+import grapheus.it.util.GraphTestSupport;
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.storage.graph.impl.DefaultVertexStorage;
+import grapheus.persistence.storage.graph.transaction.bridge.BridgesSearchTransaction;
+import grapheus.persistence.storage.traverse.Edge;
+import grapheus.persistence.testutil.DbTestsContextConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,13 +19,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import grapheus.it.TestConstants;
-import grapheus.it.util.GraphTestSupport;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.storage.graph.impl.DefaultVertexStorage;
-import grapheus.persistence.storage.graph.transaction.bridge.BridgesSearchTransaction;
-import grapheus.persistence.storage.traverse.Edge;
-import grapheus.persistence.testutil.DbTestsContextConfig;
+import javax.inject.Inject;
+import java.util.List;
 
 /**
  * @author black
@@ -34,7 +34,8 @@ import grapheus.persistence.testutil.DbTestsContextConfig;
 public class BridgesSearchTransactionIT extends GraphTestSupport {
 
     private final static String GRAPH_NAME = "graph1";
-    
+
+    @Inject
     private BridgesSearchTransaction transaction;
 
     @Test

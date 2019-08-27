@@ -1,4 +1,6 @@
-function (graphName) {
+exports.execute = function (params) {
+    var graphName = params['graphId']
+
     var adb = require("@arangodb")
     var agraph = require('@arangodb/general-graph')._graph(graphName)
     var ecol = eval('agraph.E_'+graphName)    
@@ -11,7 +13,7 @@ function (graphName) {
     var count=0
     var parent={}
     var bridges = []
-    
+
     function toKey(aId) {
     	var n = aId.indexOf("/");
     	return aId=aId.substr(n+1);
@@ -58,5 +60,4 @@ function (graphName) {
     return {
         bridges:bridges
     }
-    
 }

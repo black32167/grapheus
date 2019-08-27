@@ -4,4 +4,5 @@ public final class FoxxEndpointNames {
     public final static String FIND_PATHS = "find-paths";
     public static final String MERGE_VERTICES = "merge-vertices";
     public static final String FIND_CYCLES = "find-cycles";
+    public static final String FIND_BRIDGES = "find-bridges";
 }
