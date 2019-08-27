@@ -1,6 +1,6 @@
-function (params) {
-	var sourceGraph = params[0];
-	var newGraphName = params[1];
+exports.execute = function (params) {
+	var sourceGraph = params['sourceGraphId'];
+	var newGraphName = params['newGraphId'];
 	var adb = require("@arangodb")
 	
     var graphSrc = require('@arangodb/general-graph')._graph(sourceGraph)
@@ -28,4 +28,6 @@ function (params) {
         adb.print("Saving Edge '" + e._from + "' -> '" + e._to + "'")
         ecolDst.save(e);
    	}
+
+   	return {}
 }

@@ -3,29 +3,25 @@
  */
 package grapheus.persistence.storage.graph.transaction.clone;
 
+import grapheus.persistence.storage.graph.transaction.FoxxSupport;
 import org.springframework.stereotype.Service;
 
-import com.arangodb.model.TransactionOptions;
-
-import grapheus.persistence.storage.graph.GraphNameUtils;
-import grapheus.persistence.storage.graph.transaction.ServerSideTransaction;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author black
  *
  */
 @Service
-public class CloneGraphTransaction extends ServerSideTransaction  {
+public class CloneGraphTransaction extends FoxxSupport {
 
     public void generate(String sourceGraph, String newGraphName) {
-        String targetVCollection = GraphNameUtils.verticesCollectionName(newGraphName);
-        String targetECollection = GraphNameUtils.edgesCollectionName(newGraphName);
-        transaction(
-                "CloneTransaction.js",
-                Void.class,
-                new TransactionOptions()
-                    .writeCollections(targetVCollection,targetECollection)
-                    .params(new String[] {sourceGraph, newGraphName}));
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("sourceGraphId", sourceGraph);
+        parameters.put("newGraphId", newGraphName);
+
+        invokeFoxx("clone", parameters, String.class);
     }
 
 }
