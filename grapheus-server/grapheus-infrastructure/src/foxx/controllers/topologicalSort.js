@@ -1,6 +1,8 @@
-function (graphName) {
+exports.execute = function (params) {
 	const STATE_VISITING=1
 	const STATE_VISITED=2
+
+	var graphName = params['graphId']
 	
     var adb = require("@arangodb")
     var agraph = require('@arangodb/general-graph')._graph(graphName)
@@ -63,6 +65,8 @@ function (graphName) {
         dfs(v._id)
     }
     
-    return cycleFound
+    return {
+        'cycleFound' : cycleFound
+    }
     
 }
