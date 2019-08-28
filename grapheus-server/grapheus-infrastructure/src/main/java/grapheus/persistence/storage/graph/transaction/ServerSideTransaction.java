@@ -3,16 +3,13 @@
  */
 package grapheus.persistence.storage.graph.transaction;
 
-import java.nio.charset.Charset;
-
-import javax.inject.Inject;
-
-import org.apache.commons.io.IOUtils;
-
 import com.arangodb.ArangoDatabase;
 import com.arangodb.model.TransactionOptions;
-
 import grapheus.persistence.conpool.DBConnectionPool;
+import org.apache.commons.io.IOUtils;
+
+import javax.inject.Inject;
+import java.nio.charset.Charset;
 
 /**
  * @author black
