@@ -11,6 +11,7 @@ router.get('/find-cycles', getRequestProcessor('findCycles'))
 router.get('/clone', getRequestProcessor('clone'))
 router.get('/find-bridges', getRequestProcessor('findBridges'))
 router.get('/topological-sort', getRequestProcessor('topologicalSort'))
+router.get('/clone-subgraph', getRequestProcessor('cloneSubgraph'))
 
 function getRequestProcessor(controllerPath) {
     var controller = require(`./controllers/${controllerPath}`)

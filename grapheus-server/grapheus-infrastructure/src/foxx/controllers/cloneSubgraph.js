@@ -1,21 +1,24 @@
-function (params) {
-	var sourceGraph = params['sourceGraph'];
-	var newGraphName = params['newGraphName'];
+/**
+ * Traverses source graph starting from specified vertex and builds corresponding subgraph in the destination graph.
+ */
+exports.execute = function (params) {
+	var sourceGraphId = params['sourceGraph'];
+	var destinationGraphId = params['newGraphName'];
 	var startVertex = params['startVertexId'];
 	var traversalDirection = params['traversalDirection'];
 	
 	var adb = require("@arangodb")
 	
-    var graphSrc = require('@arangodb/general-graph')._graph(sourceGraph)
-    var ecolSrc = eval('graphSrc.E_'+sourceGraph)    
-    var vcolSrc = eval('graphSrc.V_'+sourceGraph)    
-    var graphDst = require('@arangodb/general-graph')._graph(newGraphName)
-    var vcolSrcName = 'V_'+sourceGraph
-    var vcolDstName = 'V_'+newGraphName
-    var ecolDst = eval('graphDst.E_'+newGraphName)    
+    var graphSrc = require('@arangodb/general-graph')._graph(sourceGraphId)
+    var ecolSrc = eval('graphSrc.E_'+sourceGraphId)
+    var vcolSrc = eval('graphSrc.V_'+sourceGraphId)
+    var graphDst = require('@arangodb/general-graph')._graph(destinationGraphId)
+    var vcolSrcName = 'V_'+sourceGraphId
+    var vcolDstName = 'V_'+destinationGraphId
+    var ecolDst = eval('graphDst.E_'+destinationGraphId)
     var vcolDst = eval('graphDst.'+vcolDstName)
 
-    adb.print("---- Traversing '" + sourceGraph + "'/creating '"+newGraphName + "' direction " + traversalDirection)
+    adb.print("---- Traversing '" + sourceGraphId + "'/creating '"+destinationGraphId + "' direction " + traversalDirection)
     var status={}
 
     function toKey(aId) {

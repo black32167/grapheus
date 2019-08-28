@@ -21,7 +21,7 @@ public class TopologicalMarkingTransaction extends FoxxSupport {
     public static class TopologicalSortResult {
         boolean cycleFound;
     }
-    
+
     /**
      * Applies order to nodes in topological order.
      */

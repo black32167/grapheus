@@ -6,6 +6,7 @@ public final class FoxxEndpointNames {
     public static final String FIND_CYCLES = "find-cycles";
     public static final String FIND_BRIDGES = "find-bridges";
     public static final String TOPOLOGICAL_MARK = "topological-sort";
+    public static final String CLONE_SUBGRAPH = "clone-subgraph";
 
     private FoxxEndpointNames() {}
 }

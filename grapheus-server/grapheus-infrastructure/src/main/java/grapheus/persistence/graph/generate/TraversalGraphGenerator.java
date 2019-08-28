@@ -3,15 +3,14 @@
  */
 package grapheus.persistence.graph.generate;
 
-import javax.inject.Inject;
-
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.storage.graph.transaction.traverse.CloneSubgraphTransaction;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.grapheus.client.model.graph.edge.EdgeDirection;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.storage.graph.transaction.traverse.TraversalGraphTransaction;
+import javax.inject.Inject;
 
 /**
  * @author black
@@ -21,7 +20,7 @@ import grapheus.persistence.storage.graph.transaction.traverse.TraversalGraphTra
 @Service
 @RequiredArgsConstructor(onConstructor = @__({ @Inject }))
 public class TraversalGraphGenerator {
-    private final TraversalGraphTransaction traversalGraphTransaction;
+    private final CloneSubgraphTransaction cloneSubgraphTransaction;
     private final EmptyGraphGenerator emptyGraphGenerator;
     
     public void generate(
@@ -31,7 +30,7 @@ public class TraversalGraphGenerator {
             String startVertexId,
             EdgeDirection traversalDirection) throws GraphExistsException {
         emptyGraphGenerator.createGraph(grapheusUserKey, newGraphName);
-        traversalGraphTransaction.generate(sourceGraph, newGraphName, startVertexId, traversalDirection);
+        cloneSubgraphTransaction.generate(sourceGraph, newGraphName, startVertexId, traversalDirection);
     }
 
 }
