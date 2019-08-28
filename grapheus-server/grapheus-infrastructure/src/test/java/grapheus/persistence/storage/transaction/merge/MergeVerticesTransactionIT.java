@@ -3,29 +3,27 @@
  */
 package grapheus.persistence.storage.transaction.merge;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import javax.inject.Inject;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.grapheus.client.model.graph.SortDirection;
-import org.grapheus.client.model.graph.VerticesSortCriteria;
-import org.grapheus.client.model.graph.VerticesSortCriteriaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
 import grapheus.it.TestConstants;
 import grapheus.it.util.GraphTestSupport;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.model.graph.PersistentVertex;
 import grapheus.persistence.storage.graph.query.impl.DefaultEdgesFinder;
 import grapheus.persistence.storage.graph.transaction.merge.MergeVerticesTransaction;
+import org.grapheus.client.model.graph.SortDirection;
+import org.grapheus.client.model.graph.VerticesSortCriteria;
+import org.grapheus.client.model.graph.VerticesSortCriteriaType;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * @author black
@@ -36,6 +34,7 @@ import grapheus.persistence.storage.graph.transaction.merge.MergeVerticesTransac
         MergeVerticesTransaction.class, DefaultEdgesFinder.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class MergeVerticesTransactionIT extends GraphTestSupport {
 
     private static final String GRAPH_NAME = "graph";
@@ -44,7 +43,6 @@ public class MergeVerticesTransactionIT extends GraphTestSupport {
     private MergeVerticesTransaction transaction;
     
     @Test
-    @DirtiesContext
     public void testMerge() throws GraphExistsException {
         graph(GRAPH_NAME)
             .connect("v1", "v2")
@@ -75,9 +73,7 @@ public class MergeVerticesTransactionIT extends GraphTestSupport {
         Assert.assertEquals(3, vertices.size());
     }
 
-
     @Test
-    @DirtiesContext
     public void testSiblingsMerge() throws GraphExistsException {
         graph(GRAPH_NAME)
             .connect("v1", "v2")

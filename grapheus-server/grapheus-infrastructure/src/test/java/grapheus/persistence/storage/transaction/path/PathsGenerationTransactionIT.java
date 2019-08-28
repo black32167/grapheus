@@ -3,9 +3,10 @@
  */
 package grapheus.persistence.storage.transaction.path;
 
-import static java.util.Arrays.asList;
-import javax.inject.Inject;
-
+import grapheus.it.TestConstants;
+import grapheus.it.util.GraphTestSupport;
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.storage.graph.transaction.paths.PathsGenerationTransaction;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,10 +16,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import grapheus.it.TestConstants;
-import grapheus.it.util.GraphTestSupport;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.storage.graph.transaction.paths.PathsGenerationTransaction;
+import javax.inject.Inject;
+
+import static java.util.Arrays.asList;
 
 /**
  * @author black
@@ -29,6 +29,7 @@ import grapheus.persistence.storage.graph.transaction.paths.PathsGenerationTrans
         PathsGenerationTransaction.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class PathsGenerationTransactionIT extends GraphTestSupport {
 
     private static final String GRAPH_NAME = "graph";
@@ -38,7 +39,6 @@ public class PathsGenerationTransactionIT extends GraphTestSupport {
     private PathsGenerationTransaction transaction;
 
     @Test
-    @DirtiesContext
     public void testTermnalCycle() throws GraphExistsException {
         graph(GRAPH_NAME)
             .connect("v1", "v2")
@@ -55,7 +55,6 @@ public class PathsGenerationTransactionIT extends GraphTestSupport {
     }
     
     @Test
-    @DirtiesContext
     public void testFindSimplPath() throws GraphExistsException {
         graph(GRAPH_NAME)
             .connect("v1", "v2")
@@ -74,7 +73,6 @@ public class PathsGenerationTransactionIT extends GraphTestSupport {
     
 
     @Test
-    @DirtiesContext
     public void testFindSimplPathTwice() throws GraphExistsException {
         graph(GRAPH_NAME)
             .connect("v1", "v2")
@@ -93,7 +91,6 @@ public class PathsGenerationTransactionIT extends GraphTestSupport {
     }
     
     @Test
-    @DirtiesContext
     public void testFindDiamondPath() throws GraphExistsException {
         graph(GRAPH_NAME)
             .connect("v1", "v2")

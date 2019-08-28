@@ -3,10 +3,12 @@
  */
 package grapheus.persistence.storage.transaction.cycle;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
+import grapheus.it.TestConstants;
+import grapheus.it.util.GraphTestSupport;
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.storage.graph.impl.DefaultVertexStorage;
+import grapheus.persistence.storage.graph.transaction.cycle.CyclesSearchTransaction;
+import grapheus.persistence.testutil.DbTestsContextConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,12 +18,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import grapheus.it.TestConstants;
-import grapheus.it.util.GraphTestSupport;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.storage.graph.impl.DefaultVertexStorage;
-import grapheus.persistence.storage.graph.transaction.cycle.CyclesSearchTransaction;
-import grapheus.persistence.testutil.DbTestsContextConfig;
+import javax.inject.Inject;
+import java.util.List;
 
 /**
  * @author black
@@ -32,6 +30,7 @@ import grapheus.persistence.testutil.DbTestsContextConfig;
         DbTestsContextConfig.class, DefaultVertexStorage.class, CyclesSearchTransaction.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class CyclesSearchTransactionIT extends GraphTestSupport {
     private final static String GRAPH_NAME = "graph1";
     
@@ -39,7 +38,6 @@ public class CyclesSearchTransactionIT extends GraphTestSupport {
     private CyclesSearchTransaction transaction;
     
     @Test
-    @DirtiesContext
     public void testCycles() throws GraphExistsException {
         graph(GRAPH_NAME).
             connect("v1", "v2").

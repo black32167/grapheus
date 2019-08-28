@@ -3,26 +3,25 @@
  */
 package grapheus.persistence.storage.transaction.traverse;
 
-import java.util.Collection;
-
-import javax.inject.Inject;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import grapheus.it.TestConstants;
+import grapheus.it.util.GraphTestSupport;
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.storage.graph.transaction.traverse.CloneSubgraphTransaction;
 import org.grapheus.client.model.graph.SortDirection;
 import org.grapheus.client.model.graph.VerticesSortCriteria;
 import org.grapheus.client.model.graph.VerticesSortCriteriaType;
 import org.grapheus.client.model.graph.edge.EdgeDirection;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import grapheus.it.TestConstants;
-import grapheus.it.util.GraphTestSupport;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.storage.graph.transaction.traverse.TraversalGraphTransaction;
+import javax.inject.Inject;
+import java.util.Collection;
 
 /**
  * @author black
@@ -30,16 +29,16 @@ import grapheus.persistence.storage.graph.transaction.traverse.TraversalGraphTra
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes={
-        TraversalGraphTransaction.class
+        CloneSubgraphTransaction.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
-public class TraversalGraphTransactionIT extends GraphTestSupport {
-
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+public class CloneSubgraphTransactionIT extends GraphTestSupport {
     private static final String GRAPH_NAME_SRC = "graph1";
     private static final String GRAPH_NAME_DST = "graph2";
 
     @Inject
-    private TraversalGraphTransaction transaction;
+    private CloneSubgraphTransaction transaction;
     
     @Test
     public void testTraversal2vGraph1Outbound() throws GraphExistsException {

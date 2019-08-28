@@ -3,25 +3,6 @@
  */
 package grapheus.persistence.storage.graph.query;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
 import grapheus.it.TestConstants;
 import grapheus.it.util.GraphTestSupport;
 import grapheus.persistence.exception.GraphExistsException;
@@ -33,6 +14,23 @@ import grapheus.persistence.testutil.DbTestsContextConfig;
 import grapheus.service.uds.ArtifactsFilter;
 import grapheus.view.SemanticFeature;
 import grapheus.view.extract.features.SemanticFeatureType;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author black
@@ -43,6 +41,7 @@ import grapheus.view.extract.features.SemanticFeatureType;
         DbTestsContextConfig.class, DefaultVertexStorage.class, DefaultVertexFinder.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class VertexFinderIT extends GraphTestSupport {
 
     private static final String LOCAL_ID_1 = "id1";
@@ -57,7 +56,6 @@ public class VertexFinderIT extends GraphTestSupport {
     private VertexFinder finder; // Service under test
     
     @Test
-    @DirtiesContext
     public void testFindByHint() throws GraphExistsException {
 
         PersistentVertex artifact2 = partifact(DS_ID_1, LOCAL_ID_2);
@@ -86,7 +84,6 @@ public class VertexFinderIT extends GraphTestSupport {
     }
 
     @Test
-    @DirtiesContext
     public void testCount() throws GraphExistsException {
 
         graph(GRAPH_NAME).

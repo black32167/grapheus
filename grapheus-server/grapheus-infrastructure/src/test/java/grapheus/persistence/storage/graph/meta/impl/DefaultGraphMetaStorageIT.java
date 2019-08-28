@@ -3,11 +3,13 @@
  */
 package grapheus.persistence.storage.graph.meta.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import javax.inject.Inject;
-
+import grapheus.it.TestConstants;
+import grapheus.persistence.StorageSupport;
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.model.graph.Graph;
+import grapheus.persistence.storage.graph.GraphStorage;
+import grapheus.persistence.storage.graph.impl.DefaultGraphStorage;
+import grapheus.persistence.testutil.DbTestsContextConfig;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,19 +19,16 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import grapheus.it.TestConstants;
-import grapheus.persistence.StorageSupport;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.model.graph.Graph;
-import grapheus.persistence.storage.graph.GraphStorage;
-import grapheus.persistence.storage.graph.impl.DefaultGraphStorage;
-import grapheus.persistence.testutil.DbTestsContextConfig;
+import javax.inject.Inject;
+import java.util.Collection;
+import java.util.Collections;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes={
         DbTestsContextConfig.class, DefaultGraphStorage.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DefaultGraphMetaStorageIT extends StorageSupport {
     private final static String USER_KEY1 = "userKey1";
     private final static String USER_KEY2 = "userKey2";
@@ -41,7 +40,6 @@ public class DefaultGraphMetaStorageIT extends StorageSupport {
     private GraphStorage storage;
     
     @Test
-    @DirtiesContext
     public void testHappy() throws GraphExistsException {
         Graph g1 = storage.addGraph(GRAPH_QUALIFIER_1);
         g1.setUserKeys(Collections.singletonList(USER_KEY1));
@@ -64,7 +62,6 @@ public class DefaultGraphMetaStorageIT extends StorageSupport {
     }
     
     @Test(expected=GraphExistsException.class)
-    @DirtiesContext
     public void testDuplicateGraph() throws GraphExistsException {
         storage.addGraph(GRAPH_QUALIFIER_1);
         storage.addGraph(GRAPH_QUALIFIER_1);
@@ -72,7 +69,6 @@ public class DefaultGraphMetaStorageIT extends StorageSupport {
     
 
     @Test(expected=GraphExistsException.class)
-    @DirtiesContext
     public void testConflict() throws GraphExistsException {
 
         Graph g1 = storage.addGraph(GRAPH_QUALIFIER_1);

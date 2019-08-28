@@ -31,6 +31,7 @@ import java.util.List;
         DbTestsContextConfig.class, DefaultVertexStorage.class, BridgesSearchTransaction.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class BridgesSearchTransactionIT extends GraphTestSupport {
 
     private final static String GRAPH_NAME = "graph1";
@@ -39,7 +40,6 @@ public class BridgesSearchTransactionIT extends GraphTestSupport {
     private BridgesSearchTransaction transaction;
 
     @Test
-    @DirtiesContext
     public void testNoCycleBridgeTraversal() throws GraphExistsException {
         graph(GRAPH_NAME).
             connect("v1", "v2").
@@ -52,7 +52,6 @@ public class BridgesSearchTransactionIT extends GraphTestSupport {
     
 
     @Test
-    @DirtiesContext
     public void testSimpleCycleBridgeTraversal() throws GraphExistsException {
         graph(GRAPH_NAME).
             connect("v1", "v2").
@@ -69,7 +68,6 @@ public class BridgesSearchTransactionIT extends GraphTestSupport {
     }
     
     @Test
-    @DirtiesContext
     public void testInterComponentsBridgeTraversal() throws GraphExistsException {
         graph(GRAPH_NAME).
             connect("v1", "v2").
@@ -88,5 +86,4 @@ public class BridgesSearchTransactionIT extends GraphTestSupport {
         Assert.assertTrue(bridge.contains("v4"));
         Assert.assertTrue(bridge.contains("v3"));
     }
-    
 }
