@@ -5,5 +5,8 @@
   "main": "index.js",
   "provides": {
     "@foxx/dep": "1.0.0"
-  }
+  },
+  "tests":[
+    "tests/**/*Test.js"
+  ]
 }
