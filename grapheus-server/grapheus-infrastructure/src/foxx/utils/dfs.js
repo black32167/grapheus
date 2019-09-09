@@ -22,21 +22,36 @@ module.exports = function(params) {
     function getTraversableEdges(vertexId) {
         return ecol.outEdges(vertexId)
     }
-    function getNeighbors(vertexId) {
-        return graph._neighbors(vertexId)
+    function getDestinationVertexId(edge) {
+        return edge._to
     }
     function dfs(visitingVertexId) {
-        preVisitor(visitingVertexId)
-
         verticesStatuses[visitingVertexId] = VISITED
-
-        getNeighbors(visitingVertexId).forEach(dstVertexId => {
-            if(verticesStatuses[dstVertexId] !== VISITED) {
-                dfs(dstVertexId)
+        var edges = getTraversableEdges(visitingVertexId)
+        var isTerminal = (edges.length == 0)
+        var expand = preVisitor(visitingVertexId, isTerminal)
+        if(expand) {
+            var selectedEdges = []
+            edges.forEach(e => {
+                var dstVertexId = getDestinationVertexId(e)
+                if(verticesStatuses[dstVertexId] == undefined) {
+                    if(dfs(dstVertexId)) {
+                        selectedEdges.push(e)
+                    }
+                }
+            })
+            if(selectedEdges.length > 0) {
+                postVisitor(visitingVertexId, selectedEdges)
+                return true;
+            } else {
+                return false;
             }
-        })
+        } else {
+            postVisitor(visitingVertexId, [])
+            return true
+        }
 
-        postVisitor(visitingVertexId)
+        return false
     }
 
     dfs(startVertexId)

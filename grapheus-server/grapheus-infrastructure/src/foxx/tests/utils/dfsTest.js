@@ -22,7 +22,7 @@ describe("a test suite", () => {
     //
   });
 
-    it("Test transitive 3", () => {
+  it("Test transitive 3", () => {
     ctx.graph
         .edge('v1', 'v2')
         .edge('v2', 'v3')

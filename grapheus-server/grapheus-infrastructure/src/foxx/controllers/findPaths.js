@@ -1,3 +1,4 @@
+const dfs = require("../utils/dfs")
 
 exports.execute = function (params) {
    //console.log('targetVerticesIds');
@@ -10,13 +11,13 @@ exports.execute = function (params) {
     var adb = require("@arangodb")
     var db = adb.db
     console.info("graphId = " + graphId)
+    console.info("newGraphId = " + newGraphId)
     console.info("boundaryVerticesIds=" + boundaryVerticesIds)
 
 	//var console = require('console')
 	var adb = require("@arangodb")
 	var db = adb.db
 	// TODO:console.error("Msg")
-
 
 	var graphModule = require('@arangodb/general-graph')
     var graph = graphModule._graph(graphId)
@@ -31,19 +32,26 @@ exports.execute = function (params) {
     var new_vcol = eval('new_graph.V_'+newGraphId)
     var new_vcol_name = 'V_'+newGraphId
     var new_ecol_name = 'E_'+newGraphId
+    var copiedVertices = {}
+
     adb.print("=== Starting path search ... ");
+
 	//console.debug('console log', '?!?!?')
     function copyVertex(targetVertexId) {
+        if(copiedVertices[targetVertexId]) {
+            return
+        }
+        copiedVertices[targetVertexId] = true
+
 	    try {
-	        adb.print("\tcloning "+targetVertexId);
+	        console.log("\tcloning "+targetVertexId);
 	        var vertexDocument = vcol.document(targetVertexId)
 	        new_vcol.save(vertexDocument);
 	    }  catch (e) {
-	        adb.print("[ERROR] error copying vertex '" + targetVertexId + "':" + e.message)
+	        console.log("[ERROR] error copying vertex '" + targetVertexId + "':" + e.message)
 	    }
 	}
-
-
+/*
     function dfs(rootVertexId, vertexId, visited) {
     	adb.print("visiting "+vertexId+"/"+visited[vertexId]);
 	    if(visited[vertexId] != undefined) {
@@ -54,6 +62,7 @@ exports.execute = function (params) {
 	    var outEdges =  ecol.outEdges(vertexId)
 	    var shortVertexId = vertexId.replace(/.*\//,'')
 
+        // Visit
 	    if((boundaryVerticesIds.length > 1 && boundaryVerticesIds.includes(shortVertexId))
 	    		|| (boundaryVerticesIds.length == 1 && outEdges.length == 0)) {
 	    	adb.print("Terminal vertex: "+vertexId+"/" + visited.length);
@@ -90,24 +99,62 @@ exports.execute = function (params) {
 	        }
 	    })
 
+        // Post-visit
 	    adb.print("/Visited vertex: "+vertexId);
-
 
 	    return visited[vertexId] == 2
 	}
+*/
+    function preVisitor(vertexId, rootVertexId, isTerminal) {
 
+        //console.log("Visiting "+ vertexId + ", terminal=" + isTerminal)
+	    var shortVertexId = vertexId.replace(/.*\//,'')
 
+        // Visit
+	    if((boundaryVerticesIds.length > 1 && boundaryVerticesIds.includes(shortVertexId))
+	    		|| (boundaryVerticesIds.length == 1 && isTerminal)) {
+	    	console.log("Terminal vertex: "+vertexId);
 
-	try {
-		boundaryVerticesIds.forEach(vId=>{
-			var rootvId = vcol_name + '/' + vId
-			var visited = {}
-			adb.print(">>> starting search from " + rootvId);
-	        dfs(rootvId, rootvId, visited)
-		})
-	} catch (e) {
-		adb.print("[Error] " + e.stack);
-	}
+	        // Copy vertex
+	       // copyVertex(vertexId)
+	        if(rootVertexId != vertexId) {
+	        	return false; //Not expand
+	        }
+	    }
+	    return true // Expand
+    }
+
+    function postVisitor(vertexId, selectedEdges) {
+        if(selectedEdges.length > 0) {
+            copyVertex(vertexId)
+
+            selectedEdges.forEach(e => {
+                // Connect vertexId->e._to in graph new_graph
+                e._from = e._from.replace(/.*\//, new_vcol_name+'/')
+                e._to = e._to.replace(/.*\//, new_vcol_name+'/')
+                console.log("Saving edge " + e._from + "->" + e._to);
+                try {
+                    new_ecol.save(e);
+                } catch (e) {
+                    adb.print("[Error] error saving edge " + e._from + "->" + e._to + ":" + e.message);
+                }
+            })
+        }
+    }
+
+    boundaryVerticesIds.forEach(vId=>{
+        console.log(">>> starting search from " + vId);
+        dfs({
+          "graphId" : graphId,
+          "startVertexId" : vcol_name + '/' + vId,
+          "edgesCollectionName" : ecol_name,
+          "verticesCollectionName" : vcol_name,
+          "preVisitor" : (visitingVertexId, isTerminal) => {
+            return preVisitor(visitingVertexId, vcol_name + '/' + vId, isTerminal)
+          },
+          "postVisitor" : postVisitor
+        })
+    })
 
 	adb.print("Done! ");
     return true
