@@ -12,8 +12,10 @@ module.exports = function(params) {
     var verticesCollectionName = params['verticesCollectionName']
     var postVisitor = params['postVisitor'] || function(){} // PostVisitor function
     var preVisitor = params['preVisitor'] || function(){} // PreVisitor function
+    var isVisitedSelected = params['isVisitedSelected'] || function(){}
     var expand = params['direction'] || 'out'
     var verticesStatuses={}
+    var pathSelectedVia={}
 
     var graph = graphModule._graph(graphId)
     var ecol = eval(`graph.${edgesCollectionName}`)
@@ -34,10 +36,11 @@ module.exports = function(params) {
             var selectedEdges = []
             edges.forEach(e => {
                 var dstVertexId = getDestinationVertexId(e)
-                if(verticesStatuses[dstVertexId] == undefined) {
-                    if(dfs(dstVertexId)) {
-                        selectedEdges.push(e)
-                    }
+                pathSelectedVia[dstVertexId] = (verticesStatuses[dstVertexId] == undefined) //
+                    ? dfs(dstVertexId) //
+                    : pathSelectedVia[dstVertexId] || isVisitedSelected(dstVertexId)
+                if(pathSelectedVia[dstVertexId]) {
+                    selectedEdges.push(e)
                 }
             })
             if(selectedEdges.length > 0) {

@@ -39,7 +39,7 @@ public class PathsGenerationTransactionIT extends GraphTestSupport {
     private PathsGenerationTransaction transaction;
 
     @Test
-    public void testTermnalCycle() throws GraphExistsException {
+    public void testTerminalCycle() throws GraphExistsException {
         graph(GRAPH_NAME)
             .connect("v1", "v2")
             .connect("v2", "v3")
