@@ -1,4 +1,5 @@
 const dfs = require("../utils/dfs")
+const names = require("../utils/names")
 
 exports.execute = function (params) {
     var graphId = params['graphId']
@@ -17,9 +18,9 @@ exports.execute = function (params) {
 
 	var graphModule = require('@arangodb/general-graph')
     var graph = graphModule._graph(graphId)
-    var ecol_name = 'E_'+graphId
+    var ecol_name = names.edgesCollection(graphId)
     var ecol = eval('graph.'+ecol_name)
-    var vcol_name = 'V_'+graphId
+    var vcol_name = names.verticesCollection(graphId)
     var vcol = eval('graph.'+vcol_name)
 
     var new_graph = graphModule._graph(newGraphId)
@@ -81,7 +82,7 @@ exports.execute = function (params) {
 
     boundaryVerticesIds.forEach(vId=>{
         console.log(">>> starting search from " + vId);
-        dfs({
+        dfs.run({
           "graphId" : graphId,
           "startVertexId" : vcol_name + '/' + vId,
           "edgesCollectionName" : ecol_name,
@@ -90,7 +91,7 @@ exports.execute = function (params) {
             return preVisitor(visitingVertexId, vcol_name + '/' + vId, isTerminal)
           },
           "postVisitor" : postVisitor,
-          "isVisitedSelected" : (vertexId) => {
+          "isSelected" : (vertexId) => {
             return boundaryVerticesIds.length == 1
           }
         })

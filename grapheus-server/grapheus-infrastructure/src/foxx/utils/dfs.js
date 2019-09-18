@@ -1,18 +1,22 @@
 const DIRECTION = require('./directions')
 const graphModule = require('@arangodb/general-graph')
-const VISITED = 1
+const VISITING = 1
+const VISITED = 2
+
+exports.VISITING = VISITING
+exports.VISITED = VISITED
 
 /**
  * Reusable implementation of the depth-first-search.
  */
-module.exports = function(params) {
+exports.run = function(params) {
     var graphId = params['graphId']
     var startVertexId = params['startVertexId']
     var edgesCollectionName = params['edgesCollectionName']
     var verticesCollectionName = params['verticesCollectionName']
     var postVisitor = params['postVisitor'] || function(){} // PostVisitor function
     var preVisitor = params['preVisitor'] || function(){} // PreVisitor function
-    var isVisitedSelected = params['isVisitedSelected'] || function(){}
+    var isSelected = params['isSelected'] || function(){}
     var expand = params['direction'] || 'out'
     var verticesStatuses={}
     var pathSelectedVia={}
@@ -28,33 +32,31 @@ module.exports = function(params) {
         return edge._to
     }
     function dfs(visitingVertexId) {
-        verticesStatuses[visitingVertexId] = VISITED
+        verticesStatuses[visitingVertexId] = VISITING
         var edges = getTraversableEdges(visitingVertexId)
         var isTerminal = (edges.length == 0)
         var expand = preVisitor(visitingVertexId, isTerminal)
+        var selectedPath = false
+        var selectedEdges = []
         if(expand) {
-            var selectedEdges = []
             edges.forEach(e => {
                 var dstVertexId = getDestinationVertexId(e)
                 pathSelectedVia[dstVertexId] = (verticesStatuses[dstVertexId] == undefined) //
                     ? dfs(dstVertexId) //
-                    : pathSelectedVia[dstVertexId] || isVisitedSelected(dstVertexId)
+                    : pathSelectedVia[dstVertexId] || isSelected(dstVertexId, verticesStatuses[dstVertexId])
                 if(pathSelectedVia[dstVertexId]) {
                     selectedEdges.push(e)
                 }
             })
-            if(selectedEdges.length > 0) {
-                postVisitor(visitingVertexId, selectedEdges)
-                return true;
-            } else {
-                return false;
-            }
+            selectedPath = selectedEdges.length > 0
         } else {
-            postVisitor(visitingVertexId, [])
-            return true
+            selectedPath = true
         }
 
-        return false
+        postVisitor(visitingVertexId, selectedEdges)
+
+        verticesStatuses[visitingVertexId] = VISITED
+        return selectedPath
     }
 
     dfs(startVertexId)

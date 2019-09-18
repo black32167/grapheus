@@ -28,7 +28,7 @@ describe("a test suite", () => {
         .edge('v2', 'v3')
         .edge('v1', 'v3')
     var visitedVertices = []
-    dfs({
+    dfs.run({
           "graphId" : 'graph',
           "startVertexId" : "vertices/v1",
           "edgesCollectionName" : 'edges',
@@ -44,7 +44,7 @@ describe("a test suite", () => {
   it("Test one", () => {
     ctx.graph.vertex('v1')
     var visitedVertices = []
-    dfs({
+    dfs.run({
           "graphId" : 'graph',
           "startVertexId" : "vertices/v1",
           "edgesCollectionName" : 'edges',
