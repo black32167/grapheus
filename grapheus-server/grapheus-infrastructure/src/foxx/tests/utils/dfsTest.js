@@ -33,7 +33,10 @@ describe("a test suite", () => {
           "startVertexId" : "vertices/v1",
           "edgesCollectionName" : 'edges',
           "verticesCollectionName" : 'vertices',
-          "preVisitor" : (visitingVertexId) => { visitedVertices.push(visitingVertexId) }
+          "preVisitor" : (visitingVertexId) => {
+               visitedVertices.push(visitingVertexId)
+               return dfs.CONTINUE_EXPAND
+           }
     })
     expect(visitedVertices) //
         .include("vertices/v1") //
@@ -49,7 +52,10 @@ describe("a test suite", () => {
           "startVertexId" : "vertices/v1",
           "edgesCollectionName" : 'edges',
           "verticesCollectionName" : 'vertices',
-          "preVisitor" : (visitingVertexId) => { visitedVertices.push(visitingVertexId) }
+          "preVisitor" : (visitingVertexId) => {
+               visitedVertices.push(visitingVertexId)
+               return dfs.CONTINUE_EXPAND
+           }
     })
     expect(visitedVertices) //
         .include("vertices/v1")

@@ -27,21 +27,15 @@ describe("a test suite", () => {
       eColl   : 'E_dstGraph'
     })
 
-    var visitedVertices = []
     pathFinder.execute({
           "graphId" : 'srcGraph',
           "newGraphId" : "dstGraph",
-          "boundaryVerticesIds" : 'v1',
-          "preVisitor" : (visitingVertexId) => { visitedVertices.push(visitingVertexId) }
+          "boundaryVerticesIds" : 'v1'
     })
 
     var newGraph = graph_module._graph('dstGraph')
     console.log("dstColl="+newGraph.V_dstGraph.count())
-    expect(newGraph.V_dstGraph.count()).gt(0) //
-  //  expect(newGraph.V_srcGraph.size()).eq(3) //
-//        .include("vertices/v1") //
-//        .include("vertices/v2") //
-//        .include("vertices/v3")
+    expect(newGraph.V_dstGraph.count()).gt(0)
   });
 
 })

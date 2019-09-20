@@ -56,10 +56,10 @@ exports.execute = function (params) {
 	    	console.log("Terminal vertex: "+vertexId);
 
 	        if(rootVertexId != vertexId) {
-	        	return false; //Not expand
+	        	return dfs.STOP_FOUND; //Not expand
 	        }
 	    }
-	    return true // Expand
+	    return dfs.CONTINUE_EXPAND // Expand
     }
 
     function postVisitor(vertexId, selectedEdges) {
