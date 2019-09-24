@@ -53,9 +53,8 @@ exports.execute = function (params) {
         // Visit
 	    if((boundaryVerticesIds.length > 1 && boundaryVerticesIds.includes(shortVertexId))
 	    		|| (boundaryVerticesIds.length == 1 && isTerminal)) {
-	    	console.log("Terminal vertex: "+vertexId);
-
 	        if(rootVertexId != vertexId) {
+	            console.log("Fonud terminal vertex: "+vertexId);
 	        	return dfs.STOP_FOUND; //Not expand
 	        }
 	    }
