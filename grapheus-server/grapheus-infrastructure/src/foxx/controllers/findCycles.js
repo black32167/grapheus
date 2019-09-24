@@ -9,17 +9,12 @@ exports.execute = function (params) {
 
     var visited={}
     var cycles = []
-    
-    function toKey(aId) {
-    	var n = aId.indexOf("/");
-    	return aId=aId.substr(n+1);
-    }
 
     var path = []
     
     while(allVertices.hasNext()) {
         var a = allVertices.next()
-        // dfs(a._id, [])
+
         console.log("running dfs for " + a._id)
         dfs.run({
           "graphId" : graphId,

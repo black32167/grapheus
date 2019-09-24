@@ -4,15 +4,13 @@ exports.execute = function (params) {
 	var adb = require("@arangodb")
 	
     var graphSrc = require('@arangodb/general-graph')._graph(sourceGraph)
-    var ecolSrc = eval('graphSrc.E_'+sourceGraph)    
-    var vcolSrc = eval('graphSrc.V_'+sourceGraph)    
+    var ecolSrc = eval('graphSrc.E_'+sourceGraph)
+    var vcolSrc = eval('graphSrc.V_'+sourceGraph)
     var graphDst = require('@arangodb/general-graph')._graph(newGraphName)
     var vcolDstName = 'V_'+newGraphName
-    var ecolDst = eval('graphDst.E_'+newGraphName)    
-    var vcolDst = eval('graphDst.'+vcolDstName)   
-    
-    
-    adb.print("Copying '" + sourceGraph + "' to '"+newGraphName + "'")
+    var ecolDst = eval('graphDst.E_'+newGraphName)
+    var vcolDst = eval('graphDst.'+vcolDstName)
+
    	var allVerticesSrc=vcolSrc.all()
    	
    	while(allVerticesSrc.hasNext()) {
