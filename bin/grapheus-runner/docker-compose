@@ -8,6 +8,7 @@ services:
     ports:
       - 8529:8529
     environment:
+      - ARANGODB_LOG_LEVEL=debug
       - ARANGO_NO_AUTH=1
       - ARANGO_STORAGE_ENGINE=mmfiles
 

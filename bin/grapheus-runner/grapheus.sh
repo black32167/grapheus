@@ -14,6 +14,9 @@ echo "==== Grapheus v${VERSION} ===="
 
 
 case "$CMD" in
+    db-log)
+        docker exec -it grapheus_arangodb less /var/log/arangodb3/arangod.log
+        ;;
     pull)
         dcompose pull
         ;;
