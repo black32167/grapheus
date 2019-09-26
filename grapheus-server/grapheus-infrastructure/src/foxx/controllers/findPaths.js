@@ -61,10 +61,9 @@ exports.execute = function (params) {
 	    return dfs.CONTINUE_EXPAND // Expand
     }
 
-    function postVisitor(vertexId, selectedEdges) {
-        if(selectedEdges.length > 0) {
+    function postVisitor(vertexId, selectedEdges, selectedPath) {
+        if(selectedPath) {
             copyVertex(vertexId)
-
             selectedEdges.forEach(e => {
                 // Connect vertexId->e._to in graph new_graph
                 e._from = e._from.replace(/.*\//, new_vcol_name+'/')

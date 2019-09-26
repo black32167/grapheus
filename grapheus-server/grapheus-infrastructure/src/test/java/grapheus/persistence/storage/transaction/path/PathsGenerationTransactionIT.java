@@ -68,6 +68,7 @@ public class PathsGenerationTransactionIT extends GraphTestSupport {
         
         Assert.assertEquals(1, findInboundConnections(NEW_GRAPH_NAME, "v3").size());
         Assert.assertEquals(1, findInboundConnections(NEW_GRAPH_NAME, "v2").size());
+        Assert.assertNotNull(loadVertex(NEW_GRAPH_NAME, "v3"));
         
     }
     

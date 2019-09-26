@@ -78,7 +78,7 @@ exports.run = function(params) {
             selectedPath = preVisitDecision === STOP_FOUND
         }
 
-        postVisitor(visitingVertexId, selectedEdges)
+        postVisitor(visitingVertexId, selectedEdges, selectedPath)
 
         verticesStatuses[visitingVertexId] = VISITED
         return selectedPath
