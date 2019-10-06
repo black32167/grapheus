@@ -1,13 +1,23 @@
 <wicket:head>
 <style>
-
-.data {
-    display:none;
-}
-#graphCanvas1 {
-    width:100%;
-    height:100%;
-}
+    .data {
+        display:none;
+    }
+    #graphCanvas1 {
+        width:100%;
+        height:100%;
+    }
+    #tooltip {
+        position: absolute;
+        left: 100px;
+        top: 150px;
+        display: none;
+        padding: 5px;
+        border: 1px solid green;
+        border-radius: 5px;
+        background-color: yellow;
+        z-index: 999;
+    }
 </style>
 
 <wicket:link>
@@ -17,14 +27,16 @@
     <script src="js/cytoscape-context-menus.js"></script>
     <script src="js/graphView.js"></script>
     
-    
 </wicket:link>
 
 </wicket:head>
 
 <wicket:panel>
 
-    <div id="graphCanvas1"></div>
+    <div id="graphCanvas1">
+        <div id="tooltip">#$%</div>
+    </div>
+
 
     <div wicket:id="rootVertex" class="rootVertex"/>
     <div id="vertices">

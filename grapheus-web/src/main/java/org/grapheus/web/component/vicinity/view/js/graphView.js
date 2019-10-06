@@ -318,7 +318,7 @@ function setupGraphListeners(cy, settings) {
 	});
 	cy.on('free', 'node', function(evt) {
 		var draggedNodePos = evt.target.position()
-		console.log("dropped "+evt.target.id()+ " to " +		draggedNodePos.x)
+		console.log("dropped "+evt.target.id()+ " to " + draggedNodePos.x)
 		var rootId = getRootVertexId()
 		cy.nodes("#"+rootId).forEach(ele => {
 			if(ele.id() != evt.target.id()) {
@@ -334,6 +334,17 @@ function setupGraphListeners(cy, settings) {
 			}
 		})
 	})
+	cy.on('mouseover', 'node', function(evt) {
+	    var pos = evt.target.renderedPosition()
+        var tags = evt.target.data().tags
+	    console.log('Pos:'+pos.x+','+pos.y + '/' + this.tags);
+	    $('#tooltip').css({top: pos.y, left: pos.x})
+	    $('#tooltip').text(tags)
+        $('#tooltip').show();
+	})
+	cy.on('mouseout', 'node', function(evt) {
+        $('#tooltip').hide();
+    })
 	cy.on('mouseup', 'node', function(evt) {
 		var downduration = Date.now() - cy.downstart
 		if (downduration > 500) {
@@ -364,8 +375,6 @@ $(window).resize(() => {
 
 	//console.log("width=" + $('#graphCanvas1').parent().width());
 	console.log("resized!");
-
-
 })
 
 

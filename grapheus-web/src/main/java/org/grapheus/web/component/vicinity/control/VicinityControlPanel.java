@@ -1,14 +1,13 @@
 /**
- * 
+ *
  */
 package org.grapheus.web.component.vicinity.control;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import javax.servlet.http.HttpSession;
-
+import com.googlecode.wicket.jquery.ui.interaction.droppable.DroppableAdapter;
+import com.googlecode.wicket.jquery.ui.interaction.droppable.DroppableBehavior;
+import com.googlecode.wicket.jquery.ui.widget.dialog.InputDialog;
+import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -38,14 +37,13 @@ import org.grapheus.web.component.shared.SerializableSupplier;
 import org.grapheus.web.component.vicinity.view.VicinityInteractiveView;
 import org.grapheus.web.model.VicinityModel;
 
-import com.googlecode.wicket.jquery.ui.interaction.droppable.DroppableAdapter;
-import com.googlecode.wicket.jquery.ui.interaction.droppable.DroppableBehavior;
-import com.googlecode.wicket.jquery.ui.widget.dialog.InputDialog;
+import javax.servlet.http.HttpSession;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-import lombok.Builder;
-import lombok.extern.slf4j.Slf4j;
-
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author black
@@ -58,36 +56,39 @@ public class VicinityControlPanel extends Panel {
     private static final int MAX_NEIGHBORS_HOPS = 100;
 
     private final VicinityInteractiveView graphView;
-    
+
     private final InputDialog<String> titleEditDialog;
-    private final IModel<RVertex> artifactModel;
+    private final IModel<RVertex> selectedVertexModel;
     private final SerializableSupplier<String> graphIdSupplier;
     private final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback;
+    private final Label vertexTagsLabel;
 
     private final VicinityModel vicinityVertexModel;
 
 
     @Builder
-    public VicinityControlPanel(String id, 
-            final SerializableSupplier<String> graphIdSupplier,
-            final VicinityModel vicinityVertexModel,
-            final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback) {
+    public VicinityControlPanel(String id,
+                                final SerializableSupplier<String> graphIdSupplier,
+                                final VicinityModel vicinityVertexModel,
+                                final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback) {
         super(id);
         this.vicinityVertexModel = vicinityVertexModel;
-        this.artifactModel = createArtifactModel();
+        this.selectedVertexModel = createArtifactModel();
         this.graphView = new VicinityInteractiveView("vicinityView", vicinityVertexModel, graphIdSupplier, graphChangedCallback);
         this.graphView.setOutputMarkupId(true);
         this.titleEditDialog = createTitleEditDialog("titleEditDialog");
         this.graphChangedCallback = graphChangedCallback;
         this.graphIdSupplier = graphIdSupplier;
+        this.vertexTagsLabel = new Label("vertexTags", selectedVertexTagsModel());
     }
-    
+
     private IModel<RVertex> createArtifactModel() {
         return new LoadableDetachableModel<RVertex>() {
             private static final long serialVersionUID = 1L;
+
             @Override
             protected RVertex load() {
-                if(graphIdSupplier.get() == null || vicinityVertexModel.getFilter().getSelectedVertexId() == null) {
+                if (graphIdSupplier.get() == null || vicinityVertexModel.getFilter().getSelectedVertexId() == null) {
                     return RVertex.builder().title("none").build();
                 }
                 try {
@@ -106,35 +107,49 @@ public class VicinityControlPanel extends Panel {
 
         // "generateLink"
         add(titleEditDialog);
-            add(createTitleEditableLink("remoteDocumentLink").add(new Label("documentTitle", new PropertyModel<>(artifactModel, "title"))));
+        add(createTitleEditableLink("remoteDocumentLink").add(new Label("documentTitle", new PropertyModel<>(selectedVertexModel, "title"))));
         add(createVertexControlForm("controlsForm")
                 .add(newDepthSelector("depth"))
                 .add(newDirectionSelector("edgesDirection"))
                 .add(newLayoutDropdown("layout"))
                 .add(newVerticesTagSelector("selectedVerticesTag"))
                 .add(newEdgesTagSelector("selectedEdgesTag")));
-        add(new Label("documentBody", new PropertyModel<>(artifactModel, "description")));
-        
+        add(new Label("documentBody", new PropertyModel<>(selectedVertexModel, "description")));
+        add(vertexTagsLabel);
+
         add(graphView.add(newDroppabe(".vicinityView")));
     }
 
     private Component newVerticesTagSelector(String id) {
 
-        return new DropDownChoice<>(id, verticesTagsModel(), new ChoiceRenderer<>(null, "toString()"))
+        return new DropDownChoice<>(id, allVerticesTagsModel(), new ChoiceRenderer<>(null, "toString()"))
                 .setOutputMarkupId(true)
                 .add(new AjaxFormComponentUpdatingBehavior("change") {
                     private static final long serialVersionUID = 1L;
+
                     protected void onUpdate(AjaxRequestTarget target) {
                         target.appendJavaScript("updateNodeColors('" + vicinityVertexModel.getFilter().getSelectedVerticesTag() + "');");
                     }
                 });
     }
 
-    private IModel<List<String>> verticesTagsModel() {
+    private IModel<List<String>> allVerticesTagsModel() {
         return new LoadableDetachableModel<List<String>>() {
             @Override
             protected List<String> load() {
-                return vicinityVertexModel.getObject().getVertices().stream().flatMap(v->v.getTags().stream()).distinct().collect(toList());
+                return vicinityVertexModel.getObject().getVertices().stream().flatMap(v -> v.getTags().stream()).distinct().collect(toList());
+            }
+        };
+    }
+
+    private IModel<String> selectedVertexTagsModel() {
+        return new LoadableDetachableModel<String>() {
+            @Override
+            protected String load() {
+                return Optional.ofNullable(selectedVertexModel.getObject()) //
+                        .map(RVertex::getTags) //
+                        .map(tags -> String.join(",", tags)) //
+                        .orElse("-");
             }
         };
     }
@@ -144,6 +159,7 @@ public class VicinityControlPanel extends Panel {
                 .setOutputMarkupId(true)
                 .add(new AjaxFormComponentUpdatingBehavior("change") {
                     private static final long serialVersionUID = 1L;
+
                     protected void onUpdate(AjaxRequestTarget target) {
                         target.appendJavaScript("updateEdgeColors('" + vicinityVertexModel.getFilter().getSelectedEdgesTag() + "');");
                     }
@@ -154,7 +170,7 @@ public class VicinityControlPanel extends Panel {
         return new LoadableDetachableModel<List<String>>() {
             @Override
             protected List<String> load() {
-                return vicinityVertexModel.getObject().getEdges().stream().flatMap(e->e.getTags().stream()).distinct().collect(toList());
+                return vicinityVertexModel.getObject().getEdges().stream().flatMap(e -> e.getTags().stream()).distinct().collect(toList());
             }
         };
     }
@@ -180,53 +196,54 @@ public class VicinityControlPanel extends Panel {
 
             @Override
             public void onDrop(AjaxRequestTarget target, Component component) {
-                HttpSession session = ((ServletWebRequest)RequestCycle.get()
+                HttpSession session = ((ServletWebRequest) RequestCycle.get()
                         .getRequest()).getContainerRequest().getSession();
-                
+
                 VertexInfo data = (VertexInfo) session.getAttribute("draggingVertex");//item.getModelObject();//TODO: can we do better? See also VerticesList
-                
+
                 RemoteUtil.operationAPI().connect(graphIdSupplier.get(),
                         Collections.singletonList(data.getVertexId()),
                         Collections.singletonList(vicinityVertexModel.getFilter().getSelectedVertexId()));
                 target.add(graphView);
             }
-            
+
         });
 
     }
+
     private Component newLayoutDropdown(String id) {
         return new DropDownChoice<GraphLayout>(id, Arrays.asList(GraphLayout.values())).
                 add(updateGraphViewAjaxBehavior("change"));
     }
 
     private WebMarkupContainer createTitleEditableLink(String id) {
-        LambdaAjaxLink titleLink = new LambdaAjaxLink(id, target->{
+        LambdaAjaxLink titleLink = new LambdaAjaxLink(id, target -> {
             titleEditDialog.open(target);
         });
-     
+
         return titleLink;
     }
 
 
     private InputDialog<String> createTitleEditDialog(String id) {
-       return new InputDialog<String>(id, "Edit title", "", new PropertyModel<>(artifactModel, "title")) {
-           private static final long serialVersionUID = 1L;
+        return new InputDialog<String>(id, "Edit title", "", new PropertyModel<>(selectedVertexModel, "title")) {
+            private static final long serialVersionUID = 1L;
 
-           @Override
-           protected void onSubmit(AjaxRequestTarget target) {
-               String newTitle = getModelObject();
-               RemoteUtil.vertexAPI().updateVertex(
-                       graphIdSupplier.get(), vicinityVertexModel.getFilter().getSelectedVertexId(), RVertex.builder().title(newTitle).build());
-               graphChangedCallback.accept(target);
-           }
-       };
+            @Override
+            protected void onSubmit(AjaxRequestTarget target) {
+                String newTitle = getModelObject();
+                RemoteUtil.vertexAPI().updateVertex(
+                        graphIdSupplier.get(), vicinityVertexModel.getFilter().getSelectedVertexId(), RVertex.builder().title(newTitle).build());
+                graphChangedCallback.accept(target);
+            }
+        };
     }
 
     private Form<VicinityModel.VicinityState> createVertexControlForm(String formId) {
         return new Form<VicinityModel.VicinityState>(
                 formId, new CompoundPropertyModel<VicinityModel.VicinityState>(vicinityVertexModel.getFilter()));
     }
-    
+
 
     private AjaxEventBehavior updateGraphViewAjaxBehavior(String eventType) {
         return new AjaxFormComponentUpdatingBehavior(eventType) {

@@ -3,20 +3,14 @@
  */
 package grapheus.persistence.graph.generate;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
+import grapheus.absorb.VertexPersister;
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.model.graph.PersistentVertex;
+import grapheus.view.SemanticFeature;
+import grapheus.view.extract.features.SemanticFeatureType;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -24,14 +18,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.stereotype.Service;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import grapheus.absorb.VertexPersister;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.model.graph.PersistentVertex;
-import grapheus.view.SemanticFeature;
-import grapheus.view.extract.features.SemanticFeatureType;
+import javax.inject.Inject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Uploads own dependency graph to the database at startup.
@@ -61,13 +60,17 @@ public class SelfGraphGenerator {
             vertexPersister.update(graphName,
                     PersistentVertex.builder().id(beanClass.getCanonicalName())
                             .title(beanClass.getSimpleName()).description(beanClass.getSimpleName())
+                            .tags(tagsFromClass(beanClass))
                             .semanticFeatures(dependenciesToFeatures(dependencies)).build());
         }
 
         log.info("Processed {} beans!", beanNames.length);
         
         log.info("Graph {} is created", graphName);
+    }
 
+    private List<String> tagsFromClass(Class<?> beanClass) {
+        return Collections.singletonList(beanClass.getPackage().getName());
     }
 
     private Object unProxy(Object bean) {
