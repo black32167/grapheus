@@ -3,25 +3,9 @@
  */
 package grapheus.it.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import grapheus.persistence.foxx.GrapheusFoxxService;
-import org.grapheus.client.model.graph.VerticesSortCriteria;
-import org.grapheus.client.model.graph.edge.EdgeDirection;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
 import grapheus.it.TestConstants;
 import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.foxx.GrapheusFoxxService;
 import grapheus.persistence.model.graph.PersistentVertex;
 import grapheus.persistence.storage.graph.EdgeStorage;
 import grapheus.persistence.storage.graph.GraphStorage;
@@ -38,6 +22,20 @@ import grapheus.service.uds.ArtifactsFilter;
 import grapheus.view.SemanticFeature;
 import grapheus.view.extract.features.SemanticFeatureType;
 import lombok.RequiredArgsConstructor;
+import org.grapheus.client.model.graph.VerticesSortCriteria;
+import org.grapheus.client.model.graph.edge.EdgeDirection;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author black
@@ -60,10 +58,17 @@ abstract public class GraphTestSupport {
         private final String fromKey;
         private final String toKey;    
     }
-    
+
+    @RequiredArgsConstructor
+    protected static class Property {
+        private final String name;
+        private final String value;
+    }
+
     @RequiredArgsConstructor
     protected static class VertexDefinition {
         private final String key;
+        private final List<SemanticFeature> properties = new ArrayList<>();
     }
     
     @RequiredArgsConstructor
@@ -85,16 +90,27 @@ abstract public class GraphTestSupport {
             directVertices.add(vertex);
             return this;
         }
-        
+
+        public GraphBuilder prop(String vertexKey, String propertyName, String propertyValue) {
+            verticesDefinition
+                    .computeIfAbsent(vertexKey, VertexDefinition::new)
+                    .properties.add(SemanticFeature.builder().feature(propertyName).value(propertyValue).build());
+            return this;
+        }
+
         public void build() throws GraphExistsException {
             graphStorage.addGraph(graphName);
             for(VertexDefinition v: verticesDefinition.values()) {
-                vertexStorage.createVertex(graphName, PersistentVertex.builder().//
-                        description("").title("").id(v.key).semanticFeatures(Collections.singletonList(SemanticFeature.builder().//
-                                value(v.key).
-                                feature(SemanticFeatureType.LOCAL_ID_REFERENCE).
-                                build())).
+                v.properties.add(SemanticFeature.builder().//
+                        value(v.key).
+                        feature(SemanticFeatureType.LOCAL_ID_REFERENCE).
                         build());
+                vertexStorage.createVertex(graphName, PersistentVertex.builder() //
+                        .description("")
+                        .title("")
+                        .id(v.key)
+                        .semanticFeatures(v.properties)
+                        .build());
             }
             for(PersistentVertex v: directVertices) {
                 vertexStorage.createVertex(graphName, v);
@@ -102,9 +118,7 @@ abstract public class GraphTestSupport {
             for(EdgeDefinition e: edges) {
                 edgeStorage.connect(graphName, e.fromKey, e.toKey);
             }
-            
         }
-
     }
 
     @Inject
@@ -135,25 +149,24 @@ abstract public class GraphTestSupport {
                     .map(PersistentVertex::getId)
                     .collect(Collectors.toList());
     }
-    
+
     protected Collection<String> findInboundConnections(String graphName, String vertexId) {
         return edgesFinder.getNeighbors(graphName, vertexId, EdgeDirection.INBOUND, 1).stream()
                 .map(e->e.getFrom())
                 .collect(Collectors.toList());
     }
+
     protected Collection<String> findOutboundConnections(String graphName, String vertexId) {
         return edgesFinder.getNeighbors(graphName, vertexId, EdgeDirection.OUTBOUND, 1).stream()
                 .map(e->e.getTo())
                 .collect(Collectors.toList());
     }
-    
-
 
     protected PersistentVertex loadVertex(String graphName, String vertexId) {
         return vertexStorage.getById(graphName, vertexId).get();
     }
+
     protected void updateVertex(String graphName, PersistentVertex vertex) {
         vertexStorage.updateVertex(graphName, vertex);
     }
-
 }
