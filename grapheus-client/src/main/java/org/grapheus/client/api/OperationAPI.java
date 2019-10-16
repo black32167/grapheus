@@ -3,14 +3,10 @@
  */
 package org.grapheus.client.api;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-
-import javax.ws.rs.core.UriBuilder;
-
+import lombok.RequiredArgsConstructor;
 import org.grapheus.client.http.GrapheusRestClient;
 import org.grapheus.client.model.graph.edge.EdgeDirection;
+import org.grapheus.client.model.graph.generate.RCollapsedGraphParameters;
 import org.grapheus.client.model.graph.generate.RConnectionRequest;
 import org.grapheus.client.model.graph.generate.RDisconnectionRequest;
 import org.grapheus.client.model.graph.generate.RGraphCreationParameters;
@@ -20,7 +16,10 @@ import org.grapheus.client.model.graph.operation.RVerticesRemoveOperationContain
 import org.grapheus.client.model.graph.operation.path.RPathContainer;
 import org.grapheus.client.model.graph.operation.path.RShortestPathParameters;
 
-import lombok.RequiredArgsConstructor;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author black
@@ -107,15 +106,24 @@ public class OperationAPI {
     }
     
     public void generatePathGraph(
-            String sourceGraphName, String newGraphName,
+            String sourceGraphId, String newGraphId,
             Collection<String> boundaryVerticesIds) {
         URI uri = UriBuilder.fromPath(PATH_OPERATION).path("pathGraph")
-                .queryParam(PARAM_SOURCE_GRAPH, sourceGraphName)
+                .queryParam(PARAM_SOURCE_GRAPH, sourceGraphId)
                 .build();
         restClient.post(uri, RPathGraphParameters.builder()
-                .sourceGraphName(sourceGraphName)
-                .newGraphName(newGraphName)
+                .sourceGraphName(sourceGraphId)
+                .newGraphName(newGraphId)
                 .boundaryVerticesIds(boundaryVerticesIds));
+    }
+
+    public void generateCollapsedGraph(String sourceGraphId, String newGraphId, String groupingProperty) {
+        URI uri = UriBuilder.fromPath(PATH_OPERATION).path("collapsedGraph")
+                .queryParam(PARAM_SOURCE_GRAPH, sourceGraphId)
+                .build();
+        restClient.post(uri, RCollapsedGraphParameters.builder()
+                .newGraphId(newGraphId)
+                .groupingProperty(groupingProperty));
     }
 
     public void deleteVertices(String graphId, Collection<String> verticesIds) {
