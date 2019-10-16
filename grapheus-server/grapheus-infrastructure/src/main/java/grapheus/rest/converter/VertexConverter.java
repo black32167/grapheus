@@ -11,6 +11,7 @@ import org.grapheus.client.model.graph.vertex.RVertex.RProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public final class VertexConverter {
                 description(internalVertexModel.getDescription()).//
                 title(internalVertexModel.getTitle()).//
                 id(internalVertexModel.getId()).//
-                updateTimeMills(internalVertexModel.getUpdatedTimestamp()).//
+                updateTimeMills(Optional.ofNullable(internalVertexModel.getUpdatedTimestamp()).orElse(0L)).//
                 properties(toExternalProperties(internalVertexModel.getSemanticFeatures())).//
                 tags(ofNullable(internalVertexModel.getTags()).orElse(emptyList())).//
                 build();
