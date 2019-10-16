@@ -8,11 +8,14 @@ import grapheus.view.SemanticFeature;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.client.model.graph.vertex.RVertex.RProperty;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.*;
-import static java.util.Optional.*;
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author black
@@ -25,12 +28,12 @@ public final class VertexConverter {
                 title(internalVertexModel.getTitle()).//
                 id(internalVertexModel.getId()).//
                 updateTimeMills(internalVertexModel.getUpdatedTimestamp()).//
+                properties(toExternalProperties(internalVertexModel.getSemanticFeatures())).//
                 tags(ofNullable(internalVertexModel.getTags()).orElse(emptyList())).//
                 build();
     }
 
     public static PersistentVertex toInternal(RVertex remoteVertexModel) {
-
         return PersistentVertex.builder().//
                 url(null).
                 id(ofNullable(remoteVertexModel.getId()).orElseGet(() -> UUID.randomUUID().toString())).//
@@ -52,5 +55,16 @@ public final class VertexConverter {
                         build()).//
                 collect(Collectors.toList());
     }
+
+
+    private static List<RProperty> toExternalProperties(List<SemanticFeature> semanticFeatures) {
+        if(semanticFeatures == null) {
+            return Collections.emptyList();
+        }
+        return semanticFeatures.stream()
+                .map(f-> RProperty.builder().name(f.getFeature()).value(f.getValue()).build())
+                .collect(Collectors.toList());
+    }
+
 
 }
