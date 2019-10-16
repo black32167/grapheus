@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package grapheus.persistence.graph.generate;
 
@@ -31,15 +31,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Uploads own dependency graph to the database at startup.
- * 
+ *
  * @author black
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__({ @Inject }))
+@RequiredArgsConstructor(onConstructor = @__({@Inject}))
 public class SelfGraphGenerator {
     private final ConfigurableListableBeanFactory appCtx;
     private final VertexPersister vertexPersister;
@@ -48,24 +49,29 @@ public class SelfGraphGenerator {
     public void generate(String grapheusUserKey, String graphName) throws GraphExistsException {
 
         emptyGraphGenerator.createGraph(grapheusUserKey, graphName);
-        
+
         String[] beanNames = appCtx.getBeanDefinitionNames();
         for (String beanName : beanNames) {
-            
+
             // if(beanDefinition.isSingleton()...
             Object bean = unProxy(appCtx.getBean(beanName));
             Class<?> beanClass = unCGLib(bean.getClass());
             log.info("Processing bean '{}'", beanClass.getCanonicalName());
             Collection<Class<?>> dependencies = collectDependencies(bean);
+            List<SemanticFeature> features = Stream.concat(
+                    dependenciesToFeatures(dependencies).stream(),
+                    packageToFeatures(beanClass).stream()
+            ).collect(Collectors.toList());
             vertexPersister.update(graphName,
                     PersistentVertex.builder().id(beanClass.getCanonicalName())
                             .title(beanClass.getSimpleName()).description(beanClass.getSimpleName())
                             .tags(tagsFromClass(beanClass))
-                            .semanticFeatures(dependenciesToFeatures(dependencies)).build());
+                            .semanticFeatures(features)
+                            .build());
         }
 
         log.info("Processed {} beans!", beanNames.length);
-        
+
         log.info("Graph {} is created", graphName);
     }
 
@@ -74,17 +80,17 @@ public class SelfGraphGenerator {
     }
 
     private Object unProxy(Object bean) {
-        if(AopUtils.isAopProxy(bean) && bean instanceof Advised) {
+        if (AopUtils.isAopProxy(bean) && bean instanceof Advised) {
             Advised advised = (Advised) bean;
-            
+
             try {
                 return advised.getTargetSource().getTarget();
             } catch (Exception e) {
-              log.error("Could not unproxy bean:{}", bean, e);
+                log.error("Could not unproxy bean:{}", bean, e);
             }
         }
 
-        if(bean.getClass().getName().contains("Proxy")) {
+        if (bean.getClass().getName().contains("Proxy")) {
             log.error("Could not unproxy bean {}", bean);
         }
         return bean;
@@ -94,6 +100,10 @@ public class SelfGraphGenerator {
         return dependencies.stream()
                 .map(c -> SemanticFeature.from(SemanticFeatureType.LOCAL_ID_REFERENCE, c.getCanonicalName()))
                 .collect(Collectors.toList());
+    }
+
+    private List<SemanticFeature> packageToFeatures(Class<?> beanClass) {
+        return Collections.singletonList(SemanticFeature.from("package", beanClass.getPackage().getName()));
     }
 
     private Collection<Class<?>> collectDependencies(@NonNull Object bean) {
@@ -115,15 +125,15 @@ public class SelfGraphGenerator {
                         } catch (NoSuchBeanDefinitionException e) {
                             log.warn("Cannot retrieve bean of type {} for constructor of the class {}", parameterClass, beanClass);
                         }
-                    } else if(genericType instanceof ParameterizedType) {
+                    } else if (genericType instanceof ParameterizedType) {
                         ParameterizedType parameterizedType = (ParameterizedType) genericType;
                         Type rawType = parameterizedType.getRawType();
-                        if (rawType instanceof Class && Collection.class.isAssignableFrom((Class)rawType)) {
+                        if (rawType instanceof Class && Collection.class.isAssignableFrom((Class) rawType)) {
                             Type collectionTypeParameters[] = parameterizedType.getActualTypeArguments();
-                            if(collectionTypeParameters.length > 0 && collectionTypeParameters[0] instanceof Class) {
+                            if (collectionTypeParameters.length > 0 && collectionTypeParameters[0] instanceof Class) {
                                 Class<?> dependencyBeanClass = (Class<?>) collectionTypeParameters[0];
                                 Map<String, Object> foundBeans = (Map<String, Object>) appCtx.getBeansOfType(dependencyBeanClass);
-                                for(Object foundBean:foundBeans.values()) {
+                                for (Object foundBean : foundBeans.values()) {
                                     dependencies.add(unProxy(foundBean).getClass());
                                 }
                             }
@@ -140,11 +150,11 @@ public class SelfGraphGenerator {
                     try {
                         f.setAccessible(true);
                         Object dependency = f.get(bean);
-                        if(dependency instanceof Collection) {
-                            for(Object element:(Collection<?>)dependency) {
+                        if (dependency instanceof Collection) {
+                            for (Object element : (Collection<?>) dependency) {
                                 dependencies.add(unProxy(element).getClass());
                             }
-                        } else if(dependency != null) {
+                        } else if (dependency != null) {
                             dependencies.add(unProxy(dependency).getClass());
                         }
                     } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -157,9 +167,9 @@ public class SelfGraphGenerator {
 
         return dependencies.stream().map(this::unCGLib).collect(Collectors.toList());
     }
-    
+
     private Class<?> unCGLib(Class<?> sourceClass) {
-        while(sourceClass.getName().contains("$$")) {
+        while (sourceClass.getName().contains("$$")) {
             sourceClass = sourceClass.getSuperclass();
         }
         return sourceClass;

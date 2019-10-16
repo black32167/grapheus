@@ -1,12 +1,9 @@
-/**
- * 
- */
-package grapheus.persistence.storage.transaction.clone;
+package grapheus.persistence.storage.transaction.collapse;
 
 import grapheus.it.TestConstants;
 import grapheus.it.util.GraphTestSupport;
 import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.storage.graph.transaction.clone.CloneGraphTransaction;
+import grapheus.persistence.storage.graph.transaction.collapse.CollapseTransaction;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -16,27 +13,31 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import javax.inject.Inject;
 
-/**
- * @author black
- *
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class, classes={
-        CloneGraphTransaction.class
+        CollapseTransaction.class
 })
 @TestPropertySource(TestConstants.DB_PROPERTIES)
-public class CloneGraphTransactionIT extends GraphTestSupport {
+public class CollapseTransactionIT extends GraphTestSupport {
     private static final String GRAPH_NAME_SRC = "graph1";
     private static final String GRAPH_NAME_DST = "graph2";
 
     @Inject
-    private CloneGraphTransaction transaction;
-    
+    private CollapseTransaction transaction;
+
     @Test
-    public void testClone() throws GraphExistsException {
-        graph(GRAPH_NAME_SRC).connect("v1", "v2").build();
+    public void testCollapsedGraphShouldBeGenerated() throws GraphExistsException {
+        graph(GRAPH_NAME_SRC)
+                .connect("v1", "v2")
+                .connect("v3", "v2")
+                .prop("v1", "prop1", "val1")
+                .prop("v2", "prop1", "val1")
+                .build();
         graph(GRAPH_NAME_DST).build();
-        
-        transaction.generate(GRAPH_NAME_SRC, GRAPH_NAME_DST);
+
+        transaction.generateCollapsedGraph(GRAPH_NAME_SRC, GRAPH_NAME_DST, "prop1");
+
+        loadVertex(GRAPH_NAME_DST, "val1");
     }
+
 }

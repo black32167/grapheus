@@ -3,8 +3,24 @@
  */
 package grapheus.rest.resource.graph.operation;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import grapheus.context.GrapheusRequestContextHolder;
+import grapheus.graph.GraphsManager;
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.graph.generate.CloneGraphGenerator;
+import grapheus.persistence.graph.generate.CollapsedGraphGenerator;
+import grapheus.persistence.graph.generate.CyclesGraphGenerator;
+import grapheus.persistence.graph.generate.EmptyGraphGenerator;
+import grapheus.persistence.graph.generate.FeatureSubgraphGraphGenerator;
+import grapheus.persistence.graph.generate.PathsGraphGenerator;
+import grapheus.persistence.graph.generate.SelfGraphGenerator;
+import grapheus.persistence.graph.generate.TraversalGraphGenerator;
+import grapheus.persistence.storage.graph.transaction.merge.MergeVerticesTransaction;
+import grapheus.persistence.storage.graph.transaction.topology.TopologicalMarkingTransaction;
+import org.grapheus.client.model.graph.VerticesSortCriteriaType;
+import org.grapheus.client.model.graph.generate.RCollapsedGraphParameters;
+import org.grapheus.client.model.graph.generate.RGraphCreationParameters;
+import org.grapheus.client.model.graph.generate.RMergeRequest;
+import org.grapheus.client.model.graph.generate.RPathGraphParameters;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -15,24 +31,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.grapheus.client.model.graph.VerticesSortCriteriaType;
-import org.grapheus.client.model.graph.generate.RGraphCreationParameters;
-import org.grapheus.client.model.graph.generate.RMergeRequest;
-import org.grapheus.client.model.graph.generate.RPathGraphParameters;
-
-import grapheus.context.GrapheusRequestContextHolder;
-import grapheus.graph.GraphsManager;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.graph.generate.CloneGraphGenerator;
-import grapheus.persistence.graph.generate.CyclesGraphGenerator;
-import grapheus.persistence.graph.generate.EmptyGraphGenerator;
-import grapheus.persistence.graph.generate.FeatureSubgraphGraphGenerator;
-import grapheus.persistence.graph.generate.PathsGraphGenerator;
-import grapheus.persistence.graph.generate.SelfGraphGenerator;
-import grapheus.persistence.graph.generate.TraversalGraphGenerator;
-import grapheus.persistence.storage.graph.transaction.merge.MergeVerticesTransaction;
-import grapheus.persistence.storage.graph.transaction.topology.TopologicalMarkingTransaction;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * @author black
@@ -42,7 +42,8 @@ import grapheus.persistence.storage.graph.transaction.topology.TopologicalMarkin
 @Produces(MediaType.APPLICATION_JSON)
 @Path(OperationResourcesConstants.PATH)
 public class GraphOperationsResource {
-    
+    private static final String PARAM_SOURCE_GRAPH = "sourceGraphId";
+
     @Inject
     private CyclesGraphGenerator cyclesGraphGenerator;
     @Inject
@@ -62,8 +63,20 @@ public class GraphOperationsResource {
     @Inject
     private PathsGraphGenerator pathsGraphGenerator;
     @Inject
+    private CollapsedGraphGenerator collapsedGraphGenerator;
+    @Inject
     private GraphsManager graphsManager;
-    
+
+    @POST
+    @Path("collapsedGraph")
+    public Response collapsedGraph(@QueryParam(PARAM_SOURCE_GRAPH) String sourceGraphId, RCollapsedGraphParameters parameters) throws URISyntaxException {
+        collapsedGraphGenerator.generate(grapheusUserKey(),
+                sourceGraphId,
+                parameters.getNewGraphId(),
+                parameters.getGroupingProperty());
+        return createdResponse(parameters.getNewGraphId());
+    }
+
     @POST
     @Path("pathGraph")
     public Response findPaths(RPathGraphParameters findPathsRequest) throws GraphExistsException, URISyntaxException {
@@ -87,7 +100,7 @@ public class GraphOperationsResource {
     
     @POST
     @Path("cyclicGraph")
-    public Response generateCyclesSubraph(@QueryParam("sourceGraphId") String sourceGraphId, RGraphCreationParameters parameters) throws Exception {
+    public Response generateCyclesSubraph(@QueryParam(PARAM_SOURCE_GRAPH) String sourceGraphId, RGraphCreationParameters parameters) throws Exception {
         try {
             cyclesGraphGenerator.generateCyclesGraph(grapheusUserKey(), sourceGraphId, parameters.getNewGraphName());
             return createdResponse(parameters.getNewGraphName());
@@ -107,7 +120,6 @@ public class GraphOperationsResource {
             throw new WebApplicationException("Graph already exists:'" + parameters.getNewGraphName() + "'", Response.Status.CONFLICT);
         }
     }
-    
 
     @POST
     @Path("emptyGraph")
@@ -123,7 +135,7 @@ public class GraphOperationsResource {
 
     @POST
     @Path("cloneGraph")
-    public Response generateCloneGraph(@QueryParam("sourceGraphId") String sourceGraphId, RGraphCreationParameters parameters) throws Exception {
+    public Response generateCloneGraph(@QueryParam(PARAM_SOURCE_GRAPH) String sourceGraphId, RGraphCreationParameters parameters) throws Exception {
         try {
             cloneGraphGenerator.generate(grapheusUserKey(), sourceGraphId, parameters.getNewGraphName());
             return createdResponse(parameters.getNewGraphName());
@@ -151,7 +163,7 @@ public class GraphOperationsResource {
 
     @POST
     @Path("propertyGraph")
-    public Response generatePropertyBased(@QueryParam("sourceGraphId") String sourceGraphId, RGraphCreationParameters parameters) throws Exception {
+    public Response generatePropertyBased(@QueryParam(PARAM_SOURCE_GRAPH) String sourceGraphId, RGraphCreationParameters parameters) throws Exception {
         try {
             featureSubgraphGenerator.generate(
                     grapheusUserKey(), 
@@ -168,7 +180,7 @@ public class GraphOperationsResource {
 
     @POST
     @Path("topologicalSort")
-    public Response generateTopologicalSort(@QueryParam("sourceGraphId") String sourceGraphId) throws Exception {
+    public Response generateTopologicalSort(@QueryParam(PARAM_SOURCE_GRAPH) String sourceGraphId) throws Exception {
 
         topologicalMarkingTransaction.topologicalOrder(sourceGraphId);
         graphsManager.addOperationApplied(sourceGraphId, VerticesSortCriteriaType.TOPOLOGICAL.name());
