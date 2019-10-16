@@ -1,10 +1,6 @@
 package org.grapheus.web.page.vertices.list;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.googlecode.wicket.jquery.core.resource.StyleSheetPackageHeaderItem;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -38,7 +34,10 @@ import org.grapheus.web.model.VerticesListModel;
 import org.grapheus.web.model.VicinityModel;
 import org.grapheus.web.page.base.AbstractGrapheusAuthenticatedPage;
 
-import com.googlecode.wicket.jquery.core.resource.StyleSheetPackageHeaderItem;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
     private static final long serialVersionUID = 1L;
@@ -139,14 +138,16 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
     private TabbedPanel<ITab> newRightPanel() {
         List<ITab> tabs = new ArrayList<ITab>();
         SerializableSupplier<String> graphIdSupplier = ()->graphId;
+
         tabs.add(newTab(
-                "Vicinity", 
+                "Vicinity",
                 id -> VicinityControlPanel.builder()
-                    .id(id)
-                    .graphIdSupplier(graphIdSupplier) 
-                    .vicinityVertexModel(vicinityVertexModel)
-                    .graphChangedCallback(VerticesPage.this::reloadContent)
-                    .build()));
+                        .id(id)
+                        .graphIdSupplier(graphIdSupplier)
+                        .vicinityVertexModel(vicinityVertexModel)
+                        .graphChangedCallback(VerticesPage.this::reloadContent)
+                        .dialogOperationSupport(dialogOperationSupport)
+                        .build()));
 //        
 //        tabs.add(newTab("Connect...", id -> VerticesConnectPanel.builder()//
 //                .id(id)//

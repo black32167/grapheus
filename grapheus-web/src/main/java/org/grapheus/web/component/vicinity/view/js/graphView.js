@@ -164,15 +164,16 @@ function buildEdges(edges, knownVIds) {
 }
 
 function buildNodes(vertices) {
-
 	var nodesElements = []
 	var rootId = getRootVertexId()
 	vertices.each(function() {
 		var jV = $(this)
 		var originalVertexId = jV.attr('vertexId');
 		var tags = jV.attr('tags').split(",");
+		var properties = jV.attr('properties').split(",");
 
 		var vertexId = toValidId(originalVertexId);
+
 
         if(rootId == vertexId) {
             tags.push("root")
@@ -185,6 +186,7 @@ function buildNodes(vertices) {
 				border_color : 'gray',
 				selectedVertex: (rootId == vertexId),
 				tags: tags,
+				properties: properties,
 				originalId:originalVertexId
 			}})
 	});
@@ -252,7 +254,18 @@ function setupMenu(cy, parameters) {
 		            	Wicket.Ajax.get({ u: parameters.deleteVertexURL+'&vertexId=' + target.data().originalId });
 		            },
 		            disabled: false
-		        }
+		        },
+		        {
+                    id: 'generateCollapsedGraph',
+                    content: 'Collapse...',
+                    tooltipText: 'Collapse by property',
+                    selector: 'node',
+                    onClickFunction: function (event) {
+                        var target = event.target || event.cyTarget;
+                        Wicket.Ajax.get({ u: parameters.generateCollapsedGraphURL+'&vertexId=' + target.data().originalId });
+                    },
+                    disabled: false
+                }
 	    	]
 	}
     var instance = window.cy.contextMenus( options );
@@ -336,7 +349,11 @@ function setupGraphListeners(cy, settings) {
 	})
 	cy.on('mouseover', 'node', function(evt) {
 	    var pos = evt.target.renderedPosition()
+
         var tags = evt.target.data().tags
+        var properties = evt.target.data().properties.join('\n')
+
+
 	    console.log('Pos:'+pos.x+','+pos.y + '/' + this.tags);
 	    $('#tooltip').css({top: pos.y, left: pos.x})
 	    $('#tooltip').text(tags)

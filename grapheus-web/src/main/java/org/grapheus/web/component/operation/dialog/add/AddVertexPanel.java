@@ -3,9 +3,6 @@
  */
 package org.grapheus.web.component.operation.dialog.add;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import org.apache.wicket.ajax.AjaxPreventSubmitBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormSubmitBehavior;
@@ -21,6 +18,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.page.vertices.list.VerticesPage;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author black
@@ -80,7 +80,6 @@ public class AddVertexPanel extends Panel {
                     target.add(feedback);
                 }
             }
-
             
         };
     }
@@ -89,8 +88,8 @@ public class AddVertexPanel extends Panel {
         setResponsePage(VerticesPage.class, new PageParameters().add(VerticesPage.PARAM_SELECTED_GRAPH, graphName));
         
     }
-    private Form<AddVertexPanel> newVertexForm(String string) {
-        return (form = new StatelessForm<AddVertexPanel>("form", new CompoundPropertyModel<AddVertexPanel>(this)));
+    private Form<AddVertexPanel> newVertexForm(String id) {
+        return (form = new StatelessForm<>(id, new CompoundPropertyModel<>(this)));
     }
 
     

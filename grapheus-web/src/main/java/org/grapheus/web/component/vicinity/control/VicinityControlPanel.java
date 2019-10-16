@@ -30,6 +30,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.grapheus.client.model.graph.edge.EdgeDirection;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.web.RemoteUtil;
+import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.list.view.VerticesListViewPanel.VertexInfo;
 import org.grapheus.web.component.shared.LambdaAjaxLink;
 import org.grapheus.web.component.shared.SerializableConsumer;
@@ -55,26 +56,29 @@ public class VicinityControlPanel extends Panel {
 
     private static final int MAX_NEIGHBORS_HOPS = 100;
 
-    private final VicinityInteractiveView graphView;
-
-    private final InputDialog<String> titleEditDialog;
+    // This block of fields is initialized from constructor parameters
+    private final VicinityModel vicinityVertexModel;
     private final IModel<RVertex> selectedVertexModel;
     private final SerializableSupplier<String> graphIdSupplier;
     private final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback;
+    private final ShowOperationSupport dialogOperationSupport;
+
+    // Fields in  this block are initialized internally in the constructor
     private final Label vertexTagsLabel;
-
-    private final VicinityModel vicinityVertexModel;
-
+    private final InputDialog<String> titleEditDialog;
+    private final VicinityInteractiveView graphView;
 
     @Builder
     public VicinityControlPanel(String id,
                                 final SerializableSupplier<String> graphIdSupplier,
                                 final VicinityModel vicinityVertexModel,
+                                ShowOperationSupport dialogOperationSupport,
                                 final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback) {
         super(id);
         this.vicinityVertexModel = vicinityVertexModel;
+        this.dialogOperationSupport = dialogOperationSupport;
         this.selectedVertexModel = createArtifactModel();
-        this.graphView = new VicinityInteractiveView("vicinityView", vicinityVertexModel, graphIdSupplier, graphChangedCallback);
+        this.graphView = new VicinityInteractiveView("vicinityView", vicinityVertexModel, graphIdSupplier, graphChangedCallback, dialogOperationSupport);
         this.graphView.setOutputMarkupId(true);
         this.titleEditDialog = createTitleEditDialog("titleEditDialog");
         this.graphChangedCallback = graphChangedCallback;

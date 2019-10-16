@@ -11,11 +11,16 @@ import org.grapheus.web.model.Edge;
 import org.grapheus.web.model.Vertex;
 import org.grapheus.web.model.VicinityGraph;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static java.util.Collections.*;
-import static java.util.Optional.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author black
@@ -60,11 +65,13 @@ public class WebGraphUtils {
 
         Collection<RVertex> persistedVertices = RemoteUtil.vertexAPI().loadArtifacts(graphName, neighboringArtifactsIds);
         for(RVertex persistedVertex: persistedVertices) {
+
             verticesViews.add(Vertex.builder().//
                     name(persistedVertex.getTitle() != null ? persistedVertex.getTitle() : "#" + persistedVertex.getId()).//
                     id(persistedVertex.getId()).//
                    // neighbors(neighborsMap.getOrDefault(persistedVertex.getId(), emptyList())).//
                     tags(persistedVertex.getTags()).
+                    properties(persistedVertex.getProperties()).
                     build());
             neighboringArtifactsIds.remove(persistedVertex.getId());
         }
