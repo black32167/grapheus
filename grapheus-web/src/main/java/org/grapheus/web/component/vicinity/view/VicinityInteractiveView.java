@@ -113,11 +113,8 @@ public class VicinityInteractiveView extends Panel {
             @Override
             protected void respond(final AjaxRequestTarget target) {
                 String vertexId = getRequest().getRequestParameters().getParameterValue("vertexId").toOptionalString();
-                dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), graphIdSupplier.get(), vertexId) {
-                    //TODO
-                });
+                dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), graphIdSupplier.get(), vertexId));
             }
-
         };
     }
 
@@ -131,7 +128,6 @@ public class VicinityInteractiveView extends Panel {
                 vicinityVertexModel.getFilter().setSelectedVertexId(vertexId);
                 graphChangedCallback.accept(target);
             }
-
         };
     }
 
