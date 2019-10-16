@@ -49,7 +49,7 @@ exports.execute = function (params) {
             try {
                 var existingEdge = ecol.firstExample({_from:targetVertexId, _to:e._to})
         	
-            	if(existingEdge !=null || e._to == targetVertexId) {
+            	if(existingEdge != null || e._to == targetVertexId) {
             		ecol.remove(e._key)
             	} else {
             		ecol.update(e._key, {_from:targetVertexId})
