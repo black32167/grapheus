@@ -49,6 +49,7 @@ case "$CMD" in
         echo "    $0 down"
         echo "    $0 {start|stop|rm} [database|backend|frontend]"
         echo "    $0 show"
+        echo "    $0 db-log"
         exit 1;
 esac
 
