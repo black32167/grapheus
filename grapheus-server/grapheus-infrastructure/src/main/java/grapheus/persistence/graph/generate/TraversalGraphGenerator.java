@@ -3,6 +3,7 @@
  */
 package grapheus.persistence.graph.generate;
 
+import grapheus.graph.GraphsManager;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.storage.graph.transaction.traverse.CloneSubgraphTransaction;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +22,16 @@ import javax.inject.Inject;
 @RequiredArgsConstructor(onConstructor = @__({ @Inject }))
 public class TraversalGraphGenerator {
     private final CloneSubgraphTransaction cloneSubgraphTransaction;
-    private final EmptyGraphGenerator emptyGraphGenerator;
+    private final GraphsManager graphsManager;
     
     public void generate(
             String grapheusUserKey,
-            String sourceGraph,
-            String newGraphName,
+            String sourceGraphId,
+            String newGraphId,
             String startVertexId,
             EdgeDirection traversalDirection) throws GraphExistsException {
-        emptyGraphGenerator.createGraph(grapheusUserKey, newGraphName);
-        cloneSubgraphTransaction.generate(sourceGraph, newGraphName, startVertexId, traversalDirection);
+        graphsManager.createGraphForUser(grapheusUserKey, newGraphId, sourceGraphId);
+        cloneSubgraphTransaction.generate(sourceGraphId, newGraphId, startVertexId, traversalDirection);
     }
 
 }

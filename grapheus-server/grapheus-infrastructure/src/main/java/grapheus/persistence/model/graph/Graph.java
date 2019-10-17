@@ -3,17 +3,16 @@
  */
 package grapheus.persistence.model.graph;
 
-import java.util.List;
-
 import com.arangodb.entity.DocumentField;
 import com.arangodb.entity.DocumentField.Type;
-
+import grapheus.persistence.model.annotation.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import grapheus.persistence.model.annotation.Entity;
+
+import java.util.List;
 
 /**
  * @author black
@@ -44,4 +43,5 @@ public class Graph {
     private boolean publicAccess;
     private List<String> userKeys;
     private List<String> operationsApplied;
+    private String sourceGraphId;
 }

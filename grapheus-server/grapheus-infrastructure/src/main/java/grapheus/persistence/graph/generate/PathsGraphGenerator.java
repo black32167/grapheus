@@ -3,6 +3,7 @@
  */
 package grapheus.persistence.graph.generate;
 
+import grapheus.graph.GraphsManager;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.storage.graph.transaction.paths.PathsGenerationTransaction;
 import lombok.RequiredArgsConstructor;
@@ -21,15 +22,15 @@ import java.util.Collection;
 @Slf4j
 public class PathsGraphGenerator {
     private final PathsGenerationTransaction pathsGenerationTransaction;
-    private final EmptyGraphGenerator emptyGraphGenerator;
+    private final GraphsManager graphsManager;
     
-    public void generate(String grapheusUserKey, String sourceGraphName, String newGraphName,
+    public void generate(String grapheusUserKey, String sourceGraphId, String newGraphId,
             Collection<String> boundaryVerticesIds) {
         try {
-            emptyGraphGenerator.createGraph(grapheusUserKey, newGraphName);
+            graphsManager.createGraphForUser(grapheusUserKey, newGraphId, sourceGraphId);
         } catch (GraphExistsException e) {
-            log.info("Graph '{}' already exists", newGraphName);
+            log.info("Graph '{}' already exists", newGraphId);
         }
-        pathsGenerationTransaction.findPaths(sourceGraphName, newGraphName, boundaryVerticesIds);
+        pathsGenerationTransaction.findPaths(sourceGraphId, newGraphId, boundaryVerticesIds);
     }
 }

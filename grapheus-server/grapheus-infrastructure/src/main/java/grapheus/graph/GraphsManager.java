@@ -3,26 +3,9 @@
  */
 package grapheus.graph;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.inject.Inject;
-
-import grapheus.persistence.exception.DocumentNotFoundException;
-import org.grapheus.client.model.graph.SortDirection;
-import org.grapheus.client.model.graph.VerticesSortCriteria;
-import org.grapheus.client.model.graph.VerticesSortCriteriaType;
-import org.grapheus.client.model.graph.edge.EdgeDirection;
-import org.springframework.stereotype.Service;
-
 import grapheus.absorb.VertexPersister;
 import grapheus.exception.PermissionDeniedException;
+import grapheus.persistence.exception.DocumentNotFoundException;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.model.graph.Graph;
 import grapheus.persistence.model.graph.PersistentEdge;
@@ -33,11 +16,25 @@ import grapheus.persistence.storage.graph.VertexStorage;
 import grapheus.persistence.storage.graph.query.EdgesFinder;
 import grapheus.persistence.storage.graph.query.VertexFinder;
 import grapheus.persistence.storage.graph.query.VertexFinder.SearchResult;
-import grapheus.persistence.storage.traverse.Edge;
 import grapheus.service.uds.ArtifactsFilter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.grapheus.client.model.graph.SortDirection;
+import org.grapheus.client.model.graph.VerticesSortCriteria;
+import org.grapheus.client.model.graph.VerticesSortCriteriaType;
+import org.grapheus.client.model.graph.edge.EdgeDirection;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Facade for various operations on graph.
@@ -203,13 +200,18 @@ public class GraphsManager {
     }
 
     public Graph createGraphForUser(String grapheusUserKey, String graphId) throws GraphExistsException {
-        Graph g = graphMetaStorage.addGraph(graphId);
+        return createGraphForUser(grapheusUserKey, graphId, null);
+    }
+
+    public Graph createGraphForUser(String grapheusUserKey, String newGraphId, String sourceGraphId) throws GraphExistsException {
+        Graph g = graphMetaStorage.addGraph(newGraphId);
         if(g.getUserKeys() == null) {
-            g.setUserKeys(new ArrayList<String>());
+            g.setUserKeys(new ArrayList<>());
         }
         g.getUserKeys().add(grapheusUserKey);
         
         g.setPublicAccess(true);
+        g.setSourceGraphId(sourceGraphId);
         graphMetaStorage.updateGraphMeta(g);
         return g;
     }

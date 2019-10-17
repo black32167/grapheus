@@ -3,6 +3,7 @@
  */
 package grapheus.persistence.graph.generate;
 
+import grapheus.graph.GraphsManager;
 import grapheus.persistence.exception.DocumentExistsException;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.storage.graph.EdgeStorage;
@@ -27,7 +28,7 @@ import java.util.List;
 public class CyclesGraphGenerator {
     private final EdgeStorage edgesStorage;
     private final VertexStorage vertexStorage;
-    private final EmptyGraphGenerator emptyGraphGenerator;
+    private final GraphsManager graphsManager;
     private final CyclesSearchTransaction cyclesFinder;
     
     public void generateCyclesGraph(String grapheusUserKey, String sourceGraphName, String newGraphName) throws GraphExistsException {
@@ -39,7 +40,7 @@ public class CyclesGraphGenerator {
             newGraphName = sourceGraphName+"_cycles";
         }
         
-        emptyGraphGenerator.createGraph(grapheusUserKey, newGraphName);
+        graphsManager.createGraphForUser(grapheusUserKey, newGraphName, sourceGraphName);
         
         int cycleIdx = 0;
         

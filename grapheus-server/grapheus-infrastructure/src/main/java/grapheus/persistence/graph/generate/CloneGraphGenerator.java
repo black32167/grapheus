@@ -3,13 +3,13 @@
  */
 package grapheus.persistence.graph.generate;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
-import lombok.RequiredArgsConstructor;
+import grapheus.graph.GraphsManager;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.storage.graph.transaction.clone.CloneGraphTransaction;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
 
 /**
  * @author black
@@ -19,10 +19,10 @@ import grapheus.persistence.storage.graph.transaction.clone.CloneGraphTransactio
 @RequiredArgsConstructor(onConstructor = @__({ @Inject }))
 public class CloneGraphGenerator {
     private final CloneGraphTransaction cloneGraphTransaction;
-    private final EmptyGraphGenerator emptyGraphGenerator;
+    private final GraphsManager graphsManager;
     
     public void generate(String grapheusUserKey, String sourceGraph, String newGraphName) throws GraphExistsException {
-        emptyGraphGenerator.createGraph(grapheusUserKey, newGraphName);
+        graphsManager.createGraphForUser(grapheusUserKey, newGraphName, sourceGraph);
         cloneGraphTransaction.generate(sourceGraph, newGraphName);
     }
 

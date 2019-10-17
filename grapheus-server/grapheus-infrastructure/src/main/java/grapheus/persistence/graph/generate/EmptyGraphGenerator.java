@@ -3,17 +3,16 @@
  */
 package grapheus.persistence.graph.generate;
 
-import javax.inject.Inject;
-
-import org.grapheus.client.model.graph.GraphNamesConstants;
-import org.springframework.stereotype.Service;
-
 import grapheus.event.DatabaseInitializedListener;
 import grapheus.graph.GraphsManager;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.model.graph.Graph;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.grapheus.client.model.graph.GraphNamesConstants;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
 
 /**
  * @author black
@@ -42,5 +41,4 @@ public class EmptyGraphGenerator implements DatabaseInitializedListener {
             log.info("Graph '{}' already exists", GraphNamesConstants.DEFAULT_GRAPH_NAME);
         }
     }
-
 }

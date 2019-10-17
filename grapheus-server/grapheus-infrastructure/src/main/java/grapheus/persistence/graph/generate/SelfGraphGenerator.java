@@ -4,6 +4,7 @@
 package grapheus.persistence.graph.generate;
 
 import grapheus.absorb.VertexPersister;
+import grapheus.graph.GraphsManager;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.model.graph.PersistentVertex;
 import grapheus.view.SemanticFeature;
@@ -44,11 +45,11 @@ import java.util.stream.Stream;
 public class SelfGraphGenerator {
     private final ConfigurableListableBeanFactory appCtx;
     private final VertexPersister vertexPersister;
-    private final EmptyGraphGenerator emptyGraphGenerator;//Should we use it from an other generators?
+    private final GraphsManager graphsManager;
 
     public void generate(String grapheusUserKey, String graphName) throws GraphExistsException {
 
-        emptyGraphGenerator.createGraph(grapheusUserKey, graphName);
+        graphsManager.createGraphForUser(grapheusUserKey, graphName);
 
         String[] beanNames = appCtx.getBeanDefinitionNames();
         for (String beanName : beanNames) {

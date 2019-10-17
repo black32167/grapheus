@@ -1,5 +1,6 @@
 package grapheus.persistence.graph.generate;
 
+import grapheus.graph.GraphsManager;
 import grapheus.persistence.exception.GraphExistsException;
 import grapheus.persistence.storage.graph.transaction.collapse.CollapseTransaction;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,11 @@ import javax.inject.Inject;
 @RequiredArgsConstructor(onConstructor = @__({ @Inject}))
 public class CollapsedGraphGenerator {
     private final CollapseTransaction collapseTransaction;
-    private final EmptyGraphGenerator emptyGraphGenerator;
+    private final GraphsManager graphsManager;
 
     public void generate(String grapheusUserKey, String sourceGraphId, String newGraphId, String groupingProperty) {
         try {
-            emptyGraphGenerator.createGraph(grapheusUserKey, newGraphId);
+            graphsManager.createGraphForUser(grapheusUserKey, newGraphId, sourceGraphId);
         } catch (GraphExistsException e) {
             log.info("Graph '{}' already exists", newGraphId);
         }
