@@ -3,13 +3,13 @@
  */
 package grapheus.service.uds;
 
-import java.util.Collection;
-
-import org.grapheus.client.model.graph.edge.RAdjacentEdgesFilter;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Wither;
+import org.grapheus.client.model.graph.edge.RAdjacentEdgesFilter;
+import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
+
+import java.util.Collection;
 
 /**
  * @author black
@@ -24,5 +24,6 @@ public class ArtifactsFilter {
 //    private int start;
     private boolean sinks;
     private RAdjacentEdgesFilter minimalAdjacentEdgesFilter;
+    private RVertexPropertyFilter vertexPropertyFilter;
     private Collection<String> artifactKeys;
 }

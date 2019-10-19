@@ -3,16 +3,16 @@
  */
 package org.grapheus.web.model;
 
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.grapheus.client.model.graph.edge.EdgeDirection;
 import org.grapheus.web.component.shared.SerializableSupplier;
 import org.grapheus.web.component.vicinity.WebGraphUtils;
 import org.grapheus.web.component.vicinity.control.GraphLayout;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import java.io.Serializable;
 
 /**
  * @author black
@@ -47,16 +47,12 @@ public class VicinityModel extends LoadableDetachableModel<VicinityGraph> {
     private final SerializableSupplier<String> graphIdSupplier;
     
     @Override
-    protected VicinityGraph load() {//TODO: return VicinityGraph
-        String artifactId = filter.getSelectedVertexId();
-
+    protected VicinityGraph load() {
         VicinityGraph graphView = WebGraphUtils.listNeighbors(
-                graphIdSupplier.get(), 
-                artifactId, 
+                graphIdSupplier.get(),
+                filter.getSelectedVertexId(),
                 filter.getDepth(),
                 filter.getEdgesDirection());
-
-
         return graphView;
     }
 }

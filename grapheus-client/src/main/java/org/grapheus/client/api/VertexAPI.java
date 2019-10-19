@@ -3,18 +3,7 @@
  */
 package org.grapheus.client.api;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import javax.ws.rs.core.UriBuilder;
-
+import lombok.RequiredArgsConstructor;
 import org.grapheus.client.http.GrapheusRestClient;
 import org.grapheus.client.model.RUser;
 import org.grapheus.client.model.RUserList;
@@ -29,7 +18,15 @@ import org.grapheus.client.model.graph.vertex.RVertexInfo;
 import org.grapheus.client.model.graph.vertex.RVertexInfosContainer;
 import org.grapheus.client.model.graph.vertex.RVerticesContainer;
 
-import lombok.RequiredArgsConstructor;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author black
@@ -43,7 +40,7 @@ public class VertexAPI {
 
     private final GrapheusRestClient restClient;
     
-    public RVerticesContainer findVertices(String graphName, ArtifactsFilter filter, VerticesSortCriteria... sortingCriteria) {
+    public RVerticesContainer findVertices(String graphName, VerticesFilter filter, VerticesSortCriteria... sortingCriteria) {
         UriBuilder uriBuilder = graphPath(graphName).path("search");//
         RSearchRequest searchRequest = RSearchRequest.builder()
                 .title(filter.getTitle())
@@ -51,6 +48,7 @@ public class VertexAPI {
                 .minEdgesSpec(filter.getMinAdjacentEdgesFilter() != null ? filter.getMinAdjacentEdgesFilter().serialize() : null)
                 .verticesIds(filter.getVerticesIds() != null ? new ArrayList<>(filter.getVerticesIds()) : null)
                 .sortingCriteriaSpec(sortingCriteria != null ? VerticesSortCriteria.serializeSortingCriteria(sortingCriteria) : null)
+                .vertexPropertyFilter(filter.getVertexPropertyFilter())
                 .build();
      
 

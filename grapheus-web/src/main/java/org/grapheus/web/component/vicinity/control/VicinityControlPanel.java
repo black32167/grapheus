@@ -61,7 +61,6 @@ public class VicinityControlPanel extends Panel {
     private final IModel<RVertex> selectedVertexModel;
     private final SerializableSupplier<String> graphIdSupplier;
     private final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback;
-    private final ShowOperationSupport dialogOperationSupport;
 
     // Fields in  this block are initialized internally in the constructor
     private final Label vertexTagsLabel;
@@ -76,7 +75,6 @@ public class VicinityControlPanel extends Panel {
                                 final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback) {
         super(id);
         this.vicinityVertexModel = vicinityVertexModel;
-        this.dialogOperationSupport = dialogOperationSupport;
         this.selectedVertexModel = createArtifactModel();
         this.graphView = new VicinityInteractiveView("vicinityView", vicinityVertexModel, graphIdSupplier, graphChangedCallback, dialogOperationSupport);
         this.graphView.setOutputMarkupId(true);

@@ -20,6 +20,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
+import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.list.vcontrol.VerticesControlPanel;
@@ -40,8 +41,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
-    private static final long serialVersionUID = 1L;
     public static final String PARAM_SELECTED_GRAPH = "graph";
+    public static final String PARAM_FILTER_PROPERTY = "filterProperty";
+    private static final long serialVersionUID = 1L;
     private static final String SIDE_PANEL_ID = "graphView";
 
     private static final PackageResourceReference layoutJsReference = new PackageResourceReference(
@@ -73,14 +75,28 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
     public VerticesPage(final PageParameters parameters) {
         super(parameters);
         graphId = getPageParameters().get(PARAM_SELECTED_GRAPH).toString();
-        
+
         this.vicinityVertexModel = new VicinityModel(()->graphId);
         this.verticesListModel = new VerticesListModel(()->graphId, vicinityVertexModel);
+        verticesListModel.getFilter().setVertexPropertyFilter(parseVertexFilterProperty(getPageParameters().get(PARAM_FILTER_PROPERTY).toString()));
         
         this.dialog = new ModalWindow("operationDilaog")
                 .showUnloadConfirmation(false);
         
         dialogOperationSupport = newDialogOperationSupport();
+    }
+
+    private RVertexPropertyFilter parseVertexFilterProperty(String vertexPropFilterStr) {
+        if(vertexPropFilterStr == null) {
+            return null;
+        }
+
+        String[] parts = vertexPropFilterStr.split("=");
+        if(parts.length != 2) {
+            throw new IllegalArgumentException("Illegal vertex property filter:" + vertexPropFilterStr);
+        }
+
+        return new RVertexPropertyFilter(parts[0], parts[1]);
     }
 
     @Override
@@ -99,7 +115,6 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
         }
 
         super.onInitialize();
-        
         
         add(rightPanel = newRightPanel());
 

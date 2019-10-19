@@ -3,12 +3,12 @@
  */
 package org.grapheus.client.model.graph.search;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @author black
@@ -26,5 +26,6 @@ public class RSearchRequest {
     private String title;
     private List<String> verticesIds;
     private String sortingCriteriaSpec;
+    private RVertexPropertyFilter vertexPropertyFilter;
 
 }

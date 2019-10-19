@@ -173,6 +173,7 @@ public class VertexResource {
                 sinks(request.getSinks() != null && request.getSinks()).//
                 artifactKeys(request.getVerticesIds() == null || request.getVerticesIds().isEmpty() ? null : request.getVerticesIds()).//
                 minimalAdjacentEdgesFilter(RAdjacentEdgesFilter.deserialize(request.getMinEdgesSpec())).
+                vertexPropertyFilter(request.getVertexPropertyFilter()).
                 build();
 
         List<VerticesSortCriteria> sortingCriteria = VerticesSortCriteria.deserializeSortingCriteria(request.getSortingCriteriaSpec());

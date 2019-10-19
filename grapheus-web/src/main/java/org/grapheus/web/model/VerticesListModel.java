@@ -3,23 +3,23 @@
  */
 package org.grapheus.web.model;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.grapheus.client.api.ArtifactsFilter;
+import org.grapheus.client.api.VerticesFilter;
 import org.grapheus.client.model.graph.SortDirection;
 import org.grapheus.client.model.graph.VertexInfoType;
 import org.grapheus.client.model.graph.VerticesSortCriteria;
 import org.grapheus.client.model.graph.VerticesSortCriteriaType;
 import org.grapheus.client.model.graph.edge.EdgeDirection;
 import org.grapheus.client.model.graph.edge.RAdjacentEdgesFilter;
+import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.client.model.graph.vertex.RVertexInfo;
 import org.grapheus.client.model.graph.vertex.RVerticesContainer;
@@ -28,13 +28,13 @@ import org.grapheus.web.component.list.view.VerticesListViewPanel.VertexInfo;
 import org.grapheus.web.component.shared.SerializableSupplier;
 import org.grapheus.web.model.VerticesListModel.VerticesRemoteDataset;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author black
@@ -61,6 +61,8 @@ public class VerticesListModel extends LoadableDetachableModel<VerticesRemoteDat
         private EdgeDirection filteringEdgesDirection = EdgeDirection.INBOUND;
         @Getter @Setter
         private boolean restrictByVicinity;
+        @Getter @Setter
+        private RVertexPropertyFilter vertexPropertyFilter;
     }
     
     @Data
@@ -85,12 +87,13 @@ public class VerticesListModel extends LoadableDetachableModel<VerticesRemoteDat
     private final IModel<VicinityGraph> vicinityVerticesListModel;
     
     private VerticesRemoteDataset getVerticesInfoList() {
-        ArtifactsFilter taskFilter = ArtifactsFilter.builder().//
+        VerticesFilter taskFilter = VerticesFilter.builder().//
                 sinks(filter.isSinks()).//
                 title(filter.getSubstring()).//
                 minAdjacentEdgesFilter(RAdjacentEdgesFilter.builder().
                         amount(filter.getMinEdges()).
                         direction(filter.getFilteringEdgesDirection()).build()).
+                vertexPropertyFilter(filter.vertexPropertyFilter).
                 build();
         if(filter.isRestrictByVicinity()) {
             Set<String> vIds = vicinityVerticesListModel.getObject().getVertices().stream().map(Vertex::getId).collect(Collectors.toSet());

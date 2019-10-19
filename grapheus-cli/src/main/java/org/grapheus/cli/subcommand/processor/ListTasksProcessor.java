@@ -3,19 +3,18 @@
  */
 package org.grapheus.cli.subcommand.processor;
 
-import javax.inject.Inject;
-
+import lombok.RequiredArgsConstructor;
 import org.grapheus.cli.security.CLIUserContext;
-import org.grapheus.cli.subcommand.ListTasks;
 import org.grapheus.cli.subcommand.GrapheusCLICommand;
+import org.grapheus.cli.subcommand.ListTasks;
 import org.grapheus.client.GrapheusClientFactory;
-import org.grapheus.client.api.ArtifactsFilter;
 import org.grapheus.client.api.VertexAPI;
+import org.grapheus.client.api.VerticesFilter;
 import org.grapheus.client.http.auth.GrapheusClientCredentials;
 import org.grapheus.client.model.graph.vertex.RVerticesContainer;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
+import javax.inject.Inject;
 
 /**
  * @author black
@@ -33,7 +32,7 @@ public class ListTasksProcessor implements CommandProcessor {
         VertexAPI taskAPI = clientFactory.forUser(() -> new GrapheusClientCredentials(userCtx.getUserName(), userCtx.getPassword())).vertex();
         RVerticesContainer artifacts = taskAPI.findVertices(
                 taskCommand.getGraph(),
-                ArtifactsFilter.builder().build());
+                VerticesFilter.builder().build());
         
         System.out.println(artifacts);
     }

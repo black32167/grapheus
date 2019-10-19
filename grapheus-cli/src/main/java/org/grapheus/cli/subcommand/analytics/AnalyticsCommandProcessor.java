@@ -3,8 +3,23 @@
  */
 package org.grapheus.cli.subcommand.analytics;
 
-import static java.util.Optional.ofNullable;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.grapheus.cli.security.CLIUserContext;
+import org.grapheus.cli.subcommand.GrapheusCLICommand;
+import org.grapheus.cli.subcommand.processor.CommandProcessingException;
+import org.grapheus.cli.subcommand.processor.CommandProcessor;
+import org.grapheus.client.GrapheusClientFactory;
+import org.grapheus.client.UserClient;
+import org.grapheus.client.api.ComputeAPI;
+import org.grapheus.client.api.DataStatisticsAPI;
+import org.grapheus.client.api.VertexAPI;
+import org.grapheus.client.api.VerticesFilter;
+import org.grapheus.client.model.graph.edge.REdge;
+import org.grapheus.client.model.graph.vertex.RVertex;
+import org.springframework.stereotype.Service;
 
+import javax.inject.Inject;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -13,24 +28,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.grapheus.cli.security.CLIUserContext;
-import org.grapheus.cli.subcommand.GrapheusCLICommand;
-import org.grapheus.cli.subcommand.processor.CommandProcessingException;
-import org.grapheus.cli.subcommand.processor.CommandProcessor;
-import org.grapheus.client.GrapheusClientFactory;
-import org.grapheus.client.UserClient;
-import org.grapheus.client.api.ComputeAPI;
-import org.grapheus.client.api.ArtifactsFilter;
-import org.grapheus.client.api.DataStatisticsAPI;
-import org.grapheus.client.api.VertexAPI;
-import org.grapheus.client.model.graph.edge.REdge;
-import org.grapheus.client.model.graph.vertex.RVertex;
-import org.springframework.stereotype.Service;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import static java.util.Optional.ofNullable;
 
 /**
  * @author black
@@ -66,7 +64,7 @@ public class AnalyticsCommandProcessor implements CommandProcessor {
         case "count":
             System.out.println(dstatAPI.getDataStat().getArtifactsCount()); break;
         case "title":
-            ArtifactsFilter filter = ArtifactsFilter.builder().title("%"+analyticsCommand.getParameters()+"%").build();
+            VerticesFilter filter = VerticesFilter.builder().title("%"+analyticsCommand.getParameters()+"%").build();
             userClient.vertex().//
                 findVertices(analyticsCommand.getGraph(), filter).//
                 getArtifacts().//

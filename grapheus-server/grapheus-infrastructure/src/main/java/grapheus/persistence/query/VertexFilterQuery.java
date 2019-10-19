@@ -3,6 +3,12 @@
  */
 package grapheus.persistence.query;
 
+import grapheus.persistence.storage.graph.GraphNameUtils;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.grapheus.client.model.graph.SortDirection;
+import org.grapheus.client.model.graph.edge.EdgeDirection;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,13 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.grapheus.client.model.graph.SortDirection;
-import org.grapheus.client.model.graph.edge.EdgeDirection;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import grapheus.persistence.storage.graph.GraphNameUtils;
 
 /**
  * @author black
@@ -46,6 +45,23 @@ public class VertexFilterQuery {
         if (propertyValues != null) {
             String artsKeysArrPara = QueryUtil.arrayParameter("p" + vertexClauses.size() + "_", propertyValues, parameters);
             vertexClauses.add(" a." + propertyName + " IN " + artsKeysArrPara);
+        }
+    }
+
+
+    public void addInPropertyFilter(String propertyName, String value) {
+        if (value != null) {
+            String paramName = "p" + vertexClauses.size();
+            parameters.put(paramName, value);
+            vertexClauses.add("@" + paramName + " IN a." + propertyName);
+        }
+    }
+
+    public void addEqFilter(String propertyName, String value) {
+        if (value != null) {
+            String paramName = "p" + vertexClauses.size();
+            parameters.put(paramName, value);
+            vertexClauses.add(" a." + propertyName + " == @" + paramName);
         }
     }
 

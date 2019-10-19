@@ -3,21 +3,7 @@
  */
 package grapheus.persistence.storage.graph.query.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-
-import org.grapheus.client.model.graph.VerticesSortCriteria;
-import org.grapheus.client.model.graph.edge.EdgeDirection;
-import org.grapheus.client.model.graph.edge.RAdjacentEdgesFilter;
-import org.springframework.stereotype.Repository;
-
 import com.arangodb.ArangoCursor;
-
 import grapheus.persistence.StorageSupport;
 import grapheus.persistence.model.graph.PersistentVertex;
 import grapheus.persistence.query.QueryUtil;
@@ -27,6 +13,19 @@ import grapheus.persistence.storage.graph.query.VertexFinder;
 import grapheus.service.uds.ArtifactsFilter;
 import grapheus.view.SemanticFeature;
 import lombok.extern.slf4j.Slf4j;
+import org.grapheus.client.model.graph.VerticesSortCriteria;
+import org.grapheus.client.model.graph.edge.EdgeDirection;
+import org.grapheus.client.model.graph.edge.RAdjacentEdgesFilter;
+import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
+import org.springframework.stereotype.Repository;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * @author black
@@ -90,7 +89,13 @@ public class DefaultVertexFinder extends StorageSupport implements VertexFinder 
         query.addInFilter("_key", taskFilter.getArtifactKeys());
       
         query.addLikeFilter(PersistentVertex.FIELD_TITLE, taskFilter.getTitle());
-        
+
+        RVertexPropertyFilter vertexPropertyFilter = taskFilter.getVertexPropertyFilter();
+        if(vertexPropertyFilter != null) {
+            query.addInPropertyFilter(PersistentVertex.FIELD_VIEW_HINT_TYPE, vertexPropertyFilter.getName());
+            query.addInPropertyFilter(PersistentVertex.FIELD_VIEW_HINT_VAL, vertexPropertyFilter.getValue());
+        }
+
         query.setLimit(0/*taskFilter.getStart()*/, taskFilter.getLimit());
        
         for(VerticesSortCriteria c: verticesSortCriteria) {
