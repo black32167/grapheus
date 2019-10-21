@@ -1,4 +1,4 @@
-package org.grapheus.web.component.operation.collapsed;
+package org.grapheus.web.component.operation.dialog.collapsed;
 
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;

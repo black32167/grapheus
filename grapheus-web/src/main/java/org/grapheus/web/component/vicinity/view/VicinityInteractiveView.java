@@ -20,7 +20,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.util.template.PackageTextTemplate;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.ShowOperationSupport;
-import org.grapheus.web.component.operation.collapsed.GenerateCollapsedGraphPanel;
+import org.grapheus.web.component.operation.dialog.collapsed.GenerateCollapsedGraphPanel;
+import org.grapheus.web.component.operation.dialog.filter.property.FilterByPropertyPanel;
 import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.component.shared.SerializableSupplier;
 import org.grapheus.web.model.Edge;
@@ -40,7 +41,6 @@ import java.util.stream.Collectors;
 public class VicinityInteractiveView extends Panel {
     private static final long serialVersionUID = 1L;
 
-
     private static final PackageTextTemplate graphActivatorTemplate = new PackageTextTemplate(
             VicinityInteractiveView.class, "js/graphSettings.js");
 
@@ -54,6 +54,7 @@ public class VicinityInteractiveView extends Panel {
     private final AbstractDefaultAjaxBehavior deleteEdgeBehavior;
     private final AbstractDefaultAjaxBehavior deleteVertexBehavior;
     private final AbstractDefaultAjaxBehavior generateCollapsedGraphBehavior;
+    private final AbstractDefaultAjaxBehavior filterByPropertyBehavior;
 
     private final SerializableSupplier<String> graphIdSupplier;
 
@@ -69,6 +70,7 @@ public class VicinityInteractiveView extends Panel {
         deleteEdgeBehavior = createDeleteEdgeBehavior();
         deleteVertexBehavior = createDeleteVertexBehavior();
         generateCollapsedGraphBehavior = createGenerateCollapsedGraphBehavior();
+        this.filterByPropertyBehavior = createFilterByPropertyBehavior();
         this.vicinityVertexModel = vicinityVertexModel;
         this.graphChangedCallback = graphChangedCallback;
     }
@@ -86,9 +88,9 @@ public class VicinityInteractiveView extends Panel {
         jsParams.put("deleteEdgeURL", deleteEdgeBehavior.getCallbackUrl());
         jsParams.put("deleteVertexURL", deleteVertexBehavior.getCallbackUrl());
         jsParams.put("generateCollapsedGraphURL", generateCollapsedGraphBehavior.getCallbackUrl());
+        jsParams.put("filterByPropertyURL", filterByPropertyBehavior.getCallbackUrl());
         response.render(OnLoadHeaderItem.forScript(graphActivatorTemplate.asString(jsParams)));
     }
-
 
     @Override
     protected void onInitialize() {
@@ -104,6 +106,7 @@ public class VicinityInteractiveView extends Panel {
         add(deleteEdgeBehavior);
         add(deleteVertexBehavior);
         add(generateCollapsedGraphBehavior);
+        add(filterByPropertyBehavior);
     }
 
     private AbstractDefaultAjaxBehavior createGenerateCollapsedGraphBehavior() {
@@ -114,6 +117,18 @@ public class VicinityInteractiveView extends Panel {
             protected void respond(final AjaxRequestTarget target) {
                 String vertexId = getRequest().getRequestParameters().getParameterValue("vertexId").toOptionalString();
                 dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), graphIdSupplier.get(), vertexId));
+            }
+        };
+    }
+
+    private AbstractDefaultAjaxBehavior createFilterByPropertyBehavior() {
+        return new AbstractDefaultAjaxBehavior() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void respond(final AjaxRequestTarget target) {
+                String vertexId = getRequest().getRequestParameters().getParameterValue("vertexId").toOptionalString();
+                dialogOperationSupport.showOperation(target, new FilterByPropertyPanel(dialogOperationSupport.getId(), graphIdSupplier.get(), vertexId));
             }
         };
     }
@@ -142,7 +157,6 @@ public class VicinityInteractiveView extends Panel {
                 RemoteUtil.operationAPI().disconnect(graphIdSupplier.get(), sourceVertexId, targetVertexId);
                 target.add(VicinityInteractiveView.this);
             }
-
         };
     }
 
@@ -156,7 +170,6 @@ public class VicinityInteractiveView extends Panel {
                 RemoteUtil.vertexAPI().delete(graphIdSupplier.get(), vertexId);
                 graphChangedCallback.accept(target);
             }
-
         };
     }
 
@@ -203,7 +216,6 @@ public class VicinityInteractiveView extends Panel {
                 l.add(new AttributeAppender("properties", serializedProperties));
 
                 item.add(l);
-
             }
         };
     }

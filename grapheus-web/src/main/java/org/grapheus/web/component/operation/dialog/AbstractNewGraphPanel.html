@@ -1,15 +1,7 @@
-<wicket:panel>
-    <span wicket:id="feedback"/>
-    <form wicket:id="generatorForm" class="input-form" style="width:100%">
-        <fieldset>
-        <div>
-            <span class="form-sign">New name:</span>
-            <input type="text" wicket:id="newGraphName"></input>
-        </div>
-        <wicket:child/>
-            <div class="form-controls">
-                <button wicket:id="submitButton" type="button" class="form-submit">Generate</button>
-            </div>
-        </fieldset>
-    </form>
-</wicket:panel>
+<wicket:extend xmlns:wicket="http://www.w3.org/1999/xhtml">
+    <div>
+        <span class="form-sign">New name:</span>
+        <input type="text" wicket:id="newGraphName"></input>
+    </div>
+    <wicket:child/>
+</wicket:extend>
