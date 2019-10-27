@@ -3,18 +3,18 @@
  */
 package org.grapheus.web.component.operation.tabs.merge;
 
+import lombok.Builder;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.component.operation.tabs.AbstractEmbeddedPanel;
 import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.component.shared.vlist.VerticesListArgumentPanel;
 import org.grapheus.web.page.vertices.list.VerticesPage;
-
-import lombok.Builder;
 
 /**
  * @author black
@@ -25,13 +25,13 @@ public class MergePanel extends AbstractEmbeddedPanel {
     
     private VerticesListArgumentPanel verticesList;
 
-    private final String graphId;
+    private final IModel<String> graphIdModel;
     private String newVertexName;
 
     @Builder
-    public MergePanel(String id, SerializableConsumer<AjaxRequestTarget> operationFinishedCallback, String graphId) {
+    public MergePanel(String id, SerializableConsumer<AjaxRequestTarget> operationFinishedCallback, IModel<String> graphIdModel) {
         super(id, operationFinishedCallback);
-        this.graphId = graphId;
+        this.graphIdModel = graphIdModel;
     }
 
     @Override
@@ -47,6 +47,7 @@ public class MergePanel extends AbstractEmbeddedPanel {
 
     @Override
     protected void performOperation(AjaxRequestTarget target) {
+        String graphId = graphIdModel.getObject();
         RemoteUtil.operationAPI().merge(
                 graphId,
                 newVertexName,

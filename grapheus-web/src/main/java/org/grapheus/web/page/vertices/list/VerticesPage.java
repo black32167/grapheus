@@ -14,31 +14,25 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.JavaScriptReferenceHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
-import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.list.vcontrol.VerticesControlPanel;
 import org.grapheus.web.component.menu.AjaxMenu;
 import org.grapheus.web.component.menu.VertexPageMenuFactory;
 import org.grapheus.web.component.operation.tabs.merge.MergePanel;
 import org.grapheus.web.component.operation.tabs.rooted.RootedSubgraphGenerationPanel;
-import org.grapheus.web.component.shared.SerializableSupplier;
 import org.grapheus.web.component.vicinity.control.VicinityControlPanel;
-import org.grapheus.web.model.GraphInfo;
-import org.grapheus.web.model.VerticesListModel;
-import org.grapheus.web.model.VicinityModel;
 import org.grapheus.web.page.base.AbstractGrapheusAuthenticatedPage;
+import org.grapheus.web.state.RepresentationState;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
     public static final String PARAM_SELECTED_GRAPH = "graph";
@@ -51,13 +45,10 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
     private static final PackageResourceReference layoutCssReference = new PackageResourceReference(
             VerticesPage.class, "layout-default-latest.css");
     private static final String FIELD_CURRENT_RIGHT_PANEL_TAB = "currentRightPanelTab";
-    
-    
-    private String graphId;
-    
-    private final VerticesListModel verticesListModel;
+
     private final ShowOperationSupport dialogOperationSupport;
-    private final VicinityModel vicinityVertexModel;
+
+    private final RepresentationState representationState;
     
     private Component rightPanel;
     private Component verticesPanel;
@@ -74,13 +65,14 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
 
     public VerticesPage(final PageParameters parameters) {
         super(parameters);
-        graphId = getPageParameters().get(PARAM_SELECTED_GRAPH).toString();
 
-        this.vicinityVertexModel = new VicinityModel(()->graphId);
-        this.verticesListModel = new VerticesListModel(()->graphId, vicinityVertexModel);
-        verticesListModel.getFilter().setVertexPropertyFilter(parseVertexFilterProperty(getPageParameters().get(PARAM_FILTER_PROPERTY).toString()));
-        
-        this.dialog = new ModalWindow("operationDilaog")
+        String graphId = getPageParameters().get(PARAM_SELECTED_GRAPH).toString();
+
+        representationState = new RepresentationState(graphId);
+
+        representationState.getVertexListFilter().setVertexPropertyFilter(parseVertexFilterProperty(getPageParameters().get(PARAM_FILTER_PROPERTY).toString()));
+
+        dialog = new ModalWindow("operationDilaog")
                 .showUnloadConfirmation(false);
         
         dialogOperationSupport = newDialogOperationSupport();
@@ -101,49 +93,25 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
 
     @Override
     protected void onInitialize() {
-        IModel<List<GraphInfo>> graphListModel = loadAvailableGraphs();
         // Choosing current graph
-        List<GraphInfo> availableGraphs = graphListModel.getObject();
-        if(graphId == null) {
-            if(!availableGraphs.isEmpty()) {
-                graphId = availableGraphs.get(0).getGraphName();
-            }
-        }
-        if(graphId != null && !isExists(graphId)) {
-            // Graph does not exist -> redirecting to page w/o parameters
-            setResponsePage(VerticesPage.class);
-        }
-
         super.onInitialize();
         
         add(rightPanel = newRightPanel());
 
-        add(verticesPanel = newVerticesPanel(graphListModel));
+        add(verticesPanel = newVerticesPanel());
         
         add(dialog);
-        
     }
 
-    private boolean isExists(String graphId) {
-        return RemoteUtil.graphsAPI().graphExists(graphId);
-    }
-
-    private Component newVerticesPanel(IModel<List<GraphInfo>> graphListModel) {
+    private Component newVerticesPanel() {
         return VerticesControlPanel.builder()
                 .id("taskList")
-                .graphIdSupplier(()->graphId)
-                .verticesListModel(verticesListModel)
-                .graphListModel(graphListModel)
+                .representationState(representationState)
                 .dialogOperationSupport(dialogOperationSupport)
                 .vertexSelectionListener((target, artifactId) -> {
-                    vicinityVertexModel.getFilter().setSelectedVertexId(artifactId);
                     showVicinity(target);
                 })
                 .vertexRemovalListener((target, removedIds) -> {
-                    String selectedVertexId = vicinityVertexModel.getFilter().getSelectedVertexId();
-                    if(selectedVertexId != null && removedIds.contains(selectedVertexId)) {
-                        vicinityVertexModel.getFilter().setSelectedVertexId(null);
-                    }
                     showVicinity(target);
                 })
                 .build()
@@ -152,39 +120,25 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
 
     private TabbedPanel<ITab> newRightPanel() {
         List<ITab> tabs = new ArrayList<ITab>();
-        SerializableSupplier<String> graphIdSupplier = ()->graphId;
-
         tabs.add(newTab(
                 "Vicinity",
                 id -> VicinityControlPanel.builder()
                         .id(id)
-                        .graphIdSupplier(graphIdSupplier)
-                        .vicinityVertexModel(vicinityVertexModel)
+                        .representationState(representationState)
                         .graphChangedCallback(VerticesPage.this::reloadContent)
                         .dialogOperationSupport(dialogOperationSupport)
                         .build()));
-//        
-//        tabs.add(newTab("Connect...", id -> VerticesConnectPanel.builder()//
-//                .id(id)//
-//                .graphId(graphId)
-//                .operationFinishedCallback(VerticesPage.this::reloadContent)
-//                .build()));
-//        
-//        tabs.add(newTab("Disconnect...", id -> VerticesDisconnectPanel.builder()//
-//                .id(id)//
-//                .graphId(graphId)
-//                .operationFinishedCallback(VerticesPage.this::reloadContent)
-//                .build()));
-        
+
+        IModel<String> graphIdModel = new PropertyModel<>(representationState, RepresentationState.FIELD_GRAPH_ID);
         tabs.add(newTab("Merge...", id -> MergePanel.builder()//
                 .id(id)//
-                .graphId(graphId)
+                .graphIdModel(graphIdModel)
                 .operationFinishedCallback(VerticesPage.this::reloadContent)
                 .build()));
         
         tabs.add(newTab("Find path...", id -> RootedSubgraphGenerationPanel.builder()//
                 .id(id)//
-                .sourceGraphId(graphId)
+                .sourceGraphIdModel(graphIdModel)
                 .operationFinishedCallback(VerticesPage.this::reloadContent)
                 .build()));
       
@@ -222,24 +176,10 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
         VertexPageMenuFactory menuFactory = VertexPageMenuFactory.builder()
                 .page(this)
                 .dialogOperationSupport(dialogOperationSupport)
-                .graphIdSupplier(()->graphId)
+                .graphIdSupplier(representationState::getGraphId)
                 .editPermitted(true)//FIXME:get graph metadata
                 .build();
         return new AjaxMenu(id, new ListModel<>(menuFactory.getMenuItems()));
-    }
-   
-
-    private IModel<List<GraphInfo>> loadAvailableGraphs() {
-        return new LoadableDetachableModel<List<GraphInfo>>() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected List<GraphInfo> load() {
-                return RemoteUtil.graphsAPI().getAvailableGraphs().stream().map(
-                        rg -> GraphInfo.builder().graphName(rg.getName()).editPermitted(rg.isEditPermitted()).build())
-                        .collect(Collectors.toList());
-            }
-        };
     }
 
     private ShowOperationSupport newDialogOperationSupport() {

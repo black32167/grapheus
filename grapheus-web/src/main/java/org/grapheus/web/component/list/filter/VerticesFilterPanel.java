@@ -3,6 +3,7 @@
  */
 package org.grapheus.web.component.list.filter;
 
+import lombok.Builder;
 import org.apache.wicket.Component;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -12,28 +13,23 @@ import org.apache.wicket.model.CompoundPropertyModel;
 import org.grapheus.web.component.shared.LambdaAjaxLink;
 import org.grapheus.web.component.shared.LambdaAjaxTextField;
 import org.grapheus.web.component.shared.SerializableConsumer;
-import org.grapheus.web.component.shared.SerializableSupplier;
-import org.grapheus.web.model.VerticesListModel;
-
-import lombok.Builder;
+import org.grapheus.web.state.RepresentationState;
+import org.grapheus.web.state.VertexListFilter;
 
 /**
  * @author black
  */
 public class VerticesFilterPanel extends Panel {
 	private static final long serialVersionUID = 1L;
-	private final VerticesListModel.Filter verticesFilter;
+	private final RepresentationState representationState;
 	private final SerializableConsumer<IPartialPageRequestHandler> filterChangedCallback;
-	private final SerializableSupplier<String> graphIdSupplier;
 	
 	@Builder
 	public VerticesFilterPanel(String id,
-	        final SerializableSupplier<String> graphIdSupplier,
-	        VerticesListModel.Filter verticesListFilter, 
+	        RepresentationState representationState,
 	        SerializableConsumer<IPartialPageRequestHandler> filterChangedCallback) {
 		super(id);
-		this.graphIdSupplier = graphIdSupplier;
-		this.verticesFilter = verticesListFilter;
+		this.representationState = representationState;;
 		this.filterChangedCallback = filterChangedCallback;
 	}
 
@@ -52,8 +48,8 @@ public class VerticesFilterPanel extends Panel {
 		return AdvancedFilterDialog.builder()
 		        .id(dialogDivId)
 		        .title("Advanced Filter")
-		        .graphIdSupplier(graphIdSupplier)
-		        .verticesListFilter(verticesFilter)
+		        .graphIdSupplier(()->representationState.getGraphId())
+		        .verticesListFilter(representationState.getVertexListFilter())
 		        .filterAppliedCallback(filterChangedCallback::accept)
 		        .build();
 	}
@@ -67,8 +63,8 @@ public class VerticesFilterPanel extends Panel {
 	}
 
 	private WebMarkupContainer createForm(String id) {
-		return new Form<VerticesListModel.Filter>(id,
-                new CompoundPropertyModel<VerticesListModel.Filter>(verticesFilter));
+		return new Form<VertexListFilter>(id,
+                new CompoundPropertyModel<>(representationState.getVertexListFilter()));
 	}
 
 	

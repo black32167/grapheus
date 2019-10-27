@@ -3,15 +3,12 @@
  */
 package org.grapheus.web.component.list.view;
 
-import java.io.Serializable;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import javax.servlet.http.HttpSession;
-
+import com.googlecode.wicket.jquery.core.Options;
+import com.googlecode.wicket.jquery.ui.interaction.draggable.DraggableAdapter;
+import com.googlecode.wicket.jquery.ui.interaction.draggable.DraggableBehavior;
+import lombok.Builder;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -28,17 +25,17 @@ import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.web.RemoteUtil;
-import org.grapheus.web.component.shared.SerializableSupplier;
 import org.grapheus.web.component.shared.vlink.VertexLinkPanel;
-import org.grapheus.web.model.VerticesListModel.VerticesRemoteDataset;
+import org.grapheus.web.model.VerticesRemoteDataset;
+import org.grapheus.web.state.RepresentationState;
 
-import com.googlecode.wicket.jquery.core.Options;
-import com.googlecode.wicket.jquery.ui.interaction.draggable.DraggableAdapter;
-import com.googlecode.wicket.jquery.ui.interaction.draggable.DraggableBehavior;
-
-import lombok.Builder;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpSession;
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * @author black
@@ -59,26 +56,24 @@ public class VerticesListViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd-MM-yyyy mm:HH");
 
+    private final RepresentationState representationState;
     private final VertexSelectionListener vertexSelectionListener;
     private final IModel<List<String>> vertexSelectionModel;
-    private final SerializableSupplier<String> graphIdSupplier;
     
     @Builder
     public VerticesListViewPanel(
-            String id, 
-            final SerializableSupplier<String> graphIdSupplier,
-            IModel<List<String>> vertexSelectionModel,
-            IModel<VerticesRemoteDataset> listModel,
+            String id,
+            RepresentationState representationState,
             VertexSelectionListener vertexSelectionListener) {
         super(id);
 
-        this.graphIdSupplier = graphIdSupplier;
-        this.vertexSelectionModel = vertexSelectionModel;
+        this.representationState = representationState;
+        this.vertexSelectionModel = new PropertyModel<>(representationState, RepresentationState.FIELD_SELECTED_VIDS);
         this.vertexSelectionListener = vertexSelectionListener;
        
         // Add list component
         add(createListForm("verticesForm")
-                .add(getVerticesListPanel("artifacts", listModel)));
+                .add(getVerticesListPanel("artifacts", representationState.getVerticesListModel())));
     }
 
     private Form<?> createListForm(String id) {
@@ -92,7 +87,7 @@ public class VerticesListViewPanel extends Panel {
 
             @Override
             protected void populateItem(ListItem<VertexInfo> item) {
-                String graphName = graphIdSupplier.get();
+                String graphName = representationState.getGraphId();
                 IModel<VertexInfo> taskModel = (IModel<VertexInfo>) item.getDefaultModel();
                 VertexInfo vertexInfo = taskModel.getObject();
                // RVertex vertex = vertexInfo.getVertex();
@@ -134,9 +129,11 @@ public class VerticesListViewPanel extends Panel {
                         "task_title",
                         title,
                         vertexInfo.getVertexId(),
-                        graphName, target-> {
-                    	vertexSelectionListener.onVertexSelected(target, vertexInfo.getVertexId());
-                }));
+                        graphName,
+                        target -> {
+                            representationState.setClickedVertexId(vertexInfo.getVertexId());
+                            vertexSelectionListener.onVertexSelected(target, vertexInfo.getVertexId());
+                        }));
                 
                 item.add(new Label("task_info", vertexInfo.getVertexInfo()));
               

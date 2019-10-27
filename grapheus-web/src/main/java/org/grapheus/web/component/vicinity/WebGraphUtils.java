@@ -7,9 +7,9 @@ import org.grapheus.client.model.graph.edge.EdgeDirection;
 import org.grapheus.client.model.graph.edge.REdge;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.web.RemoteUtil;
-import org.grapheus.web.model.Edge;
-import org.grapheus.web.model.Vertex;
 import org.grapheus.web.model.VicinityGraph;
+import org.grapheus.web.model.WEdge;
+import org.grapheus.web.model.WVertex;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,8 +52,8 @@ public class WebGraphUtils {
                 rootArtifactId,
                 edgesDirection,
                 depth).getEdges();
-        List<Edge> edgesViews = neighborhood.stream().map(WebGraphUtils::toEdgeView).collect(toList());
-        for(Edge e: edgesViews) {
+        List<WEdge> edgesViews = neighborhood.stream().map(WebGraphUtils::toEdgeView).collect(toList());
+        for(WEdge e: edgesViews) {
             String from = e.getFromId();
             String to = e.getToId();
             neighboringArtifactsIds.add(from);
@@ -61,12 +61,12 @@ public class WebGraphUtils {
         }
 
         // Fetching neighboring vertices
-        List<Vertex> verticesViews = new ArrayList<>();
+        List<WVertex> verticesViews = new ArrayList<>();
 
         Collection<RVertex> persistedVertices = RemoteUtil.vertexAPI().loadArtifacts(graphName, neighboringArtifactsIds);
         for(RVertex persistedVertex: persistedVertices) {
 
-            verticesViews.add(Vertex.builder().//
+            verticesViews.add(WVertex.builder().//
                     name(persistedVertex.getTitle() != null ? persistedVertex.getTitle() : "#" + persistedVertex.getId()).//
                     id(persistedVertex.getId()).//
                    // neighbors(neighborsMap.getOrDefault(persistedVertex.getId(), emptyList())).//
@@ -78,7 +78,7 @@ public class WebGraphUtils {
 
         // Add remaining 'ephemeral' vertices
         for(String missingVertexId:neighboringArtifactsIds) {
-            verticesViews.add(Vertex.builder()//
+            verticesViews.add(WVertex.builder()//
                     .id(missingVertexId)
                     .name("#"+missingVertexId)
                     .tags(singletonList("external"))
@@ -92,8 +92,8 @@ public class WebGraphUtils {
                 .build();
     }
 
-    private static Edge toEdgeView(REdge remoteEdge) {
-        return Edge.builder()
+    private static WEdge toEdgeView(REdge remoteEdge) {
+        return WEdge.builder()
                 .fromId(remoteEdge.getFrom())
                 .toId(remoteEdge.getTo())
                 .tags(ofNullable(remoteEdge.getTags()).orElse(emptyList()))

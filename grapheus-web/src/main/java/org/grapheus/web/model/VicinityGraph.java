@@ -11,6 +11,6 @@ public class VicinityGraph {
     public final static String FIELD_VERTICES = "vertices";
     public final static String FIELD_EDGES = "edges";
 
-    private List<Vertex> vertices;
-    private List<Edge> edges;
+    private List<WVertex> vertices;
+    private List<WEdge> edges;
 }

@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @Builder 
-public final class Vertex implements Serializable {
+public final class WVertex implements Serializable {
     private static final long serialVersionUID = 1L;
 
     String name;

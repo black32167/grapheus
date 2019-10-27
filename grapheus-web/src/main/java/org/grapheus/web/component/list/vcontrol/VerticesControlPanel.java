@@ -3,9 +3,7 @@
  */
 package org.grapheus.web.component.list.vcontrol;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import lombok.Builder;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -26,13 +24,13 @@ import org.grapheus.web.component.list.view.VerticesListViewPanel;
 import org.grapheus.web.component.operation.dialog.add.AddVertexPanel;
 import org.grapheus.web.component.shared.LambdaAjaxCheckbox;
 import org.grapheus.web.component.shared.LambdaAjaxDropDownChoice;
-import org.grapheus.web.component.shared.SerializableSupplier;
 import org.grapheus.web.model.GraphInfo;
-import org.grapheus.web.model.VerticesListModel;
-import org.grapheus.web.model.VerticesListModel.VerticesRemoteDataset;
+import org.grapheus.web.model.VerticesRemoteDataset;
 import org.grapheus.web.page.vertices.list.VerticesPage;
+import org.grapheus.web.state.RepresentationState;
 
-import lombok.Builder;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author black
@@ -42,15 +40,14 @@ public class VerticesControlPanel extends Panel {
 	private static final long serialVersionUID = 1L;
 	private final static String FIELD_SELECTED_VERTICES_IDS = "selectedVerticesIds";
 
-	private final VerticesListModel vertexListModel;
+	private final RepresentationState representationState;
+
+	private final IModel<VerticesRemoteDataset> vertexListModel;
 	private final VertexSelectionListener vertexSelectionListener;
 	private final VertexRemovalListener vertexRemovalListener;
 	private final IModel<List<GraphInfo>> graphListModel;
 	private final ShowOperationSupport dialogOperationSupport;
-	private final SerializableSupplier<String> graphIdSupplier;
-	
-	private final List<String> selectedVerticesIds = new ArrayList<String>();
-	
+
 	private VerticesListViewPanel verticesList;
 
     private Component itemCountLabel;
@@ -58,18 +55,16 @@ public class VerticesControlPanel extends Panel {
     @Builder
 	public VerticesControlPanel(
 	        String id,
-	        final SerializableSupplier<String> graphIdSupplier,
-	        VerticesListModel verticesListModel,
-	        IModel<List<GraphInfo>> graphListModel,
+			RepresentationState representationState,
 	        ShowOperationSupport dialogOperationSupport,
 	        VertexSelectionListener vertexSelectionListener,
 			VertexRemovalListener vertexRemovalListener) {
 		super(id);
-		this.graphIdSupplier = graphIdSupplier;
+		this.representationState = representationState;
 		this.vertexSelectionListener = vertexSelectionListener;
 		this.vertexRemovalListener = vertexRemovalListener;
-		this.vertexListModel = verticesListModel;
-		this.graphListModel = graphListModel;
+		this.vertexListModel = representationState.getVerticesListModel();
+		this.graphListModel = representationState.getAvailableGraphsModel();
 		this.dialogOperationSupport = dialogOperationSupport;
 	}
 
@@ -77,13 +72,12 @@ public class VerticesControlPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-        
+        String graphId = representationState.getGraphId();
 		add(createTagAllCheckbox("tagAll"));
 		
 		add(VerticesFilterPanel.builder()
 		        .id("verticesFilter")
-		        .graphIdSupplier(graphIdSupplier)
-		        .verticesListFilter(vertexListModel.getFilter())
+				.representationState(representationState)
     	        .filterChangedCallback((target) -> {
             	    // Filter applied - should update list and count
                     target.add(verticesList);
@@ -92,8 +86,8 @@ public class VerticesControlPanel extends Panel {
     	        .build());
 		
 		GraphInfo suggestedGraphInfo = null;
-		if(graphIdSupplier.get() != null) {
-		    suggestedGraphInfo = graphListModel.getObject().stream().filter(gi->gi.getGraphName().equals(graphIdSupplier.get())).findFirst().orElse(null);
+		if(graphId != null) {
+		    suggestedGraphInfo = graphListModel.getObject().stream().filter(gi->gi.getGraphName().equals(graphId)).findFirst().orElse(null);
 		}
 		add(new Form<Void>("graph_selection_form")
 		        .add(new LambdaAjaxDropDownChoice<GraphInfo>(
@@ -105,15 +99,12 @@ public class VerticesControlPanel extends Panel {
 
 		verticesList = VerticesListViewPanel.builder()
 		        .id("verticesList")
-		        .graphIdSupplier(graphIdSupplier)
-		        .listModel(vertexListModel)
-		        .vertexSelectionModel(new PropertyModel<List<String>>(this, FIELD_SELECTED_VERTICES_IDS))
+				.representationState(representationState)
 		        .vertexSelectionListener((target, vId)-> {
-        		    if(vertexListModel.getFilter().isRestrictByVicinity()) {
+        		    if(representationState.getVertexListFilter().isRestrictByVicinity()) {
         		        target.add(verticesList);
         		        target.add(itemCountLabel);
         		    }
-        		    
         		    vertexSelectionListener.onVertexSelected(target, vId);
         		}).build();
         verticesList.setOutputMarkupId(true);
@@ -122,7 +113,6 @@ public class VerticesControlPanel extends Panel {
         add(newAddControl("addControl"));
         add(newRemoveControl("removeControl"));
 	}
-	
 
     private Component newAddControl(String id) {
         return new WebMarkupContainer(id).add(new AjaxEventBehavior("onclick") {
@@ -130,8 +120,9 @@ public class VerticesControlPanel extends Panel {
 
             @Override
             protected void onEvent(AjaxRequestTarget target) {
+				String graphId = representationState.getGraphId();
                 dialogOperationSupport.showOperation(target,
-                        new AddVertexPanel(dialogOperationSupport.getId(), graphIdSupplier.get()) {
+                        new AddVertexPanel(dialogOperationSupport.getId(), graphId) {
                             private static final long serialVersionUID = 1L;
 
                             @Override
@@ -139,7 +130,6 @@ public class VerticesControlPanel extends Panel {
                                 dialogOperationSupport.finishOperation(target);
                                 target.add(verticesList);
                             }
-                    
                 });
             }
         });
@@ -151,15 +141,20 @@ public class VerticesControlPanel extends Panel {
 
             @Override
             protected void onEvent(AjaxRequestTarget target) {
-                List<String> verticesIdsToDelete = new ArrayList<>(selectedVerticesIds);
-                selectedVerticesIds.clear();
-                RemoteUtil.operationAPI().deleteVertices(graphIdSupplier.get(), verticesIdsToDelete);
+				String graphId = representationState.getGraphId();
+                List<String> verticesIdsToDelete = new ArrayList<>(representationState.getSelectedVerticesIds());
+				representationState.getSelectedVerticesIds().clear();
+                RemoteUtil.operationAPI().deleteVertices(graphId, verticesIdsToDelete);
                 target.add(verticesList);
+
+				String selectedVertexId = representationState.getClickedVertexId();
+				if(selectedVertexId != null && verticesIdsToDelete.contains(selectedVertexId)) {
+					representationState.setClickedVertexId(null);
+				}
 				vertexRemovalListener.onVerticesRemoved(target, verticesIdsToDelete);
             }
         });
     }
-    
 
     private Component createItemsCountLabel(String labelId) {
         return new Label(labelId, new PropertyModel<String>(vertexListModel, VerticesRemoteDataset.FIELD_TOTAL_COUNT));
@@ -169,14 +164,13 @@ public class VerticesControlPanel extends Panel {
         IModel<Boolean> cbModel = Model.of(false);
         LambdaAjaxCheckbox checkbox = new LambdaAjaxCheckbox(id, cbModel, (target) -> {
             if(Boolean.TRUE.equals(cbModel.getObject())) {
-                vertexListModel.getObject().getVertices().forEach(v->selectedVerticesIds.add(v.getVertexId()));
+                vertexListModel.getObject().getVertices().forEach(v->representationState.getSelectedVerticesIds().add(v.getVertexId()));
             } else {
-                selectedVerticesIds.clear();;
+				representationState.getSelectedVerticesIds().clear();
             }
             target.add(verticesList);
         });
         
         return checkbox;
     }
-
 }

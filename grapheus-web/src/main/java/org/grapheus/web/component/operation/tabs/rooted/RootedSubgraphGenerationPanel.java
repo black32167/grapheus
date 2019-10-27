@@ -3,13 +3,13 @@
  */
 package org.grapheus.web.component.operation.tabs.rooted;
 
-import java.util.List;
-
+import lombok.Builder;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.grapheus.web.RemoteUtil;
@@ -18,7 +18,7 @@ import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.component.shared.vlist.VerticesListArgumentPanel;
 import org.grapheus.web.page.vertices.list.VerticesPage;
 
-import lombok.Builder;
+import java.util.List;
 
 /**
  * @author black
@@ -29,32 +29,32 @@ public class RootedSubgraphGenerationPanel extends AbstractEmbeddedPanel {
     
     private VerticesListArgumentPanel verticesList;
 
-    private String newGraphName;
     private String connectedSign = "???";
-    
-    private final String sourceGraphId;
+    private String newGraphName;
+
+    private final IModel<String> sourceGraphIdModel;
     private final Component connectedLabel;
     
-    
     @Builder
-    public RootedSubgraphGenerationPanel(String id, SerializableConsumer<AjaxRequestTarget> operationFinishedCallback, String sourceGraphId) {
+    public RootedSubgraphGenerationPanel(String id, SerializableConsumer<AjaxRequestTarget> operationFinishedCallback, IModel<String> sourceGraphIdModel) {
         super(id, operationFinishedCallback);
         
-        this.sourceGraphId = sourceGraphId;
-        this.newGraphName = sourceGraphId+"_rooted";
+        this.sourceGraphIdModel = sourceGraphIdModel;
+        //TODO: replace by CompoundModel?
         this.connectedLabel = new Label("connectedLabel", new PropertyModel<String>(this, "connectedSign")).setOutputMarkupId(true);
     }
     
     protected void populateForm(Form<Object> form) {
         super.populateForm(form);
         form.add(verticesList = new VerticesListArgumentPanel("verticesList", "Boundary vertices").setChangeCallback(this::checkConnection));
+        newGraphName = getSourceGraphId() + "_rooted";
         form.add(new TextField<String>("newGraphName"));
         form.add(connectedLabel);
     }
 
-
     @Override
     protected void performOperation(AjaxRequestTarget target) {
+        String sourceGraphId = getSourceGraphId();
         List<String> verticesIds = verticesList.getVerticesIds();
         RemoteUtil.operationAPI().generatePathGraph(
                 sourceGraphId, newGraphName, verticesIds);
@@ -62,6 +62,7 @@ public class RootedSubgraphGenerationPanel extends AbstractEmbeddedPanel {
     }
     
     private void checkConnection(AjaxRequestTarget target) {
+        String sourceGraphId = getSourceGraphId();
         List<String> veticesIds = verticesList.getVerticesIds();
         connectedSign = "---";
         if(veticesIds.size() == 2) {
@@ -80,6 +81,10 @@ public class RootedSubgraphGenerationPanel extends AbstractEmbeddedPanel {
             }
         }
         target.add(connectedLabel);
+    }
+
+    private String getSourceGraphId() {
+        return sourceGraphIdModel.getObject();
     }
 
 }

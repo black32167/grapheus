@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder 
-public final class Edge {
+public final class WEdge {
     String fromId;
     String toId;
     List<String> tags;
