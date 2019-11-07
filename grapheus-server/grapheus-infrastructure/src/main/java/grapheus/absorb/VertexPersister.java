@@ -3,22 +3,6 @@
  */
 package grapheus.absorb;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import grapheus.absorb.link.RealtimeDataLinker;
 import grapheus.persistence.model.graph.PersistentEdge;
 import grapheus.persistence.model.graph.PersistentVertex;
@@ -28,6 +12,20 @@ import grapheus.persistence.storage.graph.GraphStorage;
 import grapheus.persistence.storage.graph.VertexStorage;
 import grapheus.utils.ListenerUtils;
 import grapheus.view.extract.ViewExtractorPipeline;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author black
@@ -52,11 +50,11 @@ public class VertexPersister {
 
         String artifactId = ExternalCompositeId.from(newVertex);
         newVertex.setId(artifactId);
-        
+
         // Looking for existing artifact
         Optional<PersistentVertex> maybeOldVertex = vertexStorage.//
                 getById(graphName, artifactId);
-        
+
         // Extract features
         viewExtractor.extractExtraFeatures(newVertex);
         if(maybeOldVertex.isPresent()) {
@@ -68,7 +66,6 @@ public class VertexPersister {
                 return false; // Not updated
             }
             vertexStorage.updateVertex(graphName, newVertex);
-            
         } else {
             vertexStorage.createVertex(graphName, newVertex);
         }
@@ -77,13 +74,11 @@ public class VertexPersister {
         
         graphStorage.setUnprocessed(graphName);
         return true;
-              
     }
 
     private void link(String graphName, RealtimeDataLinker l, PersistentVertex newVertex) {
         Collection<PersistentEdge> connections = l.link(graphName, newVertex);
         edgeStorage.bulkConnect(graphName, connections);
-        
     }
 
     public void partialUpdate(String graphName, PersistentVertex updatePayload) {
@@ -100,13 +95,12 @@ public class VertexPersister {
             }
             
             viewExtractor.extractExtraFeatures(v);
-            
+
             ListenerUtils.iterateLogExceptions(realtimeDataLinkers, l-> connections.addAll(l.link(graphName, v)));
         });
         vertices.addAll(generateEphemeralVertices(vertices, connections));
         vertexStorage.updateVertices(graphName, vertices);
         edgeStorage.bulkConnect(graphName, connections);
-        
     }
 
     private Collection<PersistentVertex> generateEphemeralVertices(
@@ -125,7 +119,4 @@ public class VertexPersister {
         });
         return ephemeralVertices;
     }
-
-
-
 }
