@@ -6,9 +6,10 @@ package grapheus.persistence.graph.generate;
 import grapheus.absorb.VertexPersister;
 import grapheus.graph.GraphsManager;
 import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.model.graph.PersistentEdge;
 import grapheus.persistence.model.graph.PersistentVertex;
+import grapheus.persistence.storage.graph.EdgeStorage;
 import grapheus.view.SemanticFeature;
-import grapheus.view.extract.features.SemanticFeatureType;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Uploads own dependency graph to the database at startup.
@@ -45,12 +46,14 @@ import java.util.stream.Stream;
 public class SelfGraphGenerator {
     private final ConfigurableListableBeanFactory appCtx;
     private final VertexPersister vertexPersister;
+    private final EdgeStorage edgeStorage;
     private final GraphsManager graphsManager;
 
     public void generate(String grapheusUserKey, String graphName) throws GraphExistsException {
 
         graphsManager.createGraphForUser(grapheusUserKey, graphName);
 
+        Collection<PersistentEdge> edges = new ArrayList<PersistentEdge>();
         String[] beanNames = appCtx.getBeanDefinitionNames();
         for (String beanName : beanNames) {
 
@@ -59,17 +62,20 @@ public class SelfGraphGenerator {
             Class<?> beanClass = unCGLib(bean.getClass());
             log.info("Processing bean '{}'", beanClass.getCanonicalName());
             Collection<Class<?>> dependencies = collectDependencies(bean);
-            List<SemanticFeature> features = Stream.concat(
-                    dependenciesToFeatures(dependencies).stream(),
-                    packageToFeatures(beanClass).stream()
-            ).collect(Collectors.toList());
+            List<SemanticFeature> features = packageToFeatures(beanClass);
+            String vId = beanClass.getCanonicalName();
             vertexPersister.update(graphName,
-                    PersistentVertex.builder().id(beanClass.getCanonicalName())
+                    PersistentVertex.builder().id(vId)
                             .title(beanClass.getSimpleName()).description(beanClass.getSimpleName())
                             .tags(tagsFromClass(beanClass))
                             .semanticFeatures(SemanticFeature.toMap(features))
                             .build());
+            for(String targetId: dependenciesToIds(dependencies)) {
+                edges.add(PersistentEdge.create(graphName, vId, targetId));
+            }
         }
+
+        edgeStorage.bulkConnect(graphName, edges);
 
         log.info("Processed {} beans!", beanNames.length);
 
@@ -97,9 +103,9 @@ public class SelfGraphGenerator {
         return bean;
     }
 
-    private List<SemanticFeature> dependenciesToFeatures(Collection<Class<?>> dependencies) {
+    private List<String> dependenciesToIds(Collection<Class<?>> dependencies) {
         return dependencies.stream()
-                .map(c -> SemanticFeature.from(SemanticFeatureType.LOCAL_ID_REFERENCE, c.getCanonicalName()))
+                .map(Class::getCanonicalName)
                 .collect(Collectors.toList());
     }
 
@@ -175,5 +181,4 @@ public class SelfGraphGenerator {
         }
         return sourceClass;
     }
-
 }
