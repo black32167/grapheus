@@ -3,26 +3,24 @@
  */
 package grapheus.persistence.storage.graph.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.springframework.stereotype.Repository;
-
 import com.arangodb.ArangoCursor;
 import com.arangodb.ArangoDBException;
 import com.arangodb.model.DocumentImportOptions;
 import com.arangodb.model.DocumentImportOptions.OnDuplicate;
-
 import grapheus.persistence.StorageSupport;
 import grapheus.persistence.model.graph.PersistentEdge;
 import grapheus.persistence.storage.graph.EdgeStorage;
 import grapheus.persistence.storage.graph.GraphNameUtils;
 import grapheus.utils.EntityIdUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author black
@@ -67,10 +65,7 @@ public class DefaultEdgeStorage extends StorageSupport implements EdgeStorage {
             // Create new edge
             update(db -> db.graph(graphName).//
                     edgeCollection(edgeCollectionName).//
-                    insertEdge(PersistentEdge.builder().//
-                            from(vertexCollectionName + "/" + vertex1Id).//
-                            to(vertexCollectionName + "/" + vertex2Id).//
-                            build()));
+                    insertEdge(PersistentEdge.create(graphName, vertex1Id, vertex2Id)));
         }
     }
 
