@@ -41,11 +41,7 @@ public class DirectReferenceDataLinker implements RealtimeDataLinker {
         return connections;
     }
 
-    private PersistentEdge buildEdge(String vertexCollectionName, String globalSourceId, String globalTargetId) {
-        return PersistentEdge.builder().//
-                from(vertexCollectionName + "/" + globalSourceId).//
-                to(vertexCollectionName + "/" + globalTargetId).//
-                build();
+    private PersistentEdge buildEdge(String graphName, String globalSourceId, String globalTargetId) {
+        return PersistentEdge.create(graphName, globalSourceId, globalTargetId);
     }
-
 }
