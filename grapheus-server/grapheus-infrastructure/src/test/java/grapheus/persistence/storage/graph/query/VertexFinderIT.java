@@ -59,9 +59,11 @@ public class VertexFinderIT extends GraphTestSupport {
     public void testFindByHint() throws GraphExistsException {
 
         PersistentVertex artifact2 = partifact(DS_ID_1, LOCAL_ID_2);
-        artifact2.getSemanticFeatures().add(SemanticFeature.builder().//
-                feature(SemanticFeatureType.LOCAL_ID_REFERENCE).value(DS_ID_1+":"+LOCAL_ID_1).//
-                build());
+        artifact2.getSemanticFeatures().put( //
+                SemanticFeatureType.LOCAL_ID_REFERENCE, //
+                SemanticFeature.builder(). //
+                    feature(SemanticFeatureType.LOCAL_ID_REFERENCE).value(DS_ID_1+":"+LOCAL_ID_1). //
+                    build());
         
         graph(GRAPH_NAME).
             vertex(partifact(DS_ID_1, LOCAL_ID_1)).
@@ -109,9 +111,11 @@ public class VertexFinderIT extends GraphTestSupport {
                 id(artifactLocalId).//
                 id(dsId + ":" + artifactLocalId).//
                 build();
-        v.getSemanticFeatures().add(SemanticFeature.builder().//
-                feature(SemanticFeatureType.LOCAL_ID_REFERENCE).//
-                value(dsId+":"+artifactLocalId).build());
+        v.getSemanticFeatures().put(//
+                SemanticFeatureType.LOCAL_ID_REFERENCE,//
+                SemanticFeature.builder().//
+                    feature(SemanticFeatureType.LOCAL_ID_REFERENCE).//
+                    value(dsId+":"+artifactLocalId).build());
         return v;
     }
 

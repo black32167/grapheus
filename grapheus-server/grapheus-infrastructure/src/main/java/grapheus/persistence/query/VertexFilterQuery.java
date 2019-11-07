@@ -48,7 +48,6 @@ public class VertexFilterQuery {
         }
     }
 
-
     public void addInPropertyFilter(String propertyName, String value) {
         if (value != null) {
             String paramName = "p" + vertexClauses.size();

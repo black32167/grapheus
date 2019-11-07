@@ -23,6 +23,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.template.PackageTextTemplate;
+import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.list.view.VerticesListViewPanel;
@@ -114,7 +115,6 @@ public class VicinityInteractiveView extends Panel {
         add(filterByPropertyBehavior);
         add(newDroppabe(".vicinityView"));
     }
-
 
     private Behavior newDroppabe(String selector) {
         return new DroppableBehavior(selector, new DroppableAdapter() {
@@ -232,6 +232,10 @@ public class VicinityInteractiveView extends Panel {
                 l.add(new AttributeAppender("vertexId", vertex.getId()));
                 l.add(new AttributeAppender("name", vertex.getName()));
 
+                if(containsSelectedProperty(vertex)) {
+                    l.add(new AttributeAppender("highlighted", vertex.getName()));
+                }
+
                 String serializedTags = Optional.ofNullable(vertex.getTags())
                         .map(tags -> String.join(",", tags))
                         .orElse("");
@@ -245,5 +249,14 @@ public class VicinityInteractiveView extends Panel {
                 item.add(l);
             }
         };
+    }
+
+    private boolean containsSelectedProperty(WVertex vertex) {
+        RVertexPropertyFilter vertexFilter = representationState.getVertexListFilter().getVertexPropertyFilter();
+        if(vertexFilter == null || vertex.getProperties() == null) {
+            return false;
+        }
+        return vertex.getProperties().stream()
+                .anyMatch(p->p.getName().equals(vertexFilter.getName()) && p.getValue().equals(vertexFilter.getValue()));
     }
 }

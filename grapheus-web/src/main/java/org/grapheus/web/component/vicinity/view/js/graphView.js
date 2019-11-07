@@ -171,6 +171,7 @@ function buildNodes(vertices) {
 		var originalVertexId = jV.attr('vertexId');
 		var tags = jV.attr('tags').split(",");
 		var properties = jV.attr('properties').split(",");
+		var highlighted = jV.attr('highlighted') !== undefined;
 
 		var vertexId = toValidId(originalVertexId);
 
@@ -187,6 +188,7 @@ function buildNodes(vertices) {
 				selectedVertex: (rootId == vertexId),
 				tags: tags,
 				properties: properties,
+				highlighted: highlighted,
 				originalId:originalVertexId
 			}})
 	});
@@ -203,7 +205,9 @@ function updateNodeColors(selectedTag) {
         var newColor = "gray"
         var newBGColor = "gray"
         var nodeData = nodeEle.data()
-        if(nodeData.tags.includes(selectedTag)) {
+        if(nodeData.highlighted) {
+            newColor = 'red'
+        } else if(nodeData.tags.includes(selectedTag)) {
             newColor = 'green'
         }
         nodeEle.data({

@@ -4,8 +4,10 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.web.RemoteUtil;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class FilterByPropertyPanel extends AbstractFeedbackFormPanel {
     private final DropDownChoice<String> propertySelector;
     private final DropDownChoice<String> valueSelector;
+    private final TextField<String> valueTemplateField;
     private final String sourceGraphId;
     private String property;
     private String value;
@@ -30,7 +33,7 @@ public class FilterByPropertyPanel extends AbstractFeedbackFormPanel {
         this.sourceGraphId = graphId;
         vertexModel = vertexModel(graphId, vertexId);
         IModel<List<String>> propModel = newPropertiesModel();
-        propertySelector = new DropDownChoice<String>("property", propModel);
+        propertySelector = new DropDownChoice<>("property", propModel);
         propertySelector.add(new AjaxFormComponentUpdatingBehavior("change") {
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
@@ -38,7 +41,16 @@ public class FilterByPropertyPanel extends AbstractFeedbackFormPanel {
             }
         });
         valueSelector = new DropDownChoice<>("value", newValuesModel());
+        valueSelector.add(new AjaxFormComponentUpdatingBehavior("change") {
+            @Override
+            protected void onUpdate(AjaxRequestTarget target) {
+                target.add(valueTemplateField);
+            }
+        });
         valueSelector.setOutputMarkupId(true);
+
+        valueTemplateField = new TextField<>("valueTemplate", new PropertyModel<>(this, "value"));
+        valueTemplateField.setOutputMarkupId(true);
     }
 
     private IModel<RVertex> vertexModel(String graphName, String vertexId) {
@@ -86,6 +98,7 @@ public class FilterByPropertyPanel extends AbstractFeedbackFormPanel {
     protected void populateForm(Form<Object> form) {
         form.add(propertySelector);
         form.add(valueSelector);
+        form.add(valueTemplateField);
     }
 
     @Override

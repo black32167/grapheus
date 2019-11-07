@@ -109,7 +109,7 @@ abstract public class GraphTestSupport {
                         .description("")
                         .title("")
                         .id(v.key)
-                        .semanticFeatures(v.properties)
+                        .semanticFeatures(SemanticFeature.toMap(v.properties))
                         .build());
             }
             for(PersistentVertex v: directVertices) {

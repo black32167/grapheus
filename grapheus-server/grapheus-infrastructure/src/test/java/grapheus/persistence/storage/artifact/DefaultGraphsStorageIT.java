@@ -3,19 +3,6 @@
  */
 package grapheus.persistence.storage.artifact;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
 import grapheus.it.TestConstants;
 import grapheus.persistence.exception.DocumentsConflictException;
 import grapheus.persistence.exception.GraphExistsException;
@@ -25,6 +12,17 @@ import grapheus.persistence.storage.graph.VertexStorage;
 import grapheus.persistence.storage.graph.impl.DefaultVertexStorage;
 import grapheus.persistence.testutil.DbTestsContextConfig;
 import grapheus.view.SemanticFeature;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author black
@@ -67,7 +65,7 @@ public class DefaultGraphsStorageIT {
         semanticFeatures1.add(SemanticFeature.from(f2Name, "v2"));
         PersistentVertex v1 = PersistentVertex.builder().//
                 id("id1").//
-                semanticFeatures(semanticFeatures1).//
+                semanticFeatures(SemanticFeature.toMap(semanticFeatures1)).//
                 build();
         vertexStorage.createVertex(GRAPH_NAME, v1);
         
@@ -76,7 +74,7 @@ public class DefaultGraphsStorageIT {
         semanticFeatures2.add(SemanticFeature.from(f3Name, "v2"));
         PersistentVertex v2 = PersistentVertex.builder().//
                 id("id2").//
-                semanticFeatures(semanticFeatures2).//
+                semanticFeatures(SemanticFeature.toMap(semanticFeatures2)).//
                 build();
         vertexStorage.createVertex(GRAPH_NAME, v2);
         

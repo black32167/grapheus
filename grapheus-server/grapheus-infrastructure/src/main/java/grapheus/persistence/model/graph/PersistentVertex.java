@@ -3,13 +3,11 @@
  */
 package grapheus.persistence.model.graph;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import com.arangodb.entity.DocumentField;
 import com.arangodb.entity.DocumentField.Type;
-
+import grapheus.persistence.model.annotation.Index;
+import grapheus.persistence.model.annotation.Index.IndexType;
+import grapheus.view.SemanticFeature;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -17,9 +15,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import grapheus.persistence.model.annotation.Index;
-import grapheus.persistence.model.annotation.Index.IndexType;
-import grapheus.view.SemanticFeature;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Persistent representation of the issue
@@ -56,7 +56,7 @@ public class PersistentVertex {
     private String rev;
     
     /** External local references to other artifacts. For example, JIRA issue key or URL */
-    private List<SemanticFeature> semanticFeatures;
+    private Map<String, SemanticFeature> semanticFeatures;
     
     private Long processedTimestamp;
     
@@ -78,6 +78,6 @@ public class PersistentVertex {
     private List<String> tags;
     
     public static class PersistentVertexBuilder {
-        private List<SemanticFeature> semanticFeatures = new ArrayList<>();
+        private Map<String, SemanticFeature> semanticFeatures = new HashMap<>();
     }
 }

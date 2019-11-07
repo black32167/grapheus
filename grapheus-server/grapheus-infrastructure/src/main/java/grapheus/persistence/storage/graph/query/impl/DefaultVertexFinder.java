@@ -93,7 +93,7 @@ public class DefaultVertexFinder extends StorageSupport implements VertexFinder 
         RVertexPropertyFilter vertexPropertyFilter = taskFilter.getVertexPropertyFilter();
         if(vertexPropertyFilter != null) {
             query.addInPropertyFilter(PersistentVertex.FIELD_VIEW_HINT_TYPE, vertexPropertyFilter.getName());
-            query.addInPropertyFilter(PersistentVertex.FIELD_VIEW_HINT_VAL, vertexPropertyFilter.getValue());
+            query.addLikeFilter(PersistentVertex.FIELD_VIEW_HINT_VAL, vertexPropertyFilter.getValue());
         }
 
         query.setLimit(0/*taskFilter.getStart()*/, taskFilter.getLimit());

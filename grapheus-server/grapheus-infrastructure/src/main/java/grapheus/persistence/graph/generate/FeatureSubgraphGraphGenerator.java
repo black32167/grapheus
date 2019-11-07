@@ -19,12 +19,10 @@ import org.springframework.stereotype.Service;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 
 /**
  * Generates subgraph from specified one considering only vertices with the specified feature.
@@ -51,20 +49,18 @@ public class FeatureSubgraphGraphGenerator {
         Collection<Future<?>> futuresV = new ArrayList<>();
         vertexFinder.iterateAllVertices(sourceGraphId, v -> {
             Future<?> f = executor.submit(() -> {
-                List<String> values = getFeatureValues(sourceProperty, v);
-                for(String value: values) {
-                    String targetArtifactId = ExternalCompositeId.from(value);
-  
-                    if(!vertexStorage.getById(newGraphId, targetArtifactId).isPresent()) {
-                        log.info("Creating new vertex '{}'", targetArtifactId);
-                        vertexStorage.createVertex(newGraphId,
-                                PersistentVertex.builder().//
-                                id(targetArtifactId).//
-                                id(value).//
-                                title(value).//
-                                description("").//
-                                build());
-                    }
+                String value = getFeatureValue(sourceProperty, v);
+
+                String targetArtifactId = ExternalCompositeId.from(value);
+                if(!vertexStorage.getById(newGraphId, targetArtifactId).isPresent()) {
+                    log.info("Creating new vertex '{}'", targetArtifactId);
+                    vertexStorage.createVertex(newGraphId,
+                            PersistentVertex.builder().//
+                            id(targetArtifactId).//
+                            id(value).//
+                            title(value).//
+                            description("").//
+                            build());
                 }
             });
             futuresV.add(f);
@@ -85,18 +81,14 @@ public class FeatureSubgraphGraphGenerator {
                 Optional<PersistentVertex> maybeVFrom = vertexStorage.getById(sourceGraphId, fromV);
                 Optional<PersistentVertex> maybeVTo = vertexStorage.getById(sourceGraphId, toV);
                 if(maybeVFrom.isPresent() && maybeVTo.isPresent()) {
-                    List<String> valuesFrom = getFeatureValues(sourceProperty, maybeVFrom.get());
-                    List<String> valuesTo = getFeatureValues(sourceProperty, maybeVTo.get());
-                    for(String valueFromTarget : valuesFrom) {
-                        for(String valueToTarget : valuesTo) {
-                            Optional<PersistentVertex> maybeVFromTarget = vertexStorage.getById(newGraphId, ExternalCompositeId.from(valueFromTarget));
-                            Optional<PersistentVertex> maybeVToTarget = vertexStorage.getById(newGraphId, ExternalCompositeId.from(valueToTarget));
-                            if(maybeVFromTarget.isPresent() && maybeVToTarget.isPresent()) {   
-                                edgesStorage.connect(newGraphId,
-                                        maybeVFromTarget.get().getId(),
-                                        maybeVToTarget.get().getId());
-                            }
-                        }
+                    String valueFrom = getFeatureValue(sourceProperty, maybeVFrom.get());
+                    String valueTo = getFeatureValue(sourceProperty, maybeVTo.get());
+                    Optional<PersistentVertex> maybeVFromTarget = vertexStorage.getById(newGraphId, ExternalCompositeId.from(valueFrom));
+                    Optional<PersistentVertex> maybeVToTarget = vertexStorage.getById(newGraphId, ExternalCompositeId.from(valueTo));
+                    if(maybeVFromTarget.isPresent() && maybeVToTarget.isPresent()) {
+                        edgesStorage.connect(newGraphId,
+                                maybeVFromTarget.get().getId(),
+                                maybeVToTarget.get().getId());
                     }
                 }
             });
@@ -114,10 +106,7 @@ public class FeatureSubgraphGraphGenerator {
        
     }
     
-    private List<String> getFeatureValues(String featureName, PersistentVertex v) {
-        return v.getSemanticFeatures().stream().//
-            filter(f->featureName.equals(f.getFeature())).//
-            map(f->f.getValue()).collect(Collectors.toList());
+    private String getFeatureValue(String featureName, PersistentVertex v) {
+        return v.getSemanticFeatures().get(featureName).getValue();
     }
-
 }

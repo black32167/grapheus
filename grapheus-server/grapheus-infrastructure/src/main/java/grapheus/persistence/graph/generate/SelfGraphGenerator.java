@@ -67,7 +67,7 @@ public class SelfGraphGenerator {
                     PersistentVertex.builder().id(beanClass.getCanonicalName())
                             .title(beanClass.getSimpleName()).description(beanClass.getSimpleName())
                             .tags(tagsFromClass(beanClass))
-                            .semanticFeatures(features)
+                            .semanticFeatures(SemanticFeature.toMap(features))
                             .build());
         }
 
