@@ -19,7 +19,6 @@ import lombok.ToString;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Persistent representation of the issue
@@ -44,7 +43,6 @@ public class PersistentVertex {
 
     public static final String FIELD_TITLE = "title";
     public static final String FIELD_ARTIFACT_UPDATED = "updatedTimestamp";
-    public static final String FIELD_TASK_IDS = "taskIds";
     public static final String FIELD_ARTIFACT_PROCESSED = "processedTimestamp";
     public static final String DESCRIPTION = "description";
     public static final String VIRTUAL_ORDER = "order";
@@ -63,9 +61,6 @@ public class PersistentVertex {
     private Long updatedTimestamp;
     
     private Long createdTimestamp;
-    
-    /** References to the distance threshold tags */
-    private Set<String> taskIds;
     
     private String url;
     
