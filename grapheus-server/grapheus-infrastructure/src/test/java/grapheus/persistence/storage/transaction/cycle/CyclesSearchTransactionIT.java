@@ -20,6 +20,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author black
@@ -51,5 +52,7 @@ public class CyclesSearchTransactionIT extends GraphTestSupport {
         List<List<String>> cycles = transaction.cycles(GRAPH_NAME);
         Assert.assertNotNull(cycles);
         Assert.assertEquals(2, cycles.size());
+        Assert.assertFalse(cycles.get(0).stream().anyMatch(Objects::isNull));
+        Assert.assertFalse(cycles.get(1).stream().anyMatch(Objects::isNull));
     }
 }

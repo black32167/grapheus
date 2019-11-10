@@ -100,7 +100,7 @@ public class GraphOperationsResource {
     
     @POST
     @Path("cyclicGraph")
-    public Response generateCyclesSubraph(@QueryParam(PARAM_SOURCE_GRAPH) String sourceGraphId, RGraphCreationParameters parameters) throws Exception {
+    public Response generateCyclesSubgraph(@QueryParam(PARAM_SOURCE_GRAPH) String sourceGraphId, RGraphCreationParameters parameters) throws Exception {
         try {
             cyclesGraphGenerator.generateCyclesGraph(grapheusUserKey(), sourceGraphId, parameters.getNewGraphName());
             return createdResponse(parameters.getNewGraphName());

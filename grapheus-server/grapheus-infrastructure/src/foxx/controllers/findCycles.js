@@ -33,7 +33,7 @@ exports.execute = function (params) {
                 if(status == dfs.VISITING) {
                     var cycle = []
                     var i
-                    for(i = path.length; i >= 0; i--) {
+                    for(i = path.length-1; i >= 0; i--) {
                         cycle.push(path[i])
                         if(path[i] == vertexId) {
                             break;
