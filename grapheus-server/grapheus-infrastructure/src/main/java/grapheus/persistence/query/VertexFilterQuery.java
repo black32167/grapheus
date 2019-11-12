@@ -3,7 +3,9 @@
  */
 package grapheus.persistence.query;
 
+import grapheus.persistence.model.graph.PersistentVertex;
 import grapheus.persistence.storage.graph.GraphNameUtils;
+import grapheus.view.SemanticFeature;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.grapheus.client.model.graph.SortDirection;
@@ -50,7 +52,7 @@ public class VertexFilterQuery {
 
     public void addInPropertyFilter(String propertyName, String value) {
         if (value != null) {
-            String paramName = "p" + vertexClauses.size();
+            String paramName = "p" + parameters.size();
             parameters.put(paramName, value);
             vertexClauses.add("@" + paramName + " IN a." + propertyName);
         }
@@ -58,15 +60,24 @@ public class VertexFilterQuery {
 
     public void addEqFilter(String propertyName, String value) {
         if (value != null) {
-            String paramName = "p" + vertexClauses.size();
+            String paramName = "p" + parameters.size();
             parameters.put(paramName, value);
             vertexClauses.add(" a." + propertyName + " == @" + paramName);
         }
     }
 
+    public void addCustomPropertyFilter(String propertyName, String value) {
+        if (value != null) {
+            String valNameParam = "p" + parameters.size();
+            parameters.put(valNameParam, value);
+            vertexClauses.add(
+                    "a." + PersistentVertex.FIELD_SEMANTIC_FEATURES + "." + propertyName + "." + SemanticFeature.VALUE + " LIKE @" + valNameParam);
+        }
+    }
+
     public void addLikeFilter(String propertyName, String value) {
         if (value != null) {
-            String paramName = "p" + vertexClauses.size();
+            String paramName = "p" + parameters.size();
             parameters.put(paramName, "%" + value + "%");
             vertexClauses.add(" a." + propertyName + " LIKE @" + paramName);
         }

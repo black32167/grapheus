@@ -31,15 +31,13 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of="id")
-@Index(fields=PersistentVertex.FIELD_VIEW_HINT_VAL, type=IndexType.HASH, unique=false)
-@Index(fields=PersistentVertex.FIELD_VIEW_HINT_TYPE, type=IndexType.HASH, unique=false) //It has low selectivity, maybe not worth to spend memory
+//@Index(fields=PersistentVertex.FIELD_VIEW_HINT_VAL, type=IndexType.HASH, unique=false)
+//@Index(fields=PersistentVertex.FIELD_VIEW_HINT_TYPE, type=IndexType.HASH, unique=false) //It has low selectivity, maybe not worth to spend memory
 @Index(fields=PersistentVertex.FIELD_TITLE, type=IndexType.SKIP, unique=false)
 @ToString(of={"id"})
 public class PersistentVertex {
     public static final String FIELD_ID = "_key";
     public static final String FIELD_SEMANTIC_FEATURES = "semanticFeatures";
-    public static final String FIELD_VIEW_HINT_TYPE = "semanticFeatures[*].feature";
-    public static final String FIELD_VIEW_HINT_VAL = "semanticFeatures[*].value";
 
     public static final String FIELD_TITLE = "title";
     public static final String FIELD_ARTIFACT_UPDATED = "updatedTimestamp";

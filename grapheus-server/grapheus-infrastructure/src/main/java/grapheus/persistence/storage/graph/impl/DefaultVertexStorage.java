@@ -3,21 +3,9 @@
  */
 package grapheus.persistence.storage.graph.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import grapheus.persistence.ArangoDBExceptionUtil;
-import org.springframework.stereotype.Repository;
-
 import com.arangodb.ArangoDBException;
-
 import grapheus.TimeService;
+import grapheus.persistence.ArangoDBExceptionUtil;
 import grapheus.persistence.StorageSupport;
 import grapheus.persistence.exception.DocumentNotFoundException;
 import grapheus.persistence.model.graph.PersistentVertex;
@@ -27,6 +15,15 @@ import grapheus.persistence.storage.graph.VertexStorage;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
+
+import javax.inject.Inject;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author black
@@ -154,8 +151,9 @@ public class DefaultVertexStorage extends StorageSupport implements VertexStorag
     @Override
     public List<String> getAllArtifactsProperties(String graphName) {
         String vertexCollectionName = GraphNameUtils.verticesCollectionName(graphName);
-        String aql = "RETURN UNIQUE ((" + "    FOR a IN " + vertexCollectionName + " RETURN a."
-                + PersistentVertex.FIELD_VIEW_HINT_TYPE + ")[**])";
+        String aql = "RETURN UNIQUE ( FOR a IN " + vertexCollectionName + " RETURN (" +
+                "FOR name IN ATTRIBUTES(a." + PersistentVertex.FIELD_SEMANTIC_FEATURES +
+                " RETURN name )))";
         return q(aql, Collections.emptyMap(), List.class).first();
     }
 
