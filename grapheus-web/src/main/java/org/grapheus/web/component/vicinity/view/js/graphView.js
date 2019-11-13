@@ -82,8 +82,7 @@ function drawGraph(parameters) {
     // TODO: can it be invoked on VicinityControlPanel side when one is rendered?
 
     cy.ready(()=>{
-        updateNodeColors($('.verticesTagsSelector').val())
-        updateEdgeColors($('.edgesTagsSelector').val())
+        updateNodeColors($('.verticesPropertySelector').val())
 
         var levels = []
 
@@ -170,7 +169,12 @@ function buildNodes(vertices) {
 		var jV = $(this)
 		var originalVertexId = jV.attr('vertexId');
 		var tags = jV.attr('tags').split(",");
-		var properties = jV.attr('properties').split(",");
+		var properties = jV.attr('properties').split(",")
+		    .reduce((acc, serializedProperty, i) => {
+		        var [name, value] = serializedProperty.split(":")
+		        acc[name] = value
+		        return acc
+		    }, {});
 		var highlighted = jV.attr('highlighted') !== undefined;
 
 		var vertexId = toValidId(originalVertexId);
@@ -200,15 +204,25 @@ function buildNodes(vertices) {
  * Highlights nodes marked with specified tag.
  * Part of javascript API for backend
  */
-function updateNodeColors(selectedTag) {
+function updateNodeColors(selectedProperty) {
+    var colors = [
+        'green','blue','cyan','magenta', 'orange', 'black', 'gray'
+    ]
+    var prop2color = {}
+
     cy.nodes().forEach(nodeEle=> {
         var newColor = "gray"
         var newBGColor = "gray"
         var nodeData = nodeEle.data()
         if(nodeData.highlighted) {
             newColor = 'red'
-        } else if(nodeData.tags.includes(selectedTag)) {
-            newColor = 'green'
+        } else if(selectedProperty in nodeData.properties) {
+            var propValue = nodeData.properties[selectedProperty];
+            if(!(propValue in prop2color)) {
+                var colorIdx = Math.min(Object.keys(prop2color).length, colors.length-1)
+                prop2color[propValue] = colors[colorIdx]
+            }
+            newColor = prop2color[propValue]
         }
         nodeEle.data({
             color: newColor,
@@ -353,24 +367,20 @@ function setupGraphListeners(cy, settings) {
 				var dist = Math.sqrt(
 						Math.abs(draggedNodePos.x*draggedNodePos.x-pos.x*pos.x) +
 						Math.abs(draggedNodePos.y*draggedNodePos.y-pos.y*pos.y))
-						
-				if(dist < 100) {
-//					console.log("merging "+ele.attr('originalId')+"-> "+evt.target.attr('originalId'))
-//					joinNodes(evt.target.attr('originalId'), ele.attr('originalId'), settings.mergingCallbackURL)
-				}
 			}
 		})
 	})
 	cy.on('mouseover', 'node', function(evt) {
 	    var pos = evt.target.renderedPosition()
 
-        var tags = evt.target.data().tags
-        var properties = evt.target.data().properties.join('\n')
+        //var tags = evt.target.data().tags
+        var nodeProperties = evt.target.data().properties;
+        var propertiesText = Object.keys(nodeProperties)
+            .map(k => `<span style="width:30px"><b>${k}</b>:</span> ${nodeProperties[k]}`)
+            .join('<br>')
 
-
-	    console.log('Pos:'+pos.x+','+pos.y + '/' + this.tags);
 	    $('#tooltip').css({top: pos.y, left: pos.x})
-	    $('#tooltip').text(tags)
+	    $('#tooltip').html(propertiesText)
         $('#tooltip').show();
 	})
 	cy.on('mouseout', 'node', function(evt) {

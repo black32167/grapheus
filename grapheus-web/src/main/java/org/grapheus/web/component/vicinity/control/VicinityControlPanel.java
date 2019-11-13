@@ -107,32 +107,35 @@ public class VicinityControlPanel extends Panel {
                 .add(newDepthSelector("depth"))
                 .add(newDirectionSelector("edgesDirection"))
                 .add(newLayoutDropdown("layout"))
-                .add(newVerticesTagSelector("selectedVerticesTag"))
-                .add(newEdgesTagSelector("selectedEdgesTag")));
+                .add(newVerticesPropertySelector("highlightedProperty")));
         add(new Label("documentBody", new PropertyModel<>(selectedVertexModel, "description")));
         add(vertexTagsLabel);
 
         add(graphView);
     }
 
-    private Component newVerticesTagSelector(String id) {
+    private Component newVerticesPropertySelector(String id) {
 
-        return new DropDownChoice<>(id, allVerticesTagsModel(), new ChoiceRenderer<>(null, "toString()"))
+        return new DropDownChoice<>(id, allVerticesPropertiesModel(), new ChoiceRenderer<>(null, "toString()"))
                 .setOutputMarkupId(true)
                 .add(new AjaxFormComponentUpdatingBehavior("change") {
                     private static final long serialVersionUID = 1L;
 
                     protected void onUpdate(AjaxRequestTarget target) {
-                        target.appendJavaScript("updateNodeColors('" + representationState.getVicinityState().getSelectedVerticesTag() + "');");
+                        target.appendJavaScript("updateNodeColors('" + representationState.getVicinityState().getHighlightedProperty() + "');");
                     }
                 });
     }
 
-    private IModel<List<String>> allVerticesTagsModel() {
+    private IModel<List<String>> allVerticesPropertiesModel() {
         return new LoadableDetachableModel<List<String>>() {
             @Override
             protected List<String> load() {
-                return vicinityVertexModel.getObject().getVertices().stream().flatMap(v -> v.getTags().stream()).distinct().collect(toList());
+                return vicinityVertexModel.getObject().getVertices().stream()
+                        .flatMap(v -> v.getProperties().stream())
+                        .map(RVertex.RProperty::getName)
+                        .distinct()
+                        .collect(toList());
             }
         };
     }
@@ -145,27 +148,6 @@ public class VicinityControlPanel extends Panel {
                         .map(RVertex::getTags) //
                         .map(tags -> String.join(",", tags)) //
                         .orElse("-");
-            }
-        };
-    }
-
-    private Component newEdgesTagSelector(String id) {
-        return new DropDownChoice<>(id, edgesTagsModel(), new ChoiceRenderer<>(null, "toString()"))
-                .setOutputMarkupId(true)
-                .add(new AjaxFormComponentUpdatingBehavior("change") {
-                    private static final long serialVersionUID = 1L;
-
-                    protected void onUpdate(AjaxRequestTarget target) {
-                        target.appendJavaScript("updateEdgeColors('" + representationState.getVicinityState().getSelectedEdgesTag() + "');");
-                    }
-                });
-    }
-
-    private IModel<List<String>> edgesTagsModel() {
-        return new LoadableDetachableModel<List<String>>() {
-            @Override
-            protected List<String> load() {
-                return vicinityVertexModel.getObject().getEdges().stream().flatMap(e -> e.getTags().stream()).distinct().collect(toList());
             }
         };
     }

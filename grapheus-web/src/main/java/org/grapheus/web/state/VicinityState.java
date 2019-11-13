@@ -20,6 +20,5 @@ public final class VicinityState implements Serializable {
 
     private GraphLayout layout = GraphLayout.LAYERED;
 
-    private String selectedVerticesTag;
-    private String selectedEdgesTag;
+    private String highlightedProperty;
 }
