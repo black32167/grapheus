@@ -242,7 +242,9 @@ public class VicinityInteractiveView extends Panel {
                 l.add(new AttributeAppender("tags", serializedTags));
 
                 String serializedProperties = Optional.ofNullable(vertex.getProperties())
-                        .map(props -> props.stream().map(p -> p.getName() + ":" + p.getValue()).collect(Collectors.joining(",")))
+                        .map(props -> props.stream()
+                                .map(p -> p.getName() + ":" + p.getValue())
+                                .collect(Collectors.joining(",")))
                         .orElse("");
                 l.add(new AttributeAppender("properties", serializedProperties));
 

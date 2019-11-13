@@ -66,6 +66,7 @@ public final class VertexConverter {
             return Collections.emptyList();
         }
         return semanticFeatures.values().stream()
+                .filter(f->!f.getFeature().startsWith("_"))
                 .map(f-> RProperty.builder().name(f.getFeature()).value(f.getValue()).build())
                 .collect(Collectors.toList());
     }

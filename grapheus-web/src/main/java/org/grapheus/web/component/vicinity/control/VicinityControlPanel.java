@@ -131,11 +131,16 @@ public class VicinityControlPanel extends Panel {
         return new LoadableDetachableModel<List<String>>() {
             @Override
             protected List<String> load() {
-                return vicinityVertexModel.getObject().getVertices().stream()
+                VicinityState vicinityState = representationState.getVicinityState();
+                List<String> propertyNames = vicinityVertexModel.getObject().getVertices().stream()
                         .flatMap(v -> v.getProperties().stream())
                         .map(RVertex.RProperty::getName)
                         .distinct()
                         .collect(toList());
+                if(vicinityState.getHighlightedProperty() == null && !propertyNames.isEmpty()) {
+                    vicinityState.setHighlightedProperty(propertyNames.get(0));
+                }
+                return propertyNames;
             }
         };
     }
@@ -166,7 +171,7 @@ public class VicinityControlPanel extends Panel {
     }
 
     private Component newLayoutDropdown(String id) {
-        return new DropDownChoice<GraphLayout>(id, Arrays.asList(GraphLayout.values())).
+        return new DropDownChoice<>(id, Arrays.asList(GraphLayout.values())).
                 add(updateGraphViewAjaxBehavior("change"));
     }
 
