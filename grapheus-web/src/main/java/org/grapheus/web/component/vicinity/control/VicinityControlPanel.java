@@ -104,18 +104,26 @@ public class VicinityControlPanel extends Panel {
         add(titleEditDialog);
         add(createTitleEditableLink("remoteDocumentLink").add(new Label("documentTitle", new PropertyModel<>(selectedVertexModel, "title"))));
         add(createVertexControlForm("controlsForm")
-                .add(newDepthSelector("depth"))
+                .add(newDepthInput("depth"))
                 .add(newDirectionSelector("edgesDirection"))
                 .add(newLayoutDropdown("layout"))
-                .add(newVerticesPropertySelector("highlightedProperty")));
+                .add(newVerticesPropertySelector("highlightedProperty"))
+                .add(newHierarchyPropertyDepthInput("propertyHierarchyDepth")));
         add(new Label("documentBody", new PropertyModel<>(selectedVertexModel, "description")));
         add(vertexTagsLabel);
 
         add(graphView);
     }
 
-    private Component newVerticesPropertySelector(String id) {
+    private Component newHierarchyPropertyDepthInput(String id) {
+        final NumberTextField<Integer> hierarchyDepthInput = new NumberTextField<>(id);
+        hierarchyDepthInput.setMaximum(MAX_NEIGHBORS_HOPS);
+        hierarchyDepthInput.setMinimum(1);
+        hierarchyDepthInput.add(updateGraphViewAjaxBehavior("change"));
+        return hierarchyDepthInput.setRequired(true);
+    }
 
+    private Component newVerticesPropertySelector(String id) {
         return new DropDownChoice<>(id, allVerticesPropertiesModel(), new ChoiceRenderer<>(null, "toString()"))
                 .setOutputMarkupId(true)
                 .add(new AjaxFormComponentUpdatingBehavior("change") {
@@ -162,7 +170,7 @@ public class VicinityControlPanel extends Panel {
                 add(updateGraphViewAjaxBehavior("change"));
     }
 
-    private Component newDepthSelector(String id) {
+    private Component newDepthInput(String id) {
         final NumberTextField<Integer> depthInput = new NumberTextField<Integer>(id);
         depthInput.setMaximum(MAX_NEIGHBORS_HOPS);
         depthInput.setMinimum(1);
@@ -176,13 +184,8 @@ public class VicinityControlPanel extends Panel {
     }
 
     private WebMarkupContainer createTitleEditableLink(String id) {
-        LambdaAjaxLink titleLink = new LambdaAjaxLink(id, target -> {
-            titleEditDialog.open(target);
-        });
-
-        return titleLink;
+        return new LambdaAjaxLink(id, titleEditDialog::open);
     }
-
 
     private InputDialog<String> createTitleEditDialog(String id) {
         return new InputDialog<String>(id, "Edit title", "", new PropertyModel<>(selectedVertexModel, "title")) {

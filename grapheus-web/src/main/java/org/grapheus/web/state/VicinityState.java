@@ -15,10 +15,8 @@ public final class VicinityState implements Serializable {
     public static final String DEPTH = "depth";
 
     private int depth = 1;
-
     private EdgeDirection edgesDirection = EdgeDirection.ANY;
-
     private GraphLayout layout = GraphLayout.LAYERED;
-
     private String highlightedProperty;
+    private int propertyHierarchyDepth = 1;
 }

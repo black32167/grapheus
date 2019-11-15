@@ -73,16 +73,16 @@ function drawGraph(parameters) {
                         nodeDimensionsIncludeLabels:true,
                         fit:true
                   }
-
 	});
 
 	setupGraphListeners(cy, parameters)
 	setupMenu(cy, parameters)
+	$('.propertyHierarchyDepth').change(() => updateNodeColors())
 
     // TODO: can it be invoked on VicinityControlPanel side when one is rendered?
 
     cy.ready(()=>{
-        updateNodeColors($('.verticesPropertySelector').val())
+        updateNodeColors()
 
         var levels = []
 
@@ -179,7 +179,6 @@ function buildNodes(vertices) {
 
 		var vertexId = toValidId(originalVertexId);
 
-
         if(rootId == vertexId) {
             tags.push("root")
         }
@@ -200,16 +199,32 @@ function buildNodes(vertices) {
 	return nodesElements
 }
 
+function getDiscriminatorValue(value, propertyHierarchyDepth) {
+    if(propertyHierarchyDepth === undefined) {
+        propertyHierarchyDepth = $('.propertyHierarchyDepth').val()
+    }
+    if(value != undefined) {
+        var chunks = value.split('.', propertyHierarchyDepth)
+        return chunks.join('.')
+    }
+}
+
 /**
  * Highlights nodes marked with specified tag.
  * Part of javascript API for backend
  */
-function updateNodeColors(selectedProperty) {
+function updateNodeColors() {
+    var selectedProperty = $('.verticesPropertySelector').val()
     var colors = [
         'green','blue','cyan','magenta', 'orange', 'black', 'gray'
     ]
     var prop2color = {}
 
+    var selectedVertex = cy.nodes()
+        .map(nodeEle => nodeEle.data())
+        .find(v => v.selectedVertex)
+    var selectedVertexDiscriminatorValue = selectedVertex.properties[selectedProperty]
+    var propertyHierarchyDepth = $('.propertyHierarchyDepth').val()
     cy.nodes().forEach(nodeEle=> {
         var newColor = "gray"
         var newBGColor = "gray"
@@ -217,12 +232,16 @@ function updateNodeColors(selectedProperty) {
         if(nodeData.highlighted) {
             newColor = 'red'
         } else if(selectedProperty in nodeData.properties) {
-            var propValue = nodeData.properties[selectedProperty];
-            if(!(propValue in prop2color)) {
-                var colorIdx = Math.min(Object.keys(prop2color).length, colors.length-1)
-                prop2color[propValue] = colors[colorIdx]
+            var discriminatorValue = getDiscriminatorValue(nodeData.properties[selectedProperty], propertyHierarchyDepth);
+            if(selectedVertexDiscriminatorValue === discriminatorValue) {
+                newColor = 'red'
+            } else {
+                if(!(discriminatorValue in prop2color)) {
+                    var colorIdx = Math.min(Object.keys(prop2color).length, colors.length-1)
+                    prop2color[discriminatorValue] = colors[colorIdx]
+                }
+                newColor = prop2color[discriminatorValue]
             }
-            newColor = prop2color[propValue]
         }
         nodeEle.data({
             color: newColor,
@@ -372,12 +391,17 @@ function setupGraphListeners(cy, settings) {
 	})
 	cy.on('mouseover', 'node', function(evt) {
 	    var pos = evt.target.renderedPosition()
-
-        //var tags = evt.target.data().tags
-        var nodeProperties = evt.target.data().properties;
+        var selectedProperty = $('.verticesPropertySelector').val()
+        var nodeData = evt.target.data()
+        var selectedValue = nodeData.properties[selectedProperty]
+        var nodeProperties = $.extend(
+            {},
+            nodeData.properties,
+            {'discriminator': getDiscriminatorValue(selectedValue)})
         var propertiesText = Object.keys(nodeProperties)
-            .map(k => `<span style="width:30px"><b>${k}</b>:</span> ${nodeProperties[k]}`)
+            .map(k => `<div style="white-space: nowrap;"><span style="width:30px"><b>${k}</b>:</span> ${nodeProperties[k]}</div>`)
             .join('<br>')
+        var selectedProperty = $('.verticesPropertySelector').val()
 
 	    $('#tooltip').css({top: pos.y, left: pos.x})
 	    $('#tooltip').html(propertiesText)
