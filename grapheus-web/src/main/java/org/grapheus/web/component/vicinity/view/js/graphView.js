@@ -302,18 +302,7 @@ function setupMenu(cy, parameters) {
                         Wicket.Ajax.get({ u: parameters.generateCollapsedGraphURL+'&vertexId=' + target.data().originalId });
                     },
                     disabled: false
-                },
-                {
-                     id: 'filterByProperty',
-                     content: 'Filter by property...',
-                     tooltipText: 'Filter by vertex property...',
-                     selector: 'node',
-                     onClickFunction: function (event) {
-                         var target = event.target || event.cyTarget;
-                         Wicket.Ajax.get({ u: parameters.filterByPropertyURL+'&vertexId=' + target.data().originalId });
-                     },
-                     disabled: false
-                 }
+                }
 	    	]
 	}
     var instance = window.cy.contextMenus( options );

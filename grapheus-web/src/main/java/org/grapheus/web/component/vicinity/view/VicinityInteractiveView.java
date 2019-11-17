@@ -28,7 +28,6 @@ import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.list.view.VerticesListViewPanel;
 import org.grapheus.web.component.operation.dialog.collapsed.GenerateCollapsedGraphPanel;
-import org.grapheus.web.component.operation.dialog.filter.property.FilterByPropertyPanel;
 import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.model.VicinityGraph;
 import org.grapheus.web.model.WEdge;
@@ -62,7 +61,6 @@ public class VicinityInteractiveView extends Panel {
     private final AbstractDefaultAjaxBehavior deleteEdgeBehavior;
     private final AbstractDefaultAjaxBehavior deleteVertexBehavior;
     private final AbstractDefaultAjaxBehavior generateCollapsedGraphBehavior;
-    private final AbstractDefaultAjaxBehavior filterByPropertyBehavior;
 
     public VicinityInteractiveView(final String id,
                                    RepresentationState representationState,
@@ -74,7 +72,6 @@ public class VicinityInteractiveView extends Panel {
         deleteEdgeBehavior = createDeleteEdgeBehavior();
         deleteVertexBehavior = createDeleteVertexBehavior();
         generateCollapsedGraphBehavior = createGenerateCollapsedGraphBehavior();
-        this.filterByPropertyBehavior = createFilterByPropertyBehavior();
         this.representationState = representationState;
         this.graphChangedCallback = graphChangedCallback;
     }
@@ -92,7 +89,6 @@ public class VicinityInteractiveView extends Panel {
         jsParams.put("deleteEdgeURL", deleteEdgeBehavior.getCallbackUrl());
         jsParams.put("deleteVertexURL", deleteVertexBehavior.getCallbackUrl());
         jsParams.put("generateCollapsedGraphURL", generateCollapsedGraphBehavior.getCallbackUrl());
-        jsParams.put("filterByPropertyURL", filterByPropertyBehavior.getCallbackUrl());
         response.render(OnLoadHeaderItem.forScript(graphActivatorTemplate.asString(jsParams)));
     }
 
@@ -112,7 +108,6 @@ public class VicinityInteractiveView extends Panel {
         add(deleteEdgeBehavior);
         add(deleteVertexBehavior);
         add(generateCollapsedGraphBehavior);
-        add(filterByPropertyBehavior);
         add(newDroppabe(".vicinityView"));
     }
 
@@ -144,18 +139,6 @@ public class VicinityInteractiveView extends Panel {
             protected void respond(final AjaxRequestTarget target) {
                 String vertexId = getRequest().getRequestParameters().getParameterValue("vertexId").toOptionalString();
                 dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), representationState.getGraphId(), vertexId));
-            }
-        };
-    }
-
-    private AbstractDefaultAjaxBehavior createFilterByPropertyBehavior() {
-        return new AbstractDefaultAjaxBehavior() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            protected void respond(final AjaxRequestTarget target) {
-                String vertexId = getRequest().getRequestParameters().getParameterValue("vertexId").toOptionalString();
-                dialogOperationSupport.showOperation(target, new FilterByPropertyPanel(dialogOperationSupport.getId(), representationState.getGraphId(), vertexId));
             }
         };
     }
