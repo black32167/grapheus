@@ -16,4 +16,5 @@ public final class WVertex implements Serializable {
     String id;
     List<String> tags;
     List<RVertex.RProperty> properties;
+    String generativeValue;
 }

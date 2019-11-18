@@ -72,6 +72,7 @@ public class WebGraphUtils {
                    // neighbors(neighborsMap.getOrDefault(persistedVertex.getId(), emptyList())).//
                     tags(persistedVertex.getTags()).
                     properties(persistedVertex.getProperties()).
+                    generativeValue(persistedVertex.getGenerativeValue()).
                     build());
             neighboringArtifactsIds.remove(persistedVertex.getId());
         }

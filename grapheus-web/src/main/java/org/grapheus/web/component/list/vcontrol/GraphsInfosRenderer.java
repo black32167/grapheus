@@ -3,11 +3,11 @@
  */
 package org.grapheus.web.component.list.vcontrol;
 
-import java.util.List;
-
 import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.model.IModel;
 import org.grapheus.web.model.GraphInfo;
+
+import java.util.List;
 
 /**
  * @author black
@@ -20,17 +20,16 @@ public final class GraphsInfosRenderer implements IChoiceRenderer<GraphInfo> {
     
     @Override
     public Object getDisplayValue(GraphInfo object) {
-        return object.getGraphName();
+        return object.getGraphId();
     }
 
     @Override
     public String getIdValue(GraphInfo object, int index) {
-        return object.getGraphName();
+        return object.getGraphId();
     }
 
     @Override
     public GraphInfo getObject(String id, IModel<? extends List<? extends GraphInfo>> choices) {
-        return choices.getObject().stream().filter(g->g.getGraphName().equals(id)).findFirst().get();
+        return choices.getObject().stream().filter(g->g.getGraphId().equals(id)).findFirst().get();
     }
-
 }

@@ -53,4 +53,6 @@ public class RVertex {
 
     @Singular
     private List<String> tags;
+
+    private String generativeValue;
 }

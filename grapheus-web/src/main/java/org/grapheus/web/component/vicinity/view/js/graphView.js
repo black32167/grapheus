@@ -176,7 +176,7 @@ function buildNodes(vertices) {
 		        return acc
 		    }, {});
 		var highlighted = jV.attr('highlighted') !== undefined;
-
+        var generativeValue = jV.attr('generativeValue')
 		var vertexId = toValidId(originalVertexId);
 
         if(rootId == vertexId) {
@@ -192,7 +192,8 @@ function buildNodes(vertices) {
 				tags: tags,
 				properties: properties,
 				highlighted: highlighted,
-				originalId:originalVertexId
+				originalId:originalVertexId,
+				generativeValue: generativeValue
 			}})
 	});
 
@@ -294,14 +295,25 @@ function setupMenu(cy, parameters) {
 		        },
 		        {
                     id: 'generateCollapsedGraph',
-                    content: 'Collapse...',
-                    tooltipText: 'Collapse by property',
+                    content: 'Property relations graph...',
+                    tooltipText: 'Generate graph shows property relations',
                     selector: 'node',
                     onClickFunction: function (event) {
                         var target = event.target || event.cyTarget;
                         Wicket.Ajax.get({ u: parameters.generateCollapsedGraphURL+'&vertexId=' + target.data().originalId });
                     },
                     disabled: false
+                },
+                {
+                    id: 'jumpToSourceGraph',
+                    content: 'Expand...',
+                    tooltipText: 'Exapands vertex in source graph view',
+                    selector: 'node',
+                    onClickFunction: function (event) {
+                        var target = event.target || event.cyTarget;
+                        Wicket.Ajax.get({ u: parameters.sourceGraphURL+'&generativeValue=' + target.data().generativeValue });
+                    },
+                    disabled: parameters.sourceGraphURL === ""
                 }
 	    	]
 	}

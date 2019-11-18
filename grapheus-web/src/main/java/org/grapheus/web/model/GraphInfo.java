@@ -3,10 +3,10 @@
  */
 package org.grapheus.web.model;
 
-import java.io.Serializable;
-
 import lombok.Builder;
 import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * @author black
@@ -15,9 +15,9 @@ import lombok.Data;
 @Builder
 @Data
 public class GraphInfo implements Serializable {
-
     private static final long serialVersionUID = 1L;
-    private String graphName;
+    private String graphId;
     private boolean editPermitted;
-
+    private String sourceGraphId;
+    private String sourceGraphProperty;
 }

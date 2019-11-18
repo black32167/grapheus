@@ -17,6 +17,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RGraph {
-    private String name;
+    private String graphId;
     private boolean editPermitted;
+    private String generativeGraphId;
+    private String generativeProperty;
 }

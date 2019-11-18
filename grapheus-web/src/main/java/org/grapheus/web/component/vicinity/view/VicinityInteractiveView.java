@@ -22,6 +22,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.template.PackageTextTemplate;
 import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
 import org.grapheus.web.RemoteUtil;
@@ -32,6 +33,7 @@ import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.model.VicinityGraph;
 import org.grapheus.web.model.WEdge;
 import org.grapheus.web.model.WVertex;
+import org.grapheus.web.page.vertices.list.VerticesPage;
 import org.grapheus.web.state.RepresentationState;
 
 import javax.servlet.http.HttpSession;
@@ -61,6 +63,7 @@ public class VicinityInteractiveView extends Panel {
     private final AbstractDefaultAjaxBehavior deleteEdgeBehavior;
     private final AbstractDefaultAjaxBehavior deleteVertexBehavior;
     private final AbstractDefaultAjaxBehavior generateCollapsedGraphBehavior;
+    private final AbstractDefaultAjaxBehavior vertexExpansionBehavior;
 
     public VicinityInteractiveView(final String id,
                                    RepresentationState representationState,
@@ -72,6 +75,7 @@ public class VicinityInteractiveView extends Panel {
         deleteEdgeBehavior = createDeleteEdgeBehavior();
         deleteVertexBehavior = createDeleteVertexBehavior();
         generateCollapsedGraphBehavior = createGenerateCollapsedGraphBehavior();
+        vertexExpansionBehavior = createVertexExpansionBehavior();
         this.representationState = representationState;
         this.graphChangedCallback = graphChangedCallback;
     }
@@ -89,6 +93,7 @@ public class VicinityInteractiveView extends Panel {
         jsParams.put("deleteEdgeURL", deleteEdgeBehavior.getCallbackUrl());
         jsParams.put("deleteVertexURL", deleteVertexBehavior.getCallbackUrl());
         jsParams.put("generateCollapsedGraphURL", generateCollapsedGraphBehavior.getCallbackUrl());
+        jsParams.put("sourceGraphURL", vertexExpansionBehavior.getCallbackUrl());
         response.render(OnLoadHeaderItem.forScript(graphActivatorTemplate.asString(jsParams)));
     }
 
@@ -108,6 +113,7 @@ public class VicinityInteractiveView extends Panel {
         add(deleteEdgeBehavior);
         add(deleteVertexBehavior);
         add(generateCollapsedGraphBehavior);
+        add(vertexExpansionBehavior);
         add(newDroppabe(".vicinityView"));
     }
 
@@ -139,6 +145,22 @@ public class VicinityInteractiveView extends Panel {
             protected void respond(final AjaxRequestTarget target) {
                 String vertexId = getRequest().getRequestParameters().getParameterValue("vertexId").toOptionalString();
                 dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), representationState.getGraphId(), vertexId));
+            }
+        };
+    }
+
+    private AbstractDefaultAjaxBehavior createVertexExpansionBehavior() {
+        return new AbstractDefaultAjaxBehavior() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void respond(final AjaxRequestTarget target) {
+                String propertyValue = getRequest().getRequestParameters().getParameterValue("generativeValue").toOptionalString();
+                String propertyName = representationState.getSourceGraphProperty();
+                String sourceGraphId = representationState.getSourceGraphId();
+                setResponsePage(VerticesPage.class, new PageParameters()
+                        .add(VerticesPage.PARAM_SELECTED_GRAPH, sourceGraphId)
+                        .add(VerticesPage.PARAM_FILTER_PROPERTY, propertyName + "=" + propertyValue + "%"));
             }
         };
     }
@@ -223,6 +245,7 @@ public class VicinityInteractiveView extends Panel {
                         .map(tags -> String.join(",", tags))
                         .orElse("");
                 l.add(new AttributeAppender("tags", serializedTags));
+                l.add(new AttributeAppender("generativeValue", vertex.getGenerativeValue()));
 
                 String serializedProperties = Optional.ofNullable(vertex.getProperties())
                         .map(props -> props.stream()

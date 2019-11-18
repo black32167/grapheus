@@ -4,7 +4,8 @@ var parameters = {
 	deleteEdgeURL: "${deleteEdgeURL}",
 	deleteVertexURL: "${deleteVertexURL}",
 	generateCollapsedGraphURL: "${generateCollapsedGraphURL}",
-	isCircleLayout: "${layout}" == "radial"
+	isCircleLayout: "${layout}" == "radial",
+	sourceGraphURL: "${sourceGraphURL}"
 }
 // 
 drawGraph(parameters)

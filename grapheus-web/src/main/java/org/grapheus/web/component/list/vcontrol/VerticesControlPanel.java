@@ -87,12 +87,12 @@ public class VerticesControlPanel extends Panel {
 		
 		GraphInfo suggestedGraphInfo = null;
 		if(graphId != null) {
-		    suggestedGraphInfo = graphListModel.getObject().stream().filter(gi->gi.getGraphName().equals(graphId)).findFirst().orElse(null);
+		    suggestedGraphInfo = graphListModel.getObject().stream().filter(gi->gi.getGraphId().equals(graphId)).findFirst().orElse(null);
 		}
 		add(new Form<Void>("graph_selection_form")
 		        .add(new LambdaAjaxDropDownChoice<GraphInfo>(
 		                "graph", Model.of(suggestedGraphInfo), graphListModel, GraphsInfosRenderer.INSTANCE, (target, model)-> {
-    		            setResponsePage(VerticesPage.class, new PageParameters().add(VerticesPage.PARAM_SELECTED_GRAPH, model.getObject().getGraphName()));
+    		            setResponsePage(VerticesPage.class, new PageParameters().add(VerticesPage.PARAM_SELECTED_GRAPH, model.getObject().getGraphId()));
     		        })));
         
         add(itemCountLabel = createItemsCountLabel("items_count").setOutputMarkupId(true));

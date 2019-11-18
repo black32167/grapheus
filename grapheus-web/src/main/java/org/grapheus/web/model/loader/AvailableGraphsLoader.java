@@ -8,8 +8,13 @@ import java.util.stream.Collectors;
 
 public class AvailableGraphsLoader {
     public List<GraphInfo> loadAvailableGraphs() {
-        return RemoteUtil.graphsAPI().getAvailableGraphs().stream().map(
-            rg -> GraphInfo.builder().graphName(rg.getName()).editPermitted(rg.isEditPermitted()).build())
-            .collect(Collectors.toList());
+        return RemoteUtil.graphsAPI().getAvailableGraphs().stream()
+                .map(rg -> GraphInfo.builder()
+                        .graphId(rg.getGraphId())
+                        .editPermitted(rg.isEditPermitted())
+                        .sourceGraphId(rg.getGenerativeGraphId())
+                        .sourceGraphProperty(rg.getGenerativeProperty())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

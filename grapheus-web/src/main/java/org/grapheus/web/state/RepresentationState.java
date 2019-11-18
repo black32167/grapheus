@@ -25,6 +25,12 @@ public class RepresentationState implements Serializable {
     private final String graphId;
 
     @Getter
+    private final String sourceGraphId;
+
+    @Getter
+    private final String sourceGraphProperty;
+
+    @Getter
     private final VertexListFilter vertexListFilter = new VertexListFilter();
 
     @Getter
@@ -46,14 +52,20 @@ public class RepresentationState implements Serializable {
         verticesListModel = createVerticesModel();
         vicinityGraphModel = createVicinityGraphModel();
 
+        List<GraphInfo> availableGraphs = getAvailableGraphs();
         if(graphId == null || !isExists(graphId)) {
-            List<GraphInfo> availableGraphs = getAvailableGraphs();
-
             if(!availableGraphs.isEmpty()) {
-                graphId = availableGraphs.get(0).getGraphName();
+                graphId = availableGraphs.get(0).getGraphId();
             }
         }
         this.graphId = graphId;
+
+        GraphInfo graphInfo = availableGraphs.stream()
+                .filter(g->g.getGraphId().equals(this.graphId))
+                .findFirst()
+                .orElse(null);
+        this.sourceGraphId = (graphInfo == null) ? null : graphInfo.getSourceGraphId();
+        this.sourceGraphProperty = (graphInfo == null) ? null : graphInfo.getSourceGraphProperty();
     }
 
     private boolean isExists(String graphId) {
