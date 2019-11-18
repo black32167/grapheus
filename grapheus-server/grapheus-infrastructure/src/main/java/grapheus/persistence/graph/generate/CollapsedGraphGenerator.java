@@ -21,7 +21,7 @@ public class CollapsedGraphGenerator {
 
     public void generate(String grapheusUserKey, String sourceGraphId, String newGraphId, String groupingProperty) {
         try {
-            graphsManager.createGraphForUser(grapheusUserKey, newGraphId, sourceGraphId);
+            graphsManager.createGraphForUser(grapheusUserKey, newGraphId, sourceGraphId, groupingProperty);
         } catch (GraphExistsException e) {
             log.info("Graph '{}' already exists", newGraphId);
         }

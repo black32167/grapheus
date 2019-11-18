@@ -34,6 +34,7 @@ public final class VertexConverter {
                 updateTimeMills(Optional.ofNullable(internalVertexModel.getUpdatedTimestamp()).orElse(0L)).//
                 properties(properties).//
                 tags(ofNullable(internalVertexModel.getTags()).orElse(emptyList())).//
+                generativeValue(internalVertexModel.getGenerativeValue()).//
                 build();
     }
 

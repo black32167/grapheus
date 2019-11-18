@@ -15,8 +15,8 @@ exports.execute = function (params) {
     var ecolDst = eval('dstGraph.'+names.edgesCollection(newGraphId))
 
     function getVertexPropertyValue(vertex, propertyName) {
-        var maybeProperty = vertex.semanticFeatures.find(prop => prop["feature"] === groupingProperty)
-        return maybeProperty === undefined ? "undefined" : maybeProperty.value
+        var feature = vertex.semanticFeatures[propertyName]
+        return (feature === undefined) ? "undefined" : feature.value;
     }
 
     // Create vertices
@@ -29,11 +29,12 @@ exports.execute = function (params) {
         var mergedTitle = propertyValue
 
         var maybeDstVertex = vcolDst.firstExample({_key:mergedVKey})
-        console.log('iterating ' + vertex._id + '/maybeDstVertex='+maybeDstVertex)
+        console.log('iterating ' + vertex._id + '/maybeDstVertex='+maybeDstVertex + "/propertyValue="+propertyValue)
         if(maybeDstVertex === null) {
             vcolDst.insert({
                 _key: mergedVKey,
-                title: mergedTitle
+                title: mergedTitle,
+                generativeValue: propertyValue
             });
         }
     }

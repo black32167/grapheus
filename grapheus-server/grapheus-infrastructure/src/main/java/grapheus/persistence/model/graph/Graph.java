@@ -44,4 +44,5 @@ public class Graph {
     private List<String> userKeys;
     private List<String> operationsApplied;
     private String sourceGraphId;
+    private String generativePropertyName;
 }

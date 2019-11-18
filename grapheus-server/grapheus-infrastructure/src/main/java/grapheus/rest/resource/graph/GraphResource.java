@@ -3,14 +3,25 @@
  */
 package grapheus.rest.resource.graph;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
+import grapheus.context.GrapheusRequestContextHolder;
+import grapheus.graph.GraphMetaInfo;
+import grapheus.graph.GraphsManager;
+import grapheus.graph.bulk.EdgeBulkImporterFactory;
+import grapheus.graph.bulk.EdgeBulkImporterFactory.EdgeBulkImporter;
+import grapheus.graph.bulk.VertexBulkImporterFactory;
+import grapheus.graph.bulk.VertexBulkImporterFactory.VertexBulkImporter;
+import grapheus.persistence.exception.GraphExistsException;
+import grapheus.persistence.storage.graph.GraphNameUtils;
+import grapheus.rest.converter.EdgeConverter;
+import grapheus.rest.converter.VertexConverter;
+import lombok.extern.slf4j.Slf4j;
+import org.grapheus.client.model.GraphStreamSerializer;
+import org.grapheus.client.model.RGraphInfo;
+import org.grapheus.client.model.graph.RGraph;
+import org.grapheus.client.model.graph.RGraphsContainer;
+import org.grapheus.client.model.graph.VerticesSortCriteriaType;
+import org.grapheus.client.model.graph.edge.REdge;
+import org.grapheus.client.model.graph.vertex.RVertex;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -25,27 +36,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
-
-import org.grapheus.client.model.GraphStreamSerializer;
-import org.grapheus.client.model.RGraphInfo;
-import org.grapheus.client.model.graph.RGraph;
-import org.grapheus.client.model.graph.RGraphsContainer;
-import org.grapheus.client.model.graph.VerticesSortCriteriaType;
-import org.grapheus.client.model.graph.edge.REdge;
-import org.grapheus.client.model.graph.vertex.RVertex;
-
-import grapheus.context.GrapheusRequestContextHolder;
-import grapheus.graph.GraphMetaInfo;
-import grapheus.graph.GraphsManager;
-import grapheus.graph.bulk.EdgeBulkImporterFactory;
-import grapheus.graph.bulk.EdgeBulkImporterFactory.EdgeBulkImporter;
-import grapheus.graph.bulk.VertexBulkImporterFactory;
-import grapheus.graph.bulk.VertexBulkImporterFactory.VertexBulkImporter;
-import grapheus.persistence.exception.GraphExistsException;
-import grapheus.persistence.storage.graph.GraphNameUtils;
-import grapheus.rest.converter.EdgeConverter;
-import grapheus.rest.converter.VertexConverter;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * @author black
@@ -164,13 +162,12 @@ public class GraphResource {
                 .build();
     }
 
-
     private RGraph toExternalGraph(GraphMetaInfo graphInfo) {
-        return RGraph.builder().//
-                name(graphInfo.getName()).//
-                editPermitted(graphInfo.isHasEditPermissions()).
-                build();
+        return RGraph.builder()//
+                .graphId(graphInfo.getGraphId())//
+                .editPermitted(graphInfo.isHasEditPermissions())
+                .generativeGraphId(graphInfo.getSourceGraphId())
+                .generativeProperty(graphInfo.getSourceGraphProperty())
+                .build();
     }
-    
-
 }

@@ -153,7 +153,7 @@ public class GraphsManager {
     public List<GraphMetaInfo> getUserGraphs(String userKey) {
         return graphMetaStorage.getUserGraphs(userKey).stream()
                 .map(ug->GraphMetaInfo.builder()
-                        .name(ug.getName())
+                        .persistentGraph(ug)
                         .hasEditPermissions(hasEditUserPermissions(ug, userKey))
                         .build())
                 .collect(Collectors.toList());
@@ -200,10 +200,14 @@ public class GraphsManager {
     }
 
     public Graph createGraphForUser(String grapheusUserKey, String graphId) throws GraphExistsException {
-        return createGraphForUser(grapheusUserKey, graphId, null);
+        return createGraphForUser(grapheusUserKey, graphId, null, null);
     }
 
-    public Graph createGraphForUser(String grapheusUserKey, String newGraphId, String sourceGraphId) throws GraphExistsException {
+    public Graph createGraphForUser(String grapheusUserKey, String graphId, String sourceGraphId) throws GraphExistsException {
+        return createGraphForUser(grapheusUserKey, graphId, sourceGraphId, null);
+    }
+
+    public Graph createGraphForUser(String grapheusUserKey, String newGraphId, String sourceGraphId, String generativeProperty) throws GraphExistsException {
         Graph g = graphMetaStorage.addGraph(newGraphId);
         if(g.getUserKeys() == null) {
             g.setUserKeys(new ArrayList<>());
@@ -212,6 +216,7 @@ public class GraphsManager {
         
         g.setPublicAccess(true);
         g.setSourceGraphId(sourceGraphId);
+        g.setGenerativePropertyName(generativeProperty);
         graphMetaStorage.updateGraphMeta(g);
         return g;
     }

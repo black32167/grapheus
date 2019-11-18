@@ -44,31 +44,25 @@ public class PersistentVertex {
     public static final String FIELD_ARTIFACT_PROCESSED = "processedTimestamp";
     public static final String DESCRIPTION = "description";
     public static final String VIRTUAL_ORDER = "order";
-    
+
     @DocumentField(Type.KEY)
     private String id;
 
     @DocumentField(Type.REV)
     private String rev;
-    
+
     /** External local references to other artifacts. For example, JIRA issue key or URL */
     private Map<String, SemanticFeature> semanticFeatures;
-    
-    private Long processedTimestamp;
-    
-    private Long updatedTimestamp;
-    
-    private Long createdTimestamp;
-    
-    private String url;
-    
-    private String title;
-    
-    private String description;
-    
-    private String sourceId;
 
+    private Long processedTimestamp;
+    private Long updatedTimestamp;
+    private Long createdTimestamp;
+    private String url;
+    private String title;
+    private String description;
+    private String sourceId;
     private List<String> tags;
+    private String generativeValue;
     
     public static class PersistentVertexBuilder {
         private Map<String, SemanticFeature> semanticFeatures = new HashMap<>();
