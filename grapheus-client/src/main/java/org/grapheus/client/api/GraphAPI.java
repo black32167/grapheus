@@ -3,12 +3,8 @@
  */
 package org.grapheus.client.api;
 
-import java.io.InputStream;
-import java.net.URI;
-import java.util.List;
-
-import javax.ws.rs.core.UriBuilder;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.grapheus.client.http.GrapheusRestClient;
 import org.grapheus.client.http.ServerErrorResponseException;
 import org.grapheus.client.model.RGraphInfo;
@@ -16,8 +12,10 @@ import org.grapheus.client.model.graph.RGraph;
 import org.grapheus.client.model.graph.RGraphsContainer;
 import org.grapheus.client.model.graph.VerticesSortCriteriaType;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import javax.ws.rs.core.UriBuilder;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.List;
 
 /**
  * @author black
@@ -39,20 +37,25 @@ public class GraphAPI {
                 RGraphsContainer.class).getGraphs();
     }
     
-    public void delete(String graphName) {
-        URI uri = UriBuilder.fromPath(PATH_GRAPH).path(graphName).build();
+    public void delete(String graphId) {
+        URI uri = graphDescriptorURI(graphId);
         restClient.delete(uri);
     }
 
+    public RGraph getGraph(String graphId) {
+        URI uri = graphDescriptorURI(graphId);
+        return restClient.get(uri, RGraph.class);
+    }
+
     public List<VerticesSortCriteriaType> getAvailableSortingCriteria(String graphId) {
-        URI uri = UriBuilder.fromPath(PATH_GRAPH).path(graphId).build();
+        URI uri = graphInfoURI(graphId);
         return restClient.get(uri, RGraphInfo.class).getAvailableSortCriteria();
     }
 
     public boolean graphExists(String graphId) {
         URI uri = UriBuilder.fromPath(PATH_GRAPH).path(graphId).build();
         try {
-            restClient.get(uri, RGraphInfo.class);
+            restClient.get(uri, RGraph.class);
         } catch (ServerErrorResponseException e) {
             if(e.getCode() == HTTP_NOT_FOUND) {
                 return false;
@@ -66,8 +69,7 @@ public class GraphAPI {
 
     public InputStream export(String graphId) {
         URI uri = UriBuilder.fromPath(PATH_GRAPH).path(graphId).path("export").build();
-        InputStream responseStream = restClient.get(uri, InputStream.class);
-        return responseStream;
+        return restClient.get(uri, InputStream.class);
     }
 
     public void upload(String newGraphId, InputStream inputStream) {
@@ -75,6 +77,11 @@ public class GraphAPI {
         restClient.post(uri, inputStream, "application/zip");
     }
 
+    private URI graphInfoURI(String graphId) {
+        return UriBuilder.fromPath(PATH_GRAPH).path(graphId).path("stat").build();
+    }
 
-
+    private URI graphDescriptorURI(String graphId) {
+        return UriBuilder.fromPath(PATH_GRAPH).path(graphId).build();
+    }
 }
