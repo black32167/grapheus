@@ -127,7 +127,6 @@ public class GraphsManager {
         
         return result;
     }
-    
 
     public List<String> getAllArtifactsProperties(String grapheusUserKey, String graphName) {
         return vertexStorage.getAllArtifactsProperties(graphName);
@@ -143,8 +142,6 @@ public class GraphsManager {
         artifactsPersister.update(graphName, newVertex); 
     }
 
-
-
     public void partialUpdate(String grapheusUserKey, String graphName, PersistentVertex updatePayload) {
         artifactsPersister.partialUpdate(graphName, updatePayload); 
         
@@ -152,11 +149,20 @@ public class GraphsManager {
     
     public List<GraphMetaInfo> getUserGraphs(String userKey) {
         return graphMetaStorage.getUserGraphs(userKey).stream()
-                .map(ug->GraphMetaInfo.builder()
-                        .persistentGraph(ug)
-                        .hasEditPermissions(hasEditUserPermissions(ug, userKey))
-                        .build())
+                .map(ug->toGraphMetaInfo(ug, userKey))
                 .collect(Collectors.toList());
+    }
+
+    public GraphMetaInfo getGraphInfo(String userKey, String graphId) {
+        Graph persistentGraph = graphMetaStorage.getGraphMeta(graphId);
+        return toGraphMetaInfo(persistentGraph, userKey);
+    }
+
+    private GraphMetaInfo toGraphMetaInfo(Graph persistentGraph, String userKey) {
+        return GraphMetaInfo.builder()
+                .persistentGraph(persistentGraph)
+                .hasEditPermissions(hasEditUserPermissions(persistentGraph, userKey))
+                .build();
     }
     
     public boolean hasEditUserPermissions(String graphName, String userKey) {
@@ -220,5 +226,4 @@ public class GraphsManager {
         graphMetaStorage.updateGraphMeta(g);
         return g;
     }
-
 }

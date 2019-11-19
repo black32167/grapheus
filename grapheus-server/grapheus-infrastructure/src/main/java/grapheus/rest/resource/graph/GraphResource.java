@@ -66,18 +66,24 @@ public class GraphResource {
     private EdgeBulkImporterFactory edgeBulkImporterFactory;
     
     @GET
-    //@Path("all")
     public RGraphsContainer getAvailableGraphs() {
         String userKey = GrapheusRequestContextHolder.getContext().getUserId();
         return RGraphsContainer.builder().//
                 graphs(graphManager.getUserGraphs(userKey).stream().map(this::toExternalGraph).collect(Collectors.toList())).//
                 build();
     }
-    
 
     @GET
     @Path("{graphId}")
-    public RGraphInfo getInfo(@PathParam("graphId") String graphId) {
+    public RGraph getGraph(@PathParam("graphId") String graphId) {
+        String grapheusUserKey = GrapheusRequestContextHolder.getContext().getUserId();
+        GraphMetaInfo graphInfo = graphManager.getGraphInfo(grapheusUserKey, graphId);
+        return toExternalGraph(graphInfo);
+    }
+
+    @GET
+    @Path("{graphId}/stat")
+    public RGraphInfo getStatistics(@PathParam("graphId") String graphId) {
         String grapheusUserKey = GrapheusRequestContextHolder.getContext().getUserId();
         int verticesCount = graphManager.getArtifactsCount(grapheusUserKey, graphId);
         List<VerticesSortCriteriaType> availableSortCriteria  = graphManager.getAvailableSortingCriteria(graphId);
