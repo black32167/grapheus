@@ -77,12 +77,16 @@ function drawGraph(parameters) {
 
 	setupGraphListeners(cy, parameters)
 	setupMenu(cy, parameters)
-	$('.propertyHierarchyDepth').change(() => updateNodeColors())
+	$('.propertyHierarchyDepth').change(() => {
+        updateNodeColors()
+        updateContextMenu(parameters)
+    })
 
     // TODO: can it be invoked on VicinityControlPanel side when one is rendered?
 
     cy.ready(()=>{
         updateNodeColors()
+        updateContextMenu(parameters);
 
         var levels = []
 
@@ -112,6 +116,19 @@ function drawGraph(parameters) {
 
 }
 
+function setMenuItemVisibility(menuItemId, isVisible) {
+    if(isVisible) {
+        contextMenu.showMenuItem(menuItemId)
+    } else {
+        contextMenu.hideMenuItem(menuItemId)
+    }
+}
+
+function updateContextMenu(parameters) {
+    var selectedVertexProperty = getSelectedVertexHighlightProperty()
+    setMenuItemVisibility('generatePropertiesGraph', selectedVertexProperty !== "")
+    setMenuItemVisibility('jumpToSourceGraph', parameters.sourceGraphURL !== "")
+}
 
 function toValidId(artifactId) {
     if(typeof artifactId == "undefined") {
@@ -215,7 +232,7 @@ function getDiscriminatorValue(value, propertyHierarchyDepth) {
  * Part of javascript API for backend
  */
 function updateNodeColors() {
-    var selectedProperty = $('.verticesPropertySelector').val()
+    var selectedProperty = getSelectedVertexHighlightProperty()
     var colors = [
         'green','blue','cyan','magenta', 'orange', 'black', 'gray'
     ]
@@ -294,15 +311,14 @@ function setupMenu(cy, parameters) {
 		            disabled: false
 		        },
 		        {
-                    id: 'generateCollapsedGraph',
+                    id: 'generatePropertiesGraph',
                     content: 'Property relations graph...',
                     tooltipText: 'Generate graph shows property relations',
                     selector: 'node',
                     onClickFunction: function (event) {
-                        var target = event.target || event.cyTarget;
-                        Wicket.Ajax.get({ u: parameters.generateCollapsedGraphURL+'&vertexId=' + target.data().originalId });
-                    },
-                    disabled: false
+                        var selectedVertexProperty = getSelectedVertexHighlightProperty()
+                        Wicket.Ajax.get({ u: parameters.generateCollapsedGraphURL+'&generativeProperty=' + selectedVertexProperty });
+                    }
                 },
                 {
                     id: 'jumpToSourceGraph',
@@ -312,12 +328,11 @@ function setupMenu(cy, parameters) {
                     onClickFunction: function (event) {
                         var target = event.target || event.cyTarget;
                         Wicket.Ajax.get({ u: parameters.sourceGraphURL+'&generativeValue=' + target.data().generativeValue });
-                    },
-                    disabled: parameters.sourceGraphURL === ""
+                    }
                 }
 	    	]
 	}
-    var instance = window.cy.contextMenus( options );
+    window.contextMenu = window.cy.contextMenus( options );
 }
 
 function goToNode(node, callbackUrl) {
@@ -373,6 +388,10 @@ function findCycle(cy, rootNode, pathColor) {
 	dfs(rootNode)
 }
 
+function getSelectedVertexHighlightProperty() {
+    return $('.verticesPropertySelector').val()
+}
+
 function setupGraphListeners(cy, settings) {
 	cy.on('mousedown', 'node', function(evt) {
 		cy.downstart = Date.now()
@@ -392,7 +411,7 @@ function setupGraphListeners(cy, settings) {
 	})
 	cy.on('mouseover', 'node', function(evt) {
 	    var pos = evt.target.renderedPosition()
-        var selectedProperty = $('.verticesPropertySelector').val()
+        var selectedProperty = getSelectedVertexHighlightProperty()
         var nodeData = evt.target.data()
         var selectedValue = nodeData.properties[selectedProperty]
         var nodeProperties = $.extend(
@@ -402,7 +421,6 @@ function setupGraphListeners(cy, settings) {
         var propertiesText = Object.keys(nodeProperties)
             .map(k => `<div style="white-space: nowrap;"><span style="width:30px"><b>${k}</b>:</span> ${nodeProperties[k]}</div>`)
             .join('<br>')
-        var selectedProperty = $('.verticesPropertySelector').val()
 
 	    $('#tooltip').css({top: pos.y, left: pos.x})
 	    $('#tooltip').html(propertiesText)
@@ -427,14 +445,11 @@ function setupGraphListeners(cy, settings) {
 $(window).load(() => {
     window.onLayoutResizeCallbacks.push(function() {
         handleResize()
-
         console.log("layout resized!");
-        
     })
 })
 
 $(window).resize(() => {
-
     setTimeout(()=> {
         handleResize()
     }, 500);

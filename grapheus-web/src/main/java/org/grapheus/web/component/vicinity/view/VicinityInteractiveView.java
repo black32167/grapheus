@@ -93,7 +93,7 @@ public class VicinityInteractiveView extends Panel {
         jsParams.put("deleteEdgeURL", deleteEdgeBehavior.getCallbackUrl());
         jsParams.put("deleteVertexURL", deleteVertexBehavior.getCallbackUrl());
         jsParams.put("generateCollapsedGraphURL", generateCollapsedGraphBehavior.getCallbackUrl());
-        jsParams.put("sourceGraphURL", vertexExpansionBehavior.getCallbackUrl());
+        jsParams.put("sourceGraphURL", representationState.isGenerativePropertySet() ? vertexExpansionBehavior.getCallbackUrl() : "");
         response.render(OnLoadHeaderItem.forScript(graphActivatorTemplate.asString(jsParams)));
     }
 
@@ -143,8 +143,8 @@ public class VicinityInteractiveView extends Panel {
 
             @Override
             protected void respond(final AjaxRequestTarget target) {
-                String vertexId = getRequest().getRequestParameters().getParameterValue("vertexId").toOptionalString();
-                dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), representationState.getGraphId(), vertexId));
+                String generativeProperty = getRequest().getRequestParameters().getParameterValue("generativeProperty").toOptionalString();
+                dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), representationState.getGraphId(), generativeProperty));
             }
         };
     }
@@ -156,7 +156,7 @@ public class VicinityInteractiveView extends Panel {
             @Override
             protected void respond(final AjaxRequestTarget target) {
                 String propertyValue = getRequest().getRequestParameters().getParameterValue("generativeValue").toOptionalString();
-                String propertyName = representationState.getSourceGraphProperty();
+                String propertyName = representationState.getGenerativeGraphProperty();
                 String sourceGraphId = representationState.getSourceGraphId();
                 setResponsePage(VerticesPage.class, new PageParameters()
                         .add(VerticesPage.PARAM_SELECTED_GRAPH, sourceGraphId)

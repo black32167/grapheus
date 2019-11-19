@@ -28,7 +28,7 @@ public class RepresentationState implements Serializable {
     private final String sourceGraphId;
 
     @Getter
-    private final String sourceGraphProperty;
+    private final String generativeGraphProperty;
 
     @Getter
     private final VertexListFilter vertexListFilter = new VertexListFilter();
@@ -65,7 +65,11 @@ public class RepresentationState implements Serializable {
                 .findFirst()
                 .orElse(null);
         this.sourceGraphId = (graphInfo == null) ? null : graphInfo.getSourceGraphId();
-        this.sourceGraphProperty = (graphInfo == null) ? null : graphInfo.getSourceGraphProperty();
+        this.generativeGraphProperty = (graphInfo == null) ? null : graphInfo.getSourceGraphProperty();
+    }
+
+    public boolean isGenerativePropertySet() {
+        return generativeGraphProperty != null;
     }
 
     private boolean isExists(String graphId) {
