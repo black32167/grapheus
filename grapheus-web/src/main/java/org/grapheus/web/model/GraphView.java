@@ -14,10 +14,10 @@ import java.io.Serializable;
  */
 @Builder
 @Data
-public class GraphInfo implements Serializable {
+public class GraphView implements Serializable {
     private static final long serialVersionUID = 1L;
     private String graphId;
     private boolean editPermitted;
-    private String sourceGraphId;
-    private String sourceGraphProperty;
+    private String generativeGraphId;
+    private String generativeGraphProperty;
 }

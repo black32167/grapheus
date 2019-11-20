@@ -24,7 +24,7 @@ import org.grapheus.web.component.list.view.VerticesListViewPanel;
 import org.grapheus.web.component.operation.dialog.add.AddVertexPanel;
 import org.grapheus.web.component.shared.LambdaAjaxCheckbox;
 import org.grapheus.web.component.shared.LambdaAjaxDropDownChoice;
-import org.grapheus.web.model.GraphInfo;
+import org.grapheus.web.model.GraphView;
 import org.grapheus.web.model.VerticesRemoteDataset;
 import org.grapheus.web.page.vertices.list.VerticesPage;
 import org.grapheus.web.state.RepresentationState;
@@ -45,7 +45,7 @@ public class VerticesControlPanel extends Panel {
 	private final IModel<VerticesRemoteDataset> vertexListModel;
 	private final VertexSelectionListener vertexSelectionListener;
 	private final VertexRemovalListener vertexRemovalListener;
-	private final IModel<List<GraphInfo>> graphListModel;
+	private final IModel<List<GraphView>> graphListModel;
 	private final ShowOperationSupport dialogOperationSupport;
 
 	private VerticesListViewPanel verticesList;
@@ -64,7 +64,7 @@ public class VerticesControlPanel extends Panel {
 		this.vertexSelectionListener = vertexSelectionListener;
 		this.vertexRemovalListener = vertexRemovalListener;
 		this.vertexListModel = representationState.getVerticesListModel();
-		this.graphListModel = representationState.getAvailableGraphsModel();
+		this.graphListModel = representationState.getAvailableGraphsViewModel();
 		this.dialogOperationSupport = dialogOperationSupport;
 	}
 
@@ -85,13 +85,13 @@ public class VerticesControlPanel extends Panel {
             	})
     	        .build());
 		
-		GraphInfo suggestedGraphInfo = null;
+		GraphView suggestedGraphView = null;
 		if(graphId != null) {
-		    suggestedGraphInfo = graphListModel.getObject().stream().filter(gi->gi.getGraphId().equals(graphId)).findFirst().orElse(null);
+		    suggestedGraphView = graphListModel.getObject().stream().filter(gi->gi.getGraphId().equals(graphId)).findFirst().orElse(null);
 		}
 		add(new Form<Void>("graph_selection_form")
-		        .add(new LambdaAjaxDropDownChoice<GraphInfo>(
-		                "graph", Model.of(suggestedGraphInfo), graphListModel, GraphsInfosRenderer.INSTANCE, (target, model)-> {
+		        .add(new LambdaAjaxDropDownChoice<GraphView>(
+		                "graph", Model.of(suggestedGraphView), graphListModel, GraphsInfosRenderer.INSTANCE, (target, model)-> {
     		            setResponsePage(VerticesPage.class, new PageParameters().add(VerticesPage.PARAM_SELECTED_GRAPH, model.getObject().getGraphId()));
     		        })));
         

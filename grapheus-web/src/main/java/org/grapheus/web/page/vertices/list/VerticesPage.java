@@ -66,11 +66,7 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
     public VerticesPage(final PageParameters parameters) {
         super(parameters);
 
-        String graphId = getPageParameters().get(PARAM_SELECTED_GRAPH).toString();
-
-        representationState = new RepresentationState(graphId);
-
-        representationState.getVertexListFilter().setVertexPropertyFilter(parseVertexFilterProperty(getPageParameters().get(PARAM_FILTER_PROPERTY).toString()));
+        representationState = new RepresentationState();
 
         dialog = new ModalWindow("operationDilaog")
                 .showUnloadConfirmation(false);
@@ -95,12 +91,20 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
     protected void onInitialize() {
         // Choosing current graph
         super.onInitialize();
+
+        initRepresentationState();
         
         add(rightPanel = newRightPanel());
 
         add(verticesPanel = newVerticesPanel());
         
         add(dialog);
+    }
+
+    private void initRepresentationState() {
+        String graphId = getPageParameters().get(PARAM_SELECTED_GRAPH).toString();
+        representationState.setGraphId(graphId);
+        representationState.getVertexListFilter().setVertexPropertyFilter(parseVertexFilterProperty(getPageParameters().get(PARAM_FILTER_PROPERTY).toString()));
     }
 
     private Component newVerticesPanel() {

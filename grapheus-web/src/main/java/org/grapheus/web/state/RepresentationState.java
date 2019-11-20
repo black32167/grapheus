@@ -4,11 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.grapheus.client.model.graph.RGraph;
 import org.grapheus.web.RemoteUtil;
-import org.grapheus.web.model.GraphInfo;
+import org.grapheus.web.model.GraphView;
 import org.grapheus.web.model.VerticesRemoteDataset;
 import org.grapheus.web.model.VicinityGraph;
-import org.grapheus.web.model.loader.AvailableGraphsLoader;
+import org.grapheus.web.model.loader.GraphViewFactory;
 import org.grapheus.web.model.loader.VertexListLoader;
 import org.grapheus.web.model.loader.VicinityGraphLoader;
 
@@ -16,19 +17,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+
 public class RepresentationState implements Serializable {
     public static final String FIELD_SELECTED_VIDS = "selectedVerticesIds";
     public static final String FIELD_GRAPH_ID = "graphId";
     public static final String FIELD_SELECTED_VERTEX_ID = "clickedVertexId";
 
     @Getter
-    private final String graphId;
-
-    @Getter
-    private final String sourceGraphId;
-
-    @Getter
-    private final String generativeGraphProperty;
+    private RGraph currentGraph;
 
     @Getter
     private final VertexListFilter vertexListFilter = new VertexListFilter();
@@ -43,45 +40,46 @@ public class RepresentationState implements Serializable {
     @Getter
     private final List<String> selectedVerticesIds = new ArrayList<>();
 
-    private final IModel<List<GraphInfo>> availableGraphsModel;
+    private final IModel<List<RGraph>> availableGraphsModel;
+    private final IModel<List<GraphView>> availableGraphsViewModel;
     private final IModel<VerticesRemoteDataset> verticesListModel;
     private final IModel<VicinityGraph> vicinityGraphModel;
 
-    public RepresentationState(String graphId) {
+    public RepresentationState() {
         availableGraphsModel = createAvailableGraphsModel();
+        availableGraphsViewModel = createAvailableGraphsViewsModel();
         verticesListModel = createVerticesModel();
         vicinityGraphModel = createVicinityGraphModel();
+    }
 
-        List<GraphInfo> availableGraphs = getAvailableGraphs();
-        if(graphId == null || !isExists(graphId)) {
-            if(!availableGraphs.isEmpty()) {
-                graphId = availableGraphs.get(0).getGraphId();
-            }
+    public void setGraphId(String graphId) {
+        currentGraph = RemoteUtil.graphsAPI().getGraph(graphId);
+
+        if(currentGraph == null) {
+            currentGraph = getAvailableGraphs().stream().findFirst().orElse(null);
         }
-        this.graphId = graphId;
-
-        GraphInfo graphInfo = availableGraphs.stream()
-                .filter(g->g.getGraphId().equals(this.graphId))
-                .findFirst()
-                .orElse(null);
-        this.sourceGraphId = (graphInfo == null) ? null : graphInfo.getSourceGraphId();
-        this.generativeGraphProperty = (graphInfo == null) ? null : graphInfo.getSourceGraphProperty();
     }
 
     public boolean isGenerativePropertySet() {
-        return generativeGraphProperty != null;
+        return ofNullable(currentGraph)
+                .map(RGraph::getGenerativeProperty)
+                .isPresent();
     }
 
     private boolean isExists(String graphId) {
         return RemoteUtil.graphsAPI().graphExists(graphId);
     }
 
-    public List<GraphInfo> getAvailableGraphs() {
+    public List<GraphView> getAvailableGraphsViews() {
+        return availableGraphsViewModel.getObject();
+    }
+
+    public List<RGraph> getAvailableGraphs() {
         return availableGraphsModel.getObject();
     }
 
-    public IModel<List<GraphInfo>> getAvailableGraphsModel() {
-        return availableGraphsModel;
+    public IModel<List<GraphView>> getAvailableGraphsViewModel() {
+        return availableGraphsViewModel;
     }
 
     public VerticesRemoteDataset getVerticesList() {
@@ -118,12 +116,33 @@ public class RepresentationState implements Serializable {
         };
     }
 
-    private IModel<List<GraphInfo>> createAvailableGraphsModel() {
-        return new LoadableDetachableModel<List<GraphInfo>>() {
+    private IModel<List<RGraph>> createAvailableGraphsModel() {
+        return new LoadableDetachableModel<List<RGraph>>() {
             @Override
-            protected List<GraphInfo> load() {
-                return new AvailableGraphsLoader().loadAvailableGraphs();
+            protected List<RGraph> load() {
+                return RemoteUtil.graphsAPI().getAvailableGraphs();
             }
         };
+    }
+
+    private IModel<List<GraphView>> createAvailableGraphsViewsModel() {
+        return new LoadableDetachableModel<List<GraphView>>() {
+            @Override
+            protected List<GraphView> load() {
+                return GraphViewFactory.createViews(availableGraphsModel.getObject());
+            }
+        };
+    }
+
+    public String getGraphId() {
+        return ofNullable(currentGraph).map(RGraph::getGraphId).orElse(null);
+    }
+
+    public String getGenerativeGraphProperty() {
+        return ofNullable(currentGraph).map(RGraph::getGenerativeProperty).orElse(null);
+    }
+
+    public String getGenerativeGraphId() {
+        return ofNullable(currentGraph).map(RGraph::getGenerativeGraphId).orElse(null);
     }
 }

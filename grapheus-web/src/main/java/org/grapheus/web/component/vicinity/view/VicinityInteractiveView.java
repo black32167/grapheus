@@ -157,7 +157,7 @@ public class VicinityInteractiveView extends Panel {
             protected void respond(final AjaxRequestTarget target) {
                 String propertyValue = getRequest().getRequestParameters().getParameterValue("generativeValue").toOptionalString();
                 String propertyName = representationState.getGenerativeGraphProperty();
-                String sourceGraphId = representationState.getSourceGraphId();
+                String sourceGraphId = representationState.getGenerativeGraphId();
                 setResponsePage(VerticesPage.class, new PageParameters()
                         .add(VerticesPage.PARAM_SELECTED_GRAPH, sourceGraphId)
                         .add(VerticesPage.PARAM_FILTER_PROPERTY, propertyName + "=" + propertyValue + "%"));
