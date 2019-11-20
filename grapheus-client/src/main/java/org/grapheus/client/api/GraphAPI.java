@@ -43,6 +43,9 @@ public class GraphAPI {
     }
 
     public RGraph getGraph(String graphId) {
+        if(graphId == null) {
+            return null;
+        }
         URI uri = graphDescriptorURI(graphId);
         return restClient.get(uri, RGraph.class);
     }
@@ -62,7 +65,6 @@ public class GraphAPI {
             } else {
                 throw e;
             }
-           
         }
         return true;
     }
