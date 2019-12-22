@@ -14,7 +14,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.component.operation.tabs.AbstractEmbeddedPanel;
-import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.component.shared.vlist.VerticesListArgumentPanel;
 import org.grapheus.web.page.vertices.list.VerticesPage;
 
@@ -36,8 +35,8 @@ public class RootedSubgraphGenerationPanel extends AbstractEmbeddedPanel {
     private final Component connectedLabel;
     
     @Builder
-    public RootedSubgraphGenerationPanel(String id, SerializableConsumer<AjaxRequestTarget> operationFinishedCallback, IModel<String> sourceGraphIdModel) {
-        super(id, operationFinishedCallback);
+    public RootedSubgraphGenerationPanel(String id, IModel<String> sourceGraphIdModel) {
+        super(id);
         
         this.sourceGraphIdModel = sourceGraphIdModel;
         //TODO: replace by CompoundModel?

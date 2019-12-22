@@ -12,7 +12,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.component.operation.tabs.AbstractEmbeddedPanel;
-import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.component.shared.vlist.VerticesListArgumentPanel;
 import org.grapheus.web.page.vertices.list.VerticesPage;
 
@@ -29,8 +28,8 @@ public class MergePanel extends AbstractEmbeddedPanel {
     private String newVertexName;
 
     @Builder
-    public MergePanel(String id, SerializableConsumer<AjaxRequestTarget> operationFinishedCallback, IModel<String> graphIdModel) {
-        super(id, operationFinishedCallback);
+    public MergePanel(String id, IModel<String> graphIdModel) {
+        super(id);
         this.graphIdModel = graphIdModel;
     }
 

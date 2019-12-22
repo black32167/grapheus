@@ -14,8 +14,7 @@ import org.grapheus.web.component.list.view.VerticesListViewPanel;
 import org.grapheus.web.model.VerticesRemoteDataset;
 import org.grapheus.web.model.VicinityGraph;
 import org.grapheus.web.model.WVertex;
-import org.grapheus.web.state.RepresentationState;
-import org.grapheus.web.state.VertexListFilter;
+import org.grapheus.web.state.GlobalFilter;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -27,30 +26,30 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class VertexListLoader {
-    private final RepresentationState representationState;
+    private final GlobalFilter globalFilter;
 
     public VerticesRemoteDataset load(VicinityGraph vicinityGraph) {
         return getVerticesInfoList(vicinityGraph);
     }
 
     private VerticesRemoteDataset getVerticesInfoList(VicinityGraph vicinityGraph) {
-        String graphId = representationState.getGraphId();
+        String graphId = globalFilter.getGraphId();
         if(graphId != null) {
-            VertexListFilter vertexListFilter = representationState.getVertexListFilter();
-            VerticesFilter taskFilter = VerticesFilter.builder().//
+            GlobalFilter vertexListFilter = globalFilter;
+            VerticesFilter verticesFilter = VerticesFilter.builder().//
                     sinks(vertexListFilter.isSinks()).//
                     title(vertexListFilter.getSubstring()).//
                     minAdjacentEdgesFilter(RAdjacentEdgesFilter.builder().
                     amount(vertexListFilter.getMinEdges()).
-                    direction(vertexListFilter.getFilteringEdgesDirection()).build()).
+                    direction(vertexListFilter.getTraversalDirection()).build()).
                     vertexPropertyFilter(vertexListFilter.getVertexPropertyFilter()).
                     build();
-            if (vertexListFilter.isRestrictByVicinity()) {
+            if (vertexListFilter.isFilterListByTraversalDepth()) {
                 Set<String> vIds = vicinityGraph.getVertices().stream().map(WVertex::getId).collect(Collectors.toSet());
-                taskFilter.setVerticesIds(vIds);
+                verticesFilter.setVerticesIds(vIds);
             }
             try {
-                RVerticesContainer tasksEnvelope = RemoteUtil.vertexAPI().findVertices(graphId, taskFilter,
+                RVerticesContainer tasksEnvelope = RemoteUtil.vertexAPI().findVertices(graphId, verticesFilter,
                         vertexListFilter.getSortingType() == null ? null : new VerticesSortCriteria(vertexListFilter.getSortingType(), vertexListFilter.getSortingDirection()));
 
                 Collection<RVertex> vertices = tasksEnvelope.getArtifacts();
@@ -83,8 +82,8 @@ public class VertexListLoader {
     }
 
     private Collection<RVertexInfo> loadAdditionalInfo(Collection<String> verticesKeys) {
-        String graphId = representationState.getGraphId();
-        VertexListFilter vertexListFilter = representationState.getVertexListFilter();
+        String graphId = globalFilter.getGraphId();
+        GlobalFilter vertexListFilter = globalFilter;
         switch(vertexListFilter.getSortingType()) {
             case IN_EDGES_COUNT:
                 return RemoteUtil.vertexAPI().getVerticesInfo(graphId, VertexInfoType.INBOUND_EDGES, verticesKeys);

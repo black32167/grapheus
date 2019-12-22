@@ -9,7 +9,8 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
-import org.grapheus.web.component.shared.SerializableConsumer;
+import org.grapheus.web.state.event.GraphViewChangedEvent;
+import org.grapheus.web.state.event.WebEventUtil;
 
 /**
  * @author black
@@ -17,11 +18,8 @@ import org.grapheus.web.component.shared.SerializableConsumer;
 public abstract class AbstractEmbeddedPanel extends Panel {
     private static final long serialVersionUID = 1L;
     
-    private final SerializableConsumer<AjaxRequestTarget> operationFinishedCallback;
-    
-    public AbstractEmbeddedPanel(String id, SerializableConsumer<AjaxRequestTarget> operationFinishedCallback) {
+    public AbstractEmbeddedPanel(String id) {
         super(id);
-        this.operationFinishedCallback = operationFinishedCallback;
     }
     
     abstract protected void performOperation(AjaxRequestTarget target);
@@ -53,7 +51,7 @@ public abstract class AbstractEmbeddedPanel extends Panel {
             protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
                 performOperation(target);
 
-                operationFinishedCallback.accept(target);
+                WebEventUtil.send(this, new GraphViewChangedEvent(target));
             }
         };
     }

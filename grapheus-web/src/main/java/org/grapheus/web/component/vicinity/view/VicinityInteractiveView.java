@@ -10,7 +10,7 @@ import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
@@ -22,19 +22,19 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.cycle.RequestCycle;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.template.PackageTextTemplate;
-import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
+import org.grapheus.client.model.graph.RGraph;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.list.view.VerticesListViewPanel;
 import org.grapheus.web.component.operation.dialog.collapsed.GenerateCollapsedGraphPanel;
-import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.model.VicinityGraph;
 import org.grapheus.web.model.WEdge;
 import org.grapheus.web.model.WVertex;
-import org.grapheus.web.page.vertices.list.VerticesPage;
-import org.grapheus.web.state.RepresentationState;
+import org.grapheus.web.state.GlobalFilter;
+import org.grapheus.web.state.GlobalStateController;
+import org.grapheus.web.state.VicinityVisualizationConfig;
+import org.grapheus.web.state.event.GraphViewChangedEvent;
 
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
@@ -42,6 +42,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * @author black
@@ -54,9 +56,9 @@ public class VicinityInteractiveView extends Panel {
             VicinityInteractiveView.class, "js/graphSettings.js");
 
     // Fields come from the constructor parameters
-    private final RepresentationState representationState;
-    private final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback;
     private final ShowOperationSupport dialogOperationSupport;
+    private final VicinityVisualizationConfig visualizationConfig;
+    private final GlobalStateController globalStateController;
 
     // Fields created internally in the constructor
     private final AbstractDefaultAjaxBehavior navigateBehavior;
@@ -66,18 +68,18 @@ public class VicinityInteractiveView extends Panel {
     private final AbstractDefaultAjaxBehavior vertexExpansionBehavior;
 
     public VicinityInteractiveView(final String id,
-                                   RepresentationState representationState,
-                                   final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback,
+                                   GlobalStateController globalStateController,
+                                   VicinityVisualizationConfig visualizationConfig,
                                    ShowOperationSupport dialogOperationSupport) {
         super(id);
+        this.visualizationConfig = visualizationConfig;
+        this.globalStateController = globalStateController;
         this.dialogOperationSupport = dialogOperationSupport;
         navigateBehavior = createNavigateBehavior();
         deleteEdgeBehavior = createDeleteEdgeBehavior();
         deleteVertexBehavior = createDeleteVertexBehavior();
         generateCollapsedGraphBehavior = createGenerateCollapsedGraphBehavior();
         vertexExpansionBehavior = createVertexExpansionBehavior();
-        this.representationState = representationState;
-        this.graphChangedCallback = graphChangedCallback;
     }
 
     @Override
@@ -89,21 +91,22 @@ public class VicinityInteractiveView extends Panel {
 
         Map<String, CharSequence> jsParams = new HashMap<>();
         jsParams.put("navigateCallbackURL", navigateBehavior.getCallbackUrl());
-        jsParams.put("layout", representationState.getVicinityState().getLayout().getJsName());
+        jsParams.put("layout", visualizationConfig.getLayout().getJsName());
         jsParams.put("deleteEdgeURL", deleteEdgeBehavior.getCallbackUrl());
         jsParams.put("deleteVertexURL", deleteVertexBehavior.getCallbackUrl());
         jsParams.put("generateCollapsedGraphURL", generateCollapsedGraphBehavior.getCallbackUrl());
-        jsParams.put("sourceGraphURL", representationState.isGenerativePropertySet() ? vertexExpansionBehavior.getCallbackUrl() : "");
+        jsParams.put("sourceGraphURL", isGenerativePropertySet() ? vertexExpansionBehavior.getCallbackUrl() : "");
         response.render(OnLoadHeaderItem.forScript(graphActivatorTemplate.asString(jsParams)));
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
-        IModel<VicinityGraph> vicinityVertexModel = representationState.getVicinityGraphModel();
+        IModel<VicinityGraph> vicinityVertexModel = globalStateController.getSharedModels().getVicinityGraphModel();
 
         add(new WebComponent("rootVertex")
-                .add(new AttributeAppender("vertexId", new PropertyModel<String>(representationState, RepresentationState.FIELD_SELECTED_VERTEX_ID))));
+                .add(new AttributeAppender("vertexId",
+                        new PropertyModel<String>(globalStateController.getFilter(), GlobalFilter.SELECTED_VERTEX_ID))));
 
         add(createVerticesList("linkedArtifactsList", vicinityVertexModel));
 
@@ -117,6 +120,25 @@ public class VicinityInteractiveView extends Panel {
         add(newDroppabe(".vicinityView"));
     }
 
+
+    public String getGenerativeGraphProperty() {
+        return ofNullable(getCurrentGraph()).map(RGraph::getGenerativeProperty).orElse(null);
+    }
+
+    private RGraph getCurrentGraph() {
+        return globalStateController.getSharedModels().getCurrentGraphsModel().getObject();
+    }
+
+    public String getGenerativeGraphId() {
+        return ofNullable(getCurrentGraph()).map(RGraph::getGenerativeGraphId).orElse(null);
+    }
+
+    public boolean isGenerativePropertySet() {
+        return ofNullable(getCurrentGraph())
+                .map(RGraph::getGenerativeProperty)
+                .isPresent();
+    }
+
     private Behavior newDroppabe(String selector) {
         return new DroppableBehavior(selector, new DroppableAdapter() {
 
@@ -127,11 +149,12 @@ public class VicinityInteractiveView extends Panel {
                 HttpSession session = ((ServletWebRequest) RequestCycle.get()
                         .getRequest()).getContainerRequest().getSession();
 
-                VerticesListViewPanel.VertexInfo data = (VerticesListViewPanel.VertexInfo) session.getAttribute("draggingVertex");//item.getModelObject();//TODO: can we do better? See also VerticesList
+                VerticesListViewPanel.VertexInfo data = (VerticesListViewPanel.VertexInfo) session.getAttribute("draggingVertex");
 
-                RemoteUtil.operationAPI().connect(representationState.getGraphId(),
+                GlobalFilter filter = globalStateController.getFilter();
+                RemoteUtil.operationAPI().connect(filter.getGraphId(),
                         Collections.singletonList(data.getVertexId()),
-                        Collections.singletonList(representationState.getClickedVertexId()));
+                        Collections.singletonList(filter.getSelectedVertexId()));
                 target.add(VicinityInteractiveView.this);
             }
         });
@@ -144,7 +167,7 @@ public class VicinityInteractiveView extends Panel {
             @Override
             protected void respond(final AjaxRequestTarget target) {
                 String generativeProperty = getRequest().getRequestParameters().getParameterValue("generativeProperty").toOptionalString();
-                dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), representationState.getGraphId(), generativeProperty));
+                dialogOperationSupport.showOperation(target, new GenerateCollapsedGraphPanel(dialogOperationSupport.getId(), filter().getGraphId(), generativeProperty));
             }
         };
     }
@@ -156,11 +179,15 @@ public class VicinityInteractiveView extends Panel {
             @Override
             protected void respond(final AjaxRequestTarget target) {
                 String propertyValue = getRequest().getRequestParameters().getParameterValue("generativeValue").toOptionalString();
-                String propertyName = representationState.getGenerativeGraphProperty();
-                String sourceGraphId = representationState.getGenerativeGraphId();
-                setResponsePage(VerticesPage.class, new PageParameters()
-                        .add(VerticesPage.PARAM_SELECTED_GRAPH, sourceGraphId)
-                        .add(VerticesPage.PARAM_FILTER_PROPERTY, propertyName + "=" + propertyValue + "%"));
+                String propertyName = getGenerativeGraphProperty();
+                String sourceGraphId = getGenerativeGraphId();
+
+                GlobalFilter filter = globalStateController.getFilter();
+                filter.setGraphId(sourceGraphId);
+                filter.setSelectedPropertyName(propertyName);
+                filter.setSelectedPropertyValue(propertyValue);
+                filter.setListPropertyFilterMode(GlobalFilter.PropertyFilterMode.PREFIX);
+                send(VicinityInteractiveView.this, Broadcast.BUBBLE, new GraphViewChangedEvent(target));
             }
         };
     }
@@ -172,8 +199,9 @@ public class VicinityInteractiveView extends Panel {
             @Override
             protected void respond(final AjaxRequestTarget target) {
                 String vertexId = getRequest().getRequestParameters().getParameterValue("targetVertextId").toOptionalString();
-                representationState.setClickedVertexId(vertexId);
-                graphChangedCallback.accept(target);
+
+                filter().setSelectedVertexId(vertexId);
+                send(VicinityInteractiveView.this, Broadcast.BUBBLE, new GraphViewChangedEvent(target));
             }
         };
     }
@@ -186,7 +214,7 @@ public class VicinityInteractiveView extends Panel {
             protected void respond(final AjaxRequestTarget target) {
                 String sourceVertexId = getRequest().getRequestParameters().getParameterValue("sourceId").toOptionalString();
                 String targetVertexId = getRequest().getRequestParameters().getParameterValue("targetId").toOptionalString();
-                RemoteUtil.operationAPI().disconnect(representationState.getGraphId(), sourceVertexId, targetVertexId);
+                RemoteUtil.operationAPI().disconnect(filter().getGraphId(), sourceVertexId, targetVertexId);
                 target.add(VicinityInteractiveView.this);
             }
         };
@@ -199,8 +227,8 @@ public class VicinityInteractiveView extends Panel {
             @Override
             protected void respond(final AjaxRequestTarget target) {
                 String vertexId = getRequest().getRequestParameters().getParameterValue("vertexId").toOptionalString();
-                RemoteUtil.vertexAPI().delete(representationState.getGraphId(), vertexId);
-                graphChangedCallback.accept(target);
+                RemoteUtil.vertexAPI().delete(filter().getGraphId(), vertexId);
+                send(VicinityInteractiveView.this, Broadcast.BUBBLE, new GraphViewChangedEvent(target));
             }
         };
     }
@@ -260,11 +288,16 @@ public class VicinityInteractiveView extends Panel {
     }
 
     private boolean containsSelectedProperty(WVertex vertex) {
-        RVertexPropertyFilter vertexFilter = representationState.getVertexListFilter().getVertexPropertyFilter();
-        if(vertexFilter == null || vertex.getProperties() == null) {
+        String selectedPropertyName = filter().getSelectedPropertyName();
+        String selectedPropertyValue = filter().getSelectedPropertyValue();
+        if(selectedPropertyName == null || selectedPropertyValue == null) {
             return false;
         }
         return vertex.getProperties().stream()
-                .anyMatch(p->p.getName().equals(vertexFilter.getName()) && p.getValue().equals(vertexFilter.getValue()));
+                .anyMatch(p->p.getName().equals(selectedPropertyName) && p.getValue().equals(selectedPropertyValue));
+    }
+
+    private GlobalFilter filter() {
+        return globalStateController.getFilter();
     }
 }

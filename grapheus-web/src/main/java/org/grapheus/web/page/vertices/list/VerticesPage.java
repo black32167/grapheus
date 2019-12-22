@@ -4,6 +4,7 @@ import com.googlecode.wicket.jquery.core.resource.StyleSheetPackageHeaderItem;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
 import org.apache.wicket.extensions.ajax.markup.html.tabs.AjaxTabbedPanel;
 import org.apache.wicket.extensions.markup.html.tabs.AbstractTab;
@@ -19,7 +20,6 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.ListModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
-import org.grapheus.client.model.graph.search.RVertexPropertyFilter;
 import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.list.vcontrol.VerticesControlPanel;
 import org.grapheus.web.component.menu.AjaxMenu;
@@ -28,7 +28,10 @@ import org.grapheus.web.component.operation.tabs.merge.MergePanel;
 import org.grapheus.web.component.operation.tabs.rooted.RootedSubgraphGenerationPanel;
 import org.grapheus.web.component.vicinity.control.VicinityControlPanel;
 import org.grapheus.web.page.base.AbstractGrapheusAuthenticatedPage;
-import org.grapheus.web.state.RepresentationState;
+import org.grapheus.web.state.GlobalFilter;
+import org.grapheus.web.state.GlobalStateController;
+import org.grapheus.web.state.SharedModels;
+import org.grapheus.web.state.event.GraphViewChangedEvent;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,8 +51,8 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
 
     private final ShowOperationSupport dialogOperationSupport;
 
-    private final RepresentationState representationState;
-    
+    private final GlobalStateController globalStateController;
+
     private Component rightPanel;
     private Component verticesPanel;
     
@@ -66,25 +69,15 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
     public VerticesPage(final PageParameters parameters) {
         super(parameters);
 
-        representationState = new RepresentationState();
+        GlobalFilter vertexFilter = new GlobalFilter();
+        SharedModels sharedModels = new SharedModels(vertexFilter);
+
+        globalStateController = new GlobalStateController(sharedModels, vertexFilter);
 
         dialog = new ModalWindow("operationDilaog")
                 .showUnloadConfirmation(false);
         
         dialogOperationSupport = newDialogOperationSupport();
-    }
-
-    private RVertexPropertyFilter parseVertexFilterProperty(String vertexPropFilterStr) {
-        if(vertexPropFilterStr == null) {
-            return null;
-        }
-
-        String[] parts = vertexPropFilterStr.split("=");
-        if(parts.length != 2) {
-            throw new IllegalArgumentException("Illegal vertex property filter:" + vertexPropFilterStr);
-        }
-
-        return new RVertexPropertyFilter(parts[0], parts[1]);
     }
 
     @Override
@@ -101,23 +94,31 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
         add(dialog);
     }
 
+    @Override
+    public void detachModels() {
+        super.detachModels();
+        globalStateController.getSharedModels().detach();
+    }
+
+    @Override
+    public void onEvent(IEvent<?> event) {
+        Object payload = event.getPayload();
+        if(payload instanceof GraphViewChangedEvent) {
+            currentRightPanelTab = 0;
+            IPartialPageRequestHandler target = ((GraphViewChangedEvent)payload).getTarget();
+            target.add(verticesPanel, rightPanel);
+        }
+    }
+
     private void initRepresentationState() {
-        String graphId = getPageParameters().get(PARAM_SELECTED_GRAPH).toString();
-        representationState.setGraphId(graphId);
-        representationState.getVertexListFilter().setVertexPropertyFilter(parseVertexFilterProperty(getPageParameters().get(PARAM_FILTER_PROPERTY).toString()));
+        globalStateController.init(getPageParameters());
     }
 
     private Component newVerticesPanel() {
         return VerticesControlPanel.builder()
                 .id("taskList")
-                .representationState(representationState)
+                .globalStateController(globalStateController)
                 .dialogOperationSupport(dialogOperationSupport)
-                .vertexSelectionListener((target, artifactId) -> {
-                    showVicinity(target);
-                })
-                .vertexRemovalListener((target, removedIds) -> {
-                    showVicinity(target);
-                })
                 .build()
                 .setOutputMarkupId(true);
     }
@@ -128,22 +129,20 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
                 "Vicinity",
                 id -> VicinityControlPanel.builder()
                         .id(id)
-                        .representationState(representationState)
-                        .graphChangedCallback(VerticesPage.this::reloadContent)
+                        .globalStateController(globalStateController)
                         .dialogOperationSupport(dialogOperationSupport)
                         .build()));
 
-        IModel<String> graphIdModel = new PropertyModel<>(representationState, RepresentationState.FIELD_GRAPH_ID);
+        GlobalFilter filter = globalStateController.getFilter();
+        IModel<String> graphIdModel = new PropertyModel<>(filter, SharedModels.FIELD_GRAPH_ID);
         tabs.add(newTab("Merge...", id -> MergePanel.builder()//
                 .id(id)//
                 .graphIdModel(graphIdModel)
-                .operationFinishedCallback(VerticesPage.this::reloadContent)
                 .build()));
         
         tabs.add(newTab("Find path...", id -> RootedSubgraphGenerationPanel.builder()//
                 .id(id)//
                 .sourceGraphIdModel(graphIdModel)
-                .operationFinishedCallback(VerticesPage.this::reloadContent)
                 .build()));
       
         
@@ -164,23 +163,13 @@ public class VerticesPage extends AbstractGrapheusAuthenticatedPage {
             }
         };
     }
-
-    private void showVicinity(IPartialPageRequestHandler target) {
-        currentRightPanelTab = 0;
-        target.add(rightPanel);
-    }
-
-    private void reloadContent(IPartialPageRequestHandler target) {
-        showVicinity(target);
-        target.add(verticesPanel);
-    }
     
     @Override
     protected Component newMenu(String id) {
         VertexPageMenuFactory menuFactory = VertexPageMenuFactory.builder()
                 .page(this)
                 .dialogOperationSupport(dialogOperationSupport)
-                .graphIdSupplier(representationState::getGraphId)
+                .graphIdSupplier(() -> globalStateController.getFilter().getGraphId())
                 .editPermitted(true)//FIXME:get graph metadata
                 .build();
         return new AjaxMenu(id, new ListModel<>(menuFactory.getMenuItems()));

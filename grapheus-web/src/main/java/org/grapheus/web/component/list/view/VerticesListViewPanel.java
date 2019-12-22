@@ -8,10 +8,11 @@ import com.googlecode.wicket.jquery.ui.interaction.draggable.DraggableAdapter;
 import com.googlecode.wicket.jquery.ui.interaction.draggable.DraggableBehavior;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -27,7 +28,10 @@ import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.component.shared.vlink.VertexLinkPanel;
 import org.grapheus.web.model.VerticesRemoteDataset;
-import org.grapheus.web.state.RepresentationState;
+import org.grapheus.web.state.GlobalFilter;
+import org.grapheus.web.state.GlobalStateController;
+import org.grapheus.web.state.SharedModels;
+import org.grapheus.web.state.event.GraphViewChangedEvent;
 
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
@@ -56,24 +60,20 @@ public class VerticesListViewPanel extends Panel {
     private static final long serialVersionUID = 1L;
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("dd-MM-yyyy mm:HH");
 
-    private final RepresentationState representationState;
-    private final VertexSelectionListener vertexSelectionListener;
-    private final IModel<List<String>> vertexSelectionModel;
+    private final GlobalStateController globalStateController;
     
     @Builder
     public VerticesListViewPanel(
-            String id,
-            RepresentationState representationState,
-            VertexSelectionListener vertexSelectionListener) {
+            @NonNull String id,
+            @NonNull GlobalStateController globalStateController) {
         super(id);
 
-        this.representationState = representationState;
-        this.vertexSelectionModel = new PropertyModel<>(representationState, RepresentationState.FIELD_SELECTED_VIDS);
-        this.vertexSelectionListener = vertexSelectionListener;
+        this.globalStateController = globalStateController;
        
         // Add list component
+        SharedModels sharedModels = globalStateController.getSharedModels();
         add(createListForm("verticesForm")
-                .add(getVerticesListPanel("artifacts", representationState.getVerticesListModel())));
+                .add(getVerticesListPanel("artifacts", sharedModels.getVerticesListModel())));
     }
 
     private Form<?> createListForm(String id) {
@@ -82,12 +82,13 @@ public class VerticesListViewPanel extends Panel {
 
     private ListView<VertexInfo> getVerticesListPanel(String componentId, IModel<VerticesRemoteDataset> artifactsListModel) {
         
-        ListView<VertexInfo> listView = new ListView<VertexInfo>(componentId, new PropertyModel<List<VertexInfo>>(artifactsListModel, VerticesRemoteDataset.FIELD_VERTICES)) {
+        ListView<VertexInfo> listView = new ListView<VertexInfo>(componentId, new PropertyModel<>(artifactsListModel, VerticesRemoteDataset.FIELD_VERTICES)) {
             private static final long serialVersionUID = 1L;
 
             @Override
             protected void populateItem(ListItem<VertexInfo> item) {
-                String graphName = representationState.getGraphId();
+                GlobalFilter globalFilter = globalStateController.getFilter();
+                String graphName = globalFilter.getGraphId();
                 IModel<VertexInfo> taskModel = (IModel<VertexInfo>) item.getDefaultModel();
                 VertexInfo vertexInfo = taskModel.getObject();
                // RVertex vertex = vertexInfo.getVertex();
@@ -112,15 +113,16 @@ public class VerticesListViewPanel extends Panel {
                         .set("helper", "'clone'")
                         );
                 item.add(draggableBehavior);
-                item.add(new AjaxCheckBox("selected", new Model<Boolean>(vertexSelectionModel.getObject().contains(vertexInfo.vertexId))) {
+                List<String> selectedVertices = globalFilter.getSelectedVerticesIds();
+                item.add(new AjaxCheckBox("selected", new Model<>(selectedVertices.contains(vertexInfo.vertexId))) {
                     private static final long serialVersionUID = 1L;
 
                     @Override
                     protected void onUpdate(AjaxRequestTarget target) {
                         if(Boolean.TRUE.equals(getDefaultModelObject())) {
-                            vertexSelectionModel.getObject().add(vertexInfo.vertexId);
+                            selectedVertices.add(vertexInfo.vertexId);
                         } else {
-                            vertexSelectionModel.getObject().remove(vertexInfo.vertexId);
+                            selectedVertices.remove(vertexInfo.vertexId);
                         }
                     }
                     
@@ -131,8 +133,8 @@ public class VerticesListViewPanel extends Panel {
                         vertexInfo.getVertexId(),
                         graphName,
                         target -> {
-                            representationState.setClickedVertexId(vertexInfo.getVertexId());
-                            vertexSelectionListener.onVertexSelected(target, vertexInfo.getVertexId());
+                            globalFilter.setSelectedVertexId(vertexInfo.getVertexId());
+                            send(VerticesListViewPanel.this, Broadcast.BUBBLE, new GraphViewChangedEvent(target));
                         }));
                 
                 item.add(new Label("task_info", vertexInfo.getVertexInfo()));
@@ -151,17 +153,6 @@ public class VerticesListViewPanel extends Panel {
        // listView.setReuseItems(true);
         return listView;
         
-    }
-    
-    
-
-    @Override
-    public void renderHead(IHeaderResponse response) {
-        super.renderHead(response);
-        
-       // response.render(OnDomReadyHeaderItem.forScript("setTimeout(()=> { window.layout.resizeAll();}, 500);"));
-        //response.render(OnDomReadyHeaderItem.forScript("setTimeout(()=> { $('.artifacts-list').width($('.artifacts-list').parent().width());}, 500);"));
-        //response.render(OnDomReadyHeaderItem.forScript("setTimeout(()=> { $('.artifacts-list').width($('.artifacts-list').parent().width());}, 500);"));
     }
 
     private String formatDate(long timeMills) {

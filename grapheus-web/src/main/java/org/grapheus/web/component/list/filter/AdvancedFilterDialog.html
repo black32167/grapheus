@@ -1,4 +1,4 @@
-<wicket:head>
+<wicket:head xmlns:wicket="http://www.w3.org/1999/xhtml">
 <style>
 
 .fieldset {
@@ -14,7 +14,7 @@
 
 </style>
 </wicket:head>
-<wicket:panel>
+<wicket:panel  xmlns:wicket="http://www.w3.org/1999/xhtml">
 	<form wicket:id="filter_form" style="display:inline-block;float:right;clear:right;">
 		<fieldset class="fieldset">
             <legend>Sorting</legend>
@@ -23,9 +23,12 @@
         <fieldset class="fieldset">
             <legend>Filter</legend>
 		    <span>Sinks:</span> <input wicket:id="sinks" type="checkbox"></input>|
-		    <span>Min. edges:</span> <input wicket:id="minEdges" class="small-number-input" type="number"></input><select wicket:id="filteringEdgesDirection"/>
+		    <span>Min. edges:</span> <input wicket:id="minEdges" class="small-number-input" type="number"></input><select wicket:id="traversalDirection"/>
             <div>
-		      <span>Vicinity Only:</span> <input type="checkbox" wicket:id="restrictByVicinity"></input>
+		      <span>Show vicinity content only:</span> <input type="checkbox" wicket:id="filterListByTraversalDepth"></input>
+            </div>
+            <div>
+                <span>Filter by selected property</span> <select wicket:id="listPropertyFilterMode"></select>
             </div>
 	    </fieldset>
 	</form>

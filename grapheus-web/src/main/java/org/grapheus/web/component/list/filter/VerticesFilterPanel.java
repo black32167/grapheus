@@ -5,32 +5,26 @@ package org.grapheus.web.component.list.filter;
 
 import lombok.Builder;
 import org.apache.wicket.Component;
-import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.grapheus.web.component.shared.LambdaAjaxLink;
 import org.grapheus.web.component.shared.LambdaAjaxTextField;
-import org.grapheus.web.component.shared.SerializableConsumer;
-import org.grapheus.web.state.RepresentationState;
-import org.grapheus.web.state.VertexListFilter;
+import org.grapheus.web.state.GlobalFilter;
 
 /**
  * @author black
  */
 public class VerticesFilterPanel extends Panel {
 	private static final long serialVersionUID = 1L;
-	private final RepresentationState representationState;
-	private final SerializableConsumer<IPartialPageRequestHandler> filterChangedCallback;
-	
+	private final GlobalFilter globalFilter;
+
 	@Builder
 	public VerticesFilterPanel(String id,
-	        RepresentationState representationState,
-	        SerializableConsumer<IPartialPageRequestHandler> filterChangedCallback) {
+	        GlobalFilter globalFilter) {
 		super(id);
-		this.representationState = representationState;;
-		this.filterChangedCallback = filterChangedCallback;
+		this.globalFilter = globalFilter;
 	}
 
 	@Override
@@ -48,9 +42,7 @@ public class VerticesFilterPanel extends Panel {
 		return AdvancedFilterDialog.builder()
 		        .id(dialogDivId)
 		        .title("Advanced Filter")
-		        .graphIdSupplier(()->representationState.getGraphId())
-		        .verticesListFilter(representationState.getVertexListFilter())
-		        .filterAppliedCallback(filterChangedCallback::accept)
+		        .globalFilter(globalFilter)
 		        .build();
 	}
 
@@ -59,13 +51,11 @@ public class VerticesFilterPanel extends Panel {
 	}
 
 	private Component createSubstringInput(String id) {
-		return new LambdaAjaxTextField<String>(id, filterChangedCallback);
+		return new LambdaAjaxTextField<String>(id);
 	}
 
 	private WebMarkupContainer createForm(String id) {
-		return new Form<VertexListFilter>(id,
-                new CompoundPropertyModel<>(representationState.getVertexListFilter()));
+		return new Form<>(id, new CompoundPropertyModel<>(globalFilter));
 	}
 
-	
 }

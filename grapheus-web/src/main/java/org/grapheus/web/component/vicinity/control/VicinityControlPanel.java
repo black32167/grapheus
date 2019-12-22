@@ -11,6 +11,7 @@ import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
@@ -27,11 +28,10 @@ import org.grapheus.client.model.graph.vertex.RVertex;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.ShowOperationSupport;
 import org.grapheus.web.component.shared.LambdaAjaxLink;
-import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.component.vicinity.view.VicinityInteractiveView;
-import org.grapheus.web.model.VicinityGraph;
-import org.grapheus.web.state.RepresentationState;
-import org.grapheus.web.state.VicinityState;
+import org.grapheus.web.state.GlobalStateController;
+import org.grapheus.web.state.VicinityVisualizationConfig;
+import org.grapheus.web.state.event.GraphViewChangedEvent;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,62 +49,38 @@ public class VicinityControlPanel extends Panel {
 
     private static final int MAX_NEIGHBORS_HOPS = 100;
 
-    // This block of fields is initialized from constructor parameters
-    private final IModel<VicinityGraph> vicinityVertexModel;
-    private final IModel<RVertex> selectedVertexModel;
-    private final RepresentationState representationState;
-    private final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback;
 
     // Fields in  this block are initialized internally in the constructor
     private final Label vertexTagsLabel;
     private final InputDialog<String> titleEditDialog;
     private final VicinityInteractiveView graphView;
+    private final GlobalStateController globalStateController;
+    private final VicinityVisualizationConfig visualizationConfig;
 
     @Builder
     public VicinityControlPanel(String id,
-                                final RepresentationState representationState,
-                                ShowOperationSupport dialogOperationSupport,
-                                final SerializableConsumer<IPartialPageRequestHandler> graphChangedCallback) {
+                                final GlobalStateController globalStateController,
+                                ShowOperationSupport dialogOperationSupport) {
         super(id);
-        this.vicinityVertexModel = representationState.getVicinityGraphModel();
-        this.selectedVertexModel = createArtifactModel();
-        this.graphView = new VicinityInteractiveView("vicinityView", representationState, graphChangedCallback, dialogOperationSupport);
+        this.globalStateController = globalStateController;
+        this.visualizationConfig = new VicinityVisualizationConfig(globalStateController.getFilter());
+        this.graphView = new VicinityInteractiveView("vicinityView", globalStateController, visualizationConfig, dialogOperationSupport);
         this.graphView.setOutputMarkupId(true);
         this.titleEditDialog = createTitleEditDialog("titleEditDialog");
-        this.graphChangedCallback = graphChangedCallback;
-        this.representationState = representationState;
         this.vertexTagsLabel = new Label("vertexTags", selectedVertexTagsModel());
-    }
-
-    private IModel<RVertex> createArtifactModel() {
-        return new LoadableDetachableModel<RVertex>() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected RVertex load() {
-                String graphId = representationState.getGraphId();
-                String clickedVertexId = representationState.getClickedVertexId();
-                if (graphId == null || clickedVertexId == null) {
-                    return RVertex.builder().title("none").build();
-                }
-                try {
-                    return RemoteUtil.vertexAPI().getVertex(graphId, clickedVertexId);
-                } catch (Exception e) {
-                    log.warn("Could not load vertex #{}", clickedVertexId);
-                    return null;
-                }
-            }
-        };
     }
 
     @Override
     protected void onInitialize() {
         super.onInitialize();
 
+        IModel<RVertex> selectedVertexModel = globalStateController.getSharedModels().getActiveVertexModel();
+
         // "generateLink"
         add(titleEditDialog);
         add(createTitleEditableLink("remoteDocumentLink").add(new Label("documentTitle", new PropertyModel<>(selectedVertexModel, "title"))));
         add(createVertexControlForm("controlsForm")
-                .add(newDepthInput("depth"))
+                .add(newDepthInput("traversalDepth"))
                 .add(newDirectionSelector("edgesDirection"))
                 .add(newLayoutDropdown("layout"))
                 .add(newVerticesPropertySelector("highlightedProperty"))
@@ -130,7 +106,9 @@ public class VicinityControlPanel extends Panel {
                     private static final long serialVersionUID = 1L;
 
                     protected void onUpdate(AjaxRequestTarget target) {
-                        target.appendJavaScript("updateNodeColors('" + representationState.getVicinityState().getHighlightedProperty() + "');");
+                        String selectedVertexSelectedPropertyName = visualizationConfig.getHighlightedProperty();
+                        visualizationConfig.setHighlightedProperty(selectedVertexSelectedPropertyName);
+                        target.appendJavaScript("updateNodeColors('" + selectedVertexSelectedPropertyName + "');");
                     }
                 });
     }
@@ -139,16 +117,17 @@ public class VicinityControlPanel extends Panel {
         return new LoadableDetachableModel<List<String>>() {
             @Override
             protected List<String> load() {
-                VicinityState vicinityState = representationState.getVicinityState();
-                List<String> propertyNames = vicinityVertexModel.getObject().getVertices().stream()
-                        .flatMap(v -> v.getProperties().stream())
-                        .map(RVertex.RProperty::getName)
-                        .distinct()
-                        .collect(toList());
-                if(vicinityState.getHighlightedProperty() == null && !propertyNames.isEmpty()) {
-                    vicinityState.setHighlightedProperty(propertyNames.get(0));
+                RVertex selectedVertex = globalStateController.getSharedModels().getActiveVertex();
+                if (selectedVertex != null) {
+                    List<String> propertyNames = selectedVertex
+                            .getProperties()
+                            .stream()
+                            .map(RVertex.RProperty::getName)
+                            .distinct()
+                            .collect(toList());
+                    return propertyNames;
                 }
-                return propertyNames;
+                return null;
             }
         };
     }
@@ -157,7 +136,7 @@ public class VicinityControlPanel extends Panel {
         return new LoadableDetachableModel<String>() {
             @Override
             protected String load() {
-                return Optional.ofNullable(selectedVertexModel.getObject()) //
+                return Optional.ofNullable(globalStateController.getSharedModels().getActiveVertex()) //
                         .map(RVertex::getTags) //
                         .map(tags -> String.join(",", tags)) //
                         .orElse("-");
@@ -188,6 +167,7 @@ public class VicinityControlPanel extends Panel {
     }
 
     private InputDialog<String> createTitleEditDialog(String id) {
+        IModel<RVertex> selectedVertexModel = globalStateController.getSharedModels().getActiveVertexModel();
         return new InputDialog<String>(id, "Edit title", "", new PropertyModel<>(selectedVertexModel, "title")) {
             private static final long serialVersionUID = 1L;
 
@@ -195,15 +175,15 @@ public class VicinityControlPanel extends Panel {
             protected void onSubmit(AjaxRequestTarget target) {
                 String newTitle = getModelObject();
                 RemoteUtil.vertexAPI().updateVertex(
-                        representationState.getGraphId(), representationState.getClickedVertexId(), RVertex.builder().title(newTitle).build());
-                graphChangedCallback.accept(target);
+                        globalStateController.getFilter().getGraphId(), visualizationConfig.getSelectedVertexId(), RVertex.builder().title(newTitle).build());
+                sendGraphUpdated(target);
             }
         };
     }
 
-    private Form<VicinityState> createVertexControlForm(String formId) {
+    private Form<VicinityVisualizationConfig> createVertexControlForm(String formId) {
         return new Form<>(
-                formId, new CompoundPropertyModel<>(representationState.getVicinityState()));
+                formId, new CompoundPropertyModel<>(visualizationConfig));
     }
 
     private AjaxEventBehavior updateGraphViewAjaxBehavior(String eventType) {
@@ -212,8 +192,12 @@ public class VicinityControlPanel extends Panel {
             private static final long serialVersionUID = 1L;
 
             protected void onUpdate(AjaxRequestTarget target) {
-                graphChangedCallback.accept(target);
+                sendGraphUpdated(target);
             }
         };
+    }
+
+    private void sendGraphUpdated(IPartialPageRequestHandler target) {
+        send(VicinityControlPanel.this, Broadcast.BUBBLE, new GraphViewChangedEvent(target));
     }
 }

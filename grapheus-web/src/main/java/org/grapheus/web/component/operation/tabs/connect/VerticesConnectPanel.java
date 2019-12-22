@@ -3,14 +3,12 @@
  */
 package org.grapheus.web.component.operation.tabs.connect;
 
+import lombok.Builder;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
 import org.grapheus.web.RemoteUtil;
 import org.grapheus.web.component.operation.tabs.AbstractEmbeddedPanel;
-import org.grapheus.web.component.shared.SerializableConsumer;
 import org.grapheus.web.component.shared.vlist.VerticesListArgumentPanel;
-
-import lombok.Builder;
 
 /**
  * @author black
@@ -23,8 +21,8 @@ public class VerticesConnectPanel extends AbstractEmbeddedPanel {
     private final String graphId;
     
     @Builder
-    public VerticesConnectPanel(String id, SerializableConsumer<AjaxRequestTarget> operationFinishedCallback, String graphId) {
-        super(id, operationFinishedCallback);
+    public VerticesConnectPanel(String id, String graphId) {
+        super(id);
         this.graphId = graphId;
     }
 

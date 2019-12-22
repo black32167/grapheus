@@ -3,9 +3,15 @@
  */
 package grapheus.rest.resource;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import grapheus.context.GrapheusRequestContextHolder;
+import grapheus.persistence.storage.graph.query.EdgesFinder;
+import grapheus.persistence.storage.graph.query.VertexFinder;
+import grapheus.persistence.storage.graph.transaction.bridge.BridgesSearchTransaction;
+import grapheus.rest.converter.EdgeConverter;
+import org.grapheus.client.model.graph.GraphNamesConstants;
+import org.grapheus.client.model.graph.edge.REdge;
+import org.grapheus.client.model.graph.edge.REdgesContainer;
+import org.grapheus.client.model.graph.vertex.RVerticesIdsContainer;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -16,17 +22,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import org.grapheus.client.model.graph.GraphNamesConstants;
-import org.grapheus.client.model.graph.edge.REdge;
-import org.grapheus.client.model.graph.edge.REdgesContainer;
-import org.grapheus.client.model.graph.vertex.RVerticesIdsContainer;
-
-import grapheus.context.GrapheusRequestContextHolder;
-import grapheus.persistence.storage.graph.query.EdgesFinder;
-import grapheus.persistence.storage.graph.query.VertexFinder;
-import grapheus.persistence.storage.graph.transaction.bridge.BridgesSearchTransaction;
-import grapheus.rest.converter.EdgeConverter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author black
@@ -41,7 +39,6 @@ public class ComputeResource {
     
     @Inject
     private EdgesFinder edgesFinder;
-    
 
     @Inject
     private VertexFinder vertexFinder;
@@ -74,7 +71,7 @@ public class ComputeResource {
     @Path("outbound")
     public REdgesContainer findOutboundDependencies(
             @QueryParam("rootVerticesIds") String rootVerticesIds,
-            @DefaultValue(""+DEFAULT_DEPTH) @QueryParam("depth") Integer depth) {
+            @DefaultValue(""+DEFAULT_DEPTH) @QueryParam("traversalDepth") Integer depth) {
         if(rootVerticesIds == null) {
             throw new BadRequestException("rootVerticesIds parameter is not specified");
         }

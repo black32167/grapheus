@@ -279,7 +279,7 @@ public class VertexResource {
     public REdgesContainer findNeighbors(
             @PathParam("artifactId") String artifactId,
             @QueryParam("direction") @DefaultValue("OUTBOUND") String directionSpec,
-            @QueryParam("depth") @DefaultValue("1") int depth) throws InterruptedException, ExecutionException {
+            @QueryParam("traversalDepth") @DefaultValue("1") int depth) throws InterruptedException, ExecutionException {
         String grapheusUserKey = GrapheusRequestContextHolder.getContext().getUserId();
         EdgeDirection direction = EdgeDirection.valueOf(directionSpec);
         Collection<PersistentEdge> edges = graphsManager.findNeighbors(grapheusUserKey, graphName, artifactId, direction, depth);
