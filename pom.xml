@@ -18,7 +18,7 @@
         <docker.arangodb.image>arangodb</docker.arangodb.image>
         <spring.boot.version>1.4.2.RELEASE</spring.boot.version>
         <jersey.version>2.27</jersey.version>
-        <jackson.version>2.10.0.pr3</jackson.version>
+        <jackson.version>2.12.7.1</jackson.version>
         <guava.version>23.0</guava.version>
         <kotlin.version>1.3.31</kotlin.version>
         <maven.compiler.source>1.8</maven.compiler.source>
